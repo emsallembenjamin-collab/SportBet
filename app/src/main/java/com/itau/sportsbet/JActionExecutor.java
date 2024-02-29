@@ -335,13 +335,27 @@ class JAction {
             }
             break;
             case "do_input_user_id_password": {
+                int nDigitParamCnt = digit_param_list.size();
+                int nMaxRequireRectCnt = 2;
+                for (int i = 0; i < nDigitParamCnt; i++){
+                    int nRequstIndex = digit_param_list.get(0).intValue();
+                    if (nRequstIndex + 1 > nMaxRequireRectCnt){
+                        nMaxRequireRectCnt = nRequstIndex + 1;
+                    }
+                }
                 int nPrevCnt = prevAction.result_rects.size();
-                if (nPrevCnt != 2){
+                if (nPrevCnt < nMaxRequireRectCnt){
                     result_string = "fail";
                 }
                 else {
-                    Rect rc1 = prevAction.result_rects.get(0);
-                    Rect rc2 = prevAction.result_rects.get(1);
+                    int nUserIdIndex = 0, nPasswordIndex = 1;
+                    if (nDigitParamCnt == 2){
+                        nUserIdIndex = digit_param_list.get(0).intValue();
+                        nPasswordIndex = digit_param_list.get(1).intValue();
+                    }
+
+                    Rect rc1 = prevAction.result_rects.get(nUserIdIndex);
+                    Rect rc2 = prevAction.result_rects.get(nPasswordIndex);
 
                     Point ptUser_id = JUtilFunctions.getCenterPoint(rc1);
                     Point ptPassword = JUtilFunctions.getCenterPoint(rc2);
