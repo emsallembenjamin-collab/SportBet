@@ -18,37 +18,16 @@ public class JEngine implements Runnable{
     CommandAPI commandAPI = new CommandAPI();
     @Override
     public void run() {
-        Log.d("Game Routine Running", "Loop Start");
+
+        apiStatus.jEngine  = this;
         commandAPI.callAPI(apiStatus);
-        while(apiStatus.getFinished() == false){
-            JUtilFunctions.delay_duration(100);
-        }
-        boolean api_success = true;
-        APIResponse apiResponse = apiStatus.getApiResponse();
-        if(apiResponse.commandType.equals(APIResponse.CMD_CONFIG)){
-            if(apiResponse.data != null && apiResponse.actionScenario != null){
-                Assets.save_betconfig_json_from_file(apiResponse.data);
-                Assets.save_action_scenario_from_file(apiResponse.actionScenario);
-            }else
-                api_success = false;
-        }else if(apiResponse.commandType.equals(APIResponse.CMD_GAME)){
-            if(apiResponse.data != null){
-                Assets.save_bettask_json_from_file(apiResponse.data);
-                startBetting();
-            }else {
-                api_success = false;
-            }
-        }
-
-        if(api_success != true){
-            // Setting config and command failed
-            // Send report
-
-        }
         Log.d("Game Routine Running", "Loop End");
         apiStatus.reset();
+
         handler.postDelayed(this, 5000);
     }
+
+
     public void startBetting () {
         int accumlate = 0;
         // Code to be executed periodically
