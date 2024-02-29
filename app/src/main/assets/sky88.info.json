@@ -1,0 +1,217 @@
+{
+  "action_list": [
+
+    {
+      "name"              : "starting go_website",
+      "type"              : "go_website",
+      "string_param_list" : ["https://sky88.info"],
+      "digit_param_list"  : [],
+      "delay"             : 15000,
+      "branch": {
+        "success" : ["find login button"],
+        "fail"    : []
+      }
+    },
+
+    
+    {
+      "name"              : "find login button",
+      "type"              : "do_ocr",
+      "string_param_list" : ["ĐĂNG NHẬP", "0"],
+      "digit_param_list"  : [100,50, 350, 230, 1],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click login button"],
+        "fail"    : ["find already logined"]
+      }
+    },
+
+
+    {
+      "name"              : "click login button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [1],
+      "delay"             : 2000,
+      "branch": {
+        "success" : ["find user_id and password input ctrl"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "find user_id and password input ctrl",
+      "type"              : "do_find_color_bar",
+      "string_param_list" : [],
+      "digit_param_list"  : [400,200, 400, 600, 255, 255, 255, 255, 255, 255, 40 ],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["input user_id and password"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+    {
+      "name"              : "input user_id and password",
+      "type"              : "do_input_user_id_password",
+      "string_param_list" : [],
+      "digit_param_list"  : [1,3],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["find login now button"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+    {
+      "name"              : "find login now button",
+      "type"              : "do_find_color_bar",
+      "string_param_list" : [],
+      "digit_param_list"  : [450,550, 450, 750,  54, 71, 124,   50, 67, 118, 40 ],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click enter site button"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+
+    {
+      "name"              : "click enter site button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [1],
+      "delay"             : 6000,
+      "branch": {
+        "success" : ["goto sports channel"],
+        "fail"    : []
+      }
+    },
+
+
+
+///. 여기까지는 확인함...
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "name"              : "find already logined",
+      "type"              : "do_ocr",
+      "string_param_list" : ["$user_id", "2"],
+      "digit_param_list"  : [0.5, 0.1, 1, 0.25, 1],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["goto sports channel"],
+        "fail"    : ["find prev logined user_id region"]
+      }
+    },
+
+    {
+      "name"              : "find prev logined user_id region",
+      "type"              : "do_find_color_bar",
+      "string_param_list" : [],
+      "digit_param_list"  : [0.67,0, 0.67, 0.25, 60, 60, 60, 0, 0, 0, 50 ],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click user_id region"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+    {
+      "name"              : "click user_id region",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [1,0,100,0],
+      "delay"             : 2000,
+      "branch": {
+        "success" : ["find logout menu button"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "find logout menu button",
+      "type"              : "do_ocr",
+      "string_param_list" : ["ĐĂNG XUẤT", "0"],
+      "digit_param_list"  : [0, 0.65, 0.5, 0.85, 1],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click logout menu button"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+    {
+      "name"              : "click logout menu button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [1],
+      "delay"             : 4000,
+      "branch": {
+        "success" : ["find login button"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"              : "goto sports channel",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [0.3,0.95],
+      "delay"             : 4000,
+      "branch": {
+        "success" : ["find sports category"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"              : "find sports category",
+      "type"              : "do_repeat_scroll",
+      "string_param_list" : ["$category"],
+      "digit_param_list"  : [270, 820, 800],
+      "delay"             : 1000,
+      "branch": {
+        "success" : ["goto real betting site"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "goto real betting site",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [0.5,0.5],
+      "delay"             : 7000,
+      "branch": {
+        "success" : ["the end process", "success"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"              : "the end process",
+      "type"              : "the_end",
+      "string_param_list" : [],
+      "digit_param_list"  : [],
+      "delay"             : 100,
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
+    }
+  ]
+}

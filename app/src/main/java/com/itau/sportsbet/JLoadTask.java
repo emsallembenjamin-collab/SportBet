@@ -119,7 +119,19 @@ public class JLoadTask {
         return bRet;
     }
 
-    public boolean parse_bet_config(String jsonString){
+    //.*=============================================================
+    //.func: getVerificationCode
+    //.desc: send image for verification (base64Str) to server and receive response.
+    //.
+    public String getVerificationCode(String base64Str) {
+        String strRet = "fail";
+
+        return strRet;
+    }
+
+
+
+    public boolean parse_bet_task(String jsonString){
         boolean bRet = false;
         try {
             // Parse JSON string

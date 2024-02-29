@@ -8,6 +8,7 @@ import android.util.Log;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opencv.android.Utils;
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
@@ -140,6 +141,23 @@ class JAction {
             case "do_click":{
 
                 boolean bInvalidParam = false;
+
+                //. 2024-2-29.
+                //. for indicate used index of prev's result_rects...
+                int nPrevRectIdxForUse = 0;
+                int nStringParamCnt = string_param_list.size();
+                if (nStringParamCnt > 0){
+                    nPrevRectIdxForUse = Integer.parseInt(string_param_list.get(0));
+                    int nRectCnt = prevAction.result_rects.size();
+
+                    //. decide to last order...
+                    if (nPrevRectIdxForUse < 0){
+                        nPrevRectIdxForUse = nRectCnt + nPrevRectIdxForUse;
+                    }
+
+                    //. you must guarantee nPrevRectIdxForUse's range in action script...
+                }
+
                 int nRepeatCnt = 1;
                 Point pt = null;
                 int nDigitParamCnt = digit_param_list.size();
@@ -147,10 +165,10 @@ class JAction {
                     case 1: {
                         nRepeatCnt = digit_param_list.get(0).intValue();
                         int nRectCnt = prevAction.result_rects.size();
-                        if (nRectCnt == 0) {
+                        if (nRectCnt < nPrevRectIdxForUse + 1) {
                             bInvalidParam = true;
                         } else {
-                            Rect rc = prevAction.result_rects.get(0);
+                            Rect rc = prevAction.result_rects.get(nPrevRectIdxForUse);
                             pt = JUtilFunctions.getCenterPoint(rc);
                         }
                     }
@@ -178,11 +196,11 @@ class JAction {
                         break;
                     case 4:{
                         int nRectCnt = prevAction.result_rects.size();
-                        if (nRectCnt == 0){
+                        if (nRectCnt < nPrevRectIdxForUse + 1){
                             bInvalidParam = true;
                         }
                         else{
-                            Rect rc = prevAction.result_rects.get(0);
+                            Rect rc = prevAction.result_rects.get(nPrevRectIdxForUse);
                             Point ptCenter = JUtilFunctions.getCenterPoint(rc);
 
                             nRepeatCnt = digit_param_list.get(0).intValue();
@@ -257,6 +275,23 @@ class JAction {
             }
                 break;
             case "do_find_color_bar":{
+
+                //. 2024-2-29
+                //. parse string param list...
+                boolean bCondBranch = false;
+                boolean bGreatCond = false;
+                int     nThres = 0;
+                int nStringParamCnt = string_param_list.size();
+                if (nStringParamCnt == 2){
+                    String strCond = string_param_list.get(0);
+                    if (strCond.equals("great")){
+                        bGreatCond = true;
+                    }
+                    else if (strCond.equals("less")){
+                        bGreatCond = true;
+                    }
+                }
+
                 int nDigitCnt = digit_param_list.size();
                 if (nDigitCnt != 11){
                     //. invalid param.
@@ -335,13 +370,27 @@ class JAction {
             }
             break;
             case "do_input_user_id_password": {
+                int nDigitParamCnt = digit_param_list.size();
+                int nMaxRequireRectCnt = 2;
+                for (int i = 0; i < nDigitParamCnt; i++){
+                    int nRequstIndex = digit_param_list.get(0).intValue();
+                    if (nRequstIndex + 1 > nMaxRequireRectCnt){
+                        nMaxRequireRectCnt = nRequstIndex + 1;
+                    }
+                }
                 int nPrevCnt = prevAction.result_rects.size();
-                if (nPrevCnt != 2){
+                if (nPrevCnt < nMaxRequireRectCnt){
                     result_string = "fail";
                 }
                 else {
-                    Rect rc1 = prevAction.result_rects.get(0);
-                    Rect rc2 = prevAction.result_rects.get(1);
+                    int nUserIdIndex = 0, nPasswordIndex = 1;
+                    if (nDigitParamCnt == 2){
+                        nUserIdIndex = digit_param_list.get(0).intValue();
+                        nPasswordIndex = digit_param_list.get(1).intValue();
+                    }
+
+                    Rect rc1 = prevAction.result_rects.get(nUserIdIndex);
+                    Rect rc2 = prevAction.result_rects.get(nPasswordIndex);
 
                     Point ptUser_id = JUtilFunctions.getCenterPoint(rc1);
                     Point ptPassword = JUtilFunctions.getCenterPoint(rc2);
@@ -374,6 +423,15 @@ class JAction {
                     JUtilFunctions.delay_duration(100);
 
                     result_string = "success";
+                }
+
+                //. 2024-2-29.
+                //. clone prev prevAction.result_rects for me...
+                result_rects.clear();
+                for (int i = 0; i < nPrevCnt; i++){
+                    Rect rcPrev = prevAction.result_rects.get(i);
+                    Rect rcNew = rcPrev.clone();
+                    result_rects.add(rcNew);
                 }
 
                 JUtilFunctions.delay_duration(delay);
@@ -432,6 +490,70 @@ class JAction {
                 }
 
                 JUtilFunctions.delay_duration(delay);
+
+            }
+            break;
+            case "do_input_verification_code": {
+                int nDigitParamCnt = digit_param_list.size();
+                int nMaxRequireRectCnt = 2;
+                for (int i = 0; i < nDigitParamCnt; i++){
+                    int nRequstIndex = digit_param_list.get(0).intValue();
+                    if (nRequstIndex + 1 > nMaxRequireRectCnt){
+                        nMaxRequireRectCnt = nRequstIndex + 1;
+                    }
+                }
+                int nPrevCnt = prevAction.result_rects.size();
+                if (nDigitParamCnt != 2 || nPrevCnt < nMaxRequireRectCnt){
+                    result_string = "fail";
+                }
+                else {
+                    int nIndexforClick = 0, nIndexforRecogRegion = 1;
+                    nIndexforClick = digit_param_list.get(0).intValue();
+                    nIndexforRecogRegion = digit_param_list.get(1).intValue();
+
+                    Rect rcForClick = prevAction.result_rects.get(nIndexforClick);
+                    Rect rcForRecog = prevAction.result_rects.get(nIndexforRecogRegion);
+
+                    Point ptClick = JUtilFunctions.getCenterPoint(rcForClick);
+                    Point ptRecog = JUtilFunctions.getCenterPoint(rcForRecog);
+
+                    //. if rcForRecog is empty, then it must expand...
+                    Rect rcForImage = null;
+                    if (rcForRecog.width == 0 || rcForRecog.height == 0){
+                        rcForImage = new Rect();
+                        rcForImage.x = (int)(ptRecog.x - 180);
+                        rcForImage.y = (int)(ptRecog.y - 50);
+                        rcForImage.width = 360; rcForImage.height = 100;
+                    }
+                    else{
+                        rcForImage = rcForRecog;
+                    }
+                    //. check boundary.
+                    JUtilFunctions.checkRectBoundary(rcForImage , Config.IMAGE_WIDTH, Config.IMAGE_HEIGHT);
+
+                    //. get bitmap of image rect and convert to base64 string.
+                    Mat imageForRecog = JUtilFunctions.screenshot.submat(rcForImage);
+                    Bitmap bmp = Bitmap.createBitmap(imageForRecog.cols(), imageForRecog.rows(), Bitmap.Config.ARGB_8888);
+                    Utils.matToBitmap(imageForRecog, bmp);
+                    String base64Str = JUtilFunctions.convert(bmp);
+
+                    //. call API to get recoged text.
+                    String strVCode = MyAccessibilityService.mainService.loadTask.getVerificationCode(base64Str);
+                    if (strVCode != "fail"){
+
+                        //. input verification code...
+                        JUserActions.dispatchTap(ptClick.x, ptClick.y);
+                        JUtilFunctions.delay_duration(300);
+                        JUserActions.dispatchKeyPress(strVCode);
+
+                        result_string = "success";
+                    }
+                    else{
+                        result_string = "fail";
+                    }
+              }
+
+              JUtilFunctions.delay_duration(delay);
 
             }
             break;
