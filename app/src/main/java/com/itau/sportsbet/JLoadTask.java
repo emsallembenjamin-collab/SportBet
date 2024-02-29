@@ -43,25 +43,23 @@ public class JLoadTask {
     //.
     public boolean hasTask(){
         boolean bHasTask = false;
-
-        //. communication to server and download "bet_task.json" data...
-        //. do cording later...
-        //. String jsonString = do_read_from_server...
-
+        boolean bHasConfig = false;
 
         //. now for test, use a test json file in assets.
-        String jsonString = Assets.read_bettask_json_from_file();
+        String jsonConfigString = Assets.read_betconfig_json_from_file();
+        String jsonTaskString = Assets.read_bettask_json_from_file();
 
-        if (jsonString != null){
+        if (jsonConfigString != null && jsonTaskString !=null){
+
             //. parsing...
-            parse_bet_task(jsonString);
-            bHasTask = has_bet_task.equals("yes");
+            bHasConfig = parse_bet_config(jsonConfigString);
+            bHasTask = parse_bet_task(jsonTaskString);
             Log.d("PPPP read and parse bet_task file", "has_bet_task=" + has_bet_task);
         }
         else{
             Log.d("PPPP fail read_bettask_json_from_file", "error");
         }
-        return bHasTask;
+        return bHasTask && bHasConfig;
     }
 
     //.*=============================================================
@@ -121,10 +119,8 @@ public class JLoadTask {
         return bRet;
     }
 
-
-    public boolean parse_bet_task(String jsonString){
+    public boolean parse_bet_config(String jsonString){
         boolean bRet = false;
-
         try {
             // Parse JSON string
             JSONObject jsonObject = new JSONObject(jsonString);
@@ -138,6 +134,20 @@ public class JLoadTask {
             site = jsonObject.getString("site");
             update_site_info = jsonObject.getString("update_site_info");
             JActionExecutor.limitTime = jsonObject.getInt("limitTime");
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return bRet;
+    }
+
+    public boolean parse_bet_task(String jsonString){
+        boolean bRet = false;
+
+        try {
+            // Parse JSON string
+            JSONObject jsonObject = new JSONObject(jsonString);
 
             //. 2024-2-24
             category = jsonObject.getInt("category");

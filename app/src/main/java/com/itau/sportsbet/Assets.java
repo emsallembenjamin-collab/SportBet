@@ -28,6 +28,10 @@ public class Assets {
     public static String getLocalDataPath(@NonNull Context context) {
         return getLocalDir(context).getAbsolutePath();
     }
+    @NonNull
+    public static String getExternalDataPath(@NonNull Context context){
+        return context.getExternalFilesDir(null).getAbsolutePath();
+    }
     public static String getTessDataPath() {
         String tessDataPath = rootDir + File.separator + "tessdata";
         return tessDataPath;
@@ -46,6 +50,7 @@ public class Assets {
 
         Log.d("Assets", "doInit! ");
         rootDir = getLocalDataPath(context);
+//        rootDir = getExternalDataPath(context);
 
         //. make tessdata and config sub directories...
         String tessDataPath = getTessDataPath();
@@ -143,16 +148,25 @@ public class Assets {
         }
         return json;
     }
-
-
-    public static String read_action_scenario_from_file(String siteName){
-        String actionScenarioFilePath = getConfigDataPath() + File.separator + siteName + ".json";
+    public static boolean save_bettask_json_from_file(String jsonString){
+        String betTaskJsonFilePath = getConfigDataPath() + File.separator + "bet_task.json";
+        try (
+                OutputStream o = new FileOutputStream(betTaskJsonFilePath);
+        ) {
+            byte[] buffer = jsonString.getBytes();
+            o.write(buffer);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public static String read_betconfig_json_from_file(){
+        String betTaskJsonFilePath = getConfigDataPath() + File.separator + "bet_config.json";
         String json = null;
         try (
-                InputStream in = new FileInputStream(actionScenarioFilePath);
-
+            InputStream in = new FileInputStream(betTaskJsonFilePath);
         ) {
-
             int size = in.available();
             byte[] buffer = new byte[size];
             in.read(buffer);
@@ -163,5 +177,47 @@ public class Assets {
             e.printStackTrace();
         }
         return json;
+    }
+    public static boolean save_betconfig_json_from_file(String jsonConfigString){
+        String betConfigJsonFilePath = getConfigDataPath() + File.separator + "bet_config.json";
+        try (
+                OutputStream o = new FileOutputStream(betConfigJsonFilePath);
+        ) {
+            byte[] buffer = jsonConfigString.getBytes();
+            o.write(buffer);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    public static String read_action_scenario_from_file(String siteName){
+        String actionScenarioFilePath = getConfigDataPath() + File.separator + "action_scenario.json";
+        String json = null;
+        try (
+                InputStream in = new FileInputStream(actionScenarioFilePath);
+        ) {
+            int size = in.available();
+            byte[] buffer = new byte[size];
+            in.read(buffer);
+            in.close();
+            json = new String(buffer, "UTF-8");
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+    public static boolean save_action_scenario_from_file( String jsonScenarioString){
+        String betScenarioJsonFilePath = getConfigDataPath() + File.separator + "action_scenario.json";
+        try (
+                OutputStream o = new FileOutputStream(betScenarioJsonFilePath);
+        ) {
+            byte[] buffer = jsonScenarioString.getBytes();
+            o.write(buffer);
+            return true;
+        } catch (IOException e) {
+            e.printStackTrace();
+            return false;
+        }
     }
 }

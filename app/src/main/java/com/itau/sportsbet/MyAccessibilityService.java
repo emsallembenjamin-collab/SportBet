@@ -46,57 +46,7 @@ public class MyAccessibilityService extends AccessibilityService {
         long interval = 2000; // milliseconds
 
         // Create a runnable to be executed periodically
-        runnable = new Runnable() {
-            int  accumlate = 0;
-
-            @Override
-            public void run() {
-                // Code to be executed periodically
-                Log.d("PPPP SportsBet Service", "Started! ");
-
-                boolean bHasTask = loadTask.hasTask();
-                if (bHasTask){
-                    JActionExecutor actionExecutor = loadTask.loadActionScenario();
-                    if (actionExecutor != null){
-                        //. start really...
-                        String bet_result_string = null;
-                        String login_result = actionExecutor.run();
-//                        String login_result = "success";
-                        if (login_result.equals("success")){
-                            JBetAction pBetAction = JBetAction.createObject(loadTask);
-                            if (pBetAction != null){
-                                bet_result_string = pBetAction.run();
-                            }
-                            else{
-                                bet_result_string = "fail_unknown_site";
-                            }
-                        }
-                        else{
-                            bet_result_string = "fail_login";
-                        }
-
-                        loadTask.reportResult(bet_result_string);
-
-                        //. all done.
-                        actionExecutor.clear_mem();
-                        actionExecutor = null;
-                    }
-                    else{
-                        //. parsing error.
-                    }
-
-                }
-                else {
-                    //. no task. sleep at home...
-                }
-
-                accumlate++;
-                Log.d("PPPP SportsBet Service", "finish one iteration! " + accumlate);
-                // Reschedule the task
-                //pgh for test.
-                //handler.postDelayed(this, interval);
-            }
-        };
+        runnable = new JEngine();
 
         // Schedule the initial execution of the runnable
         handler.postDelayed(runnable, initialDelay);
@@ -131,7 +81,7 @@ public class MyAccessibilityService extends AccessibilityService {
         Assets.extractTessData(this);
 
         //. for test. extract some config json files.
-        Assets.extractAllConfigAssets(this);
+//        Assets.extractAllConfigAssets(this);
 
         //. Init openCV and tesseract...
         JUtilFunctions.doInit();
