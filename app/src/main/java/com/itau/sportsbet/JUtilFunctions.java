@@ -234,6 +234,17 @@ public class JUtilFunctions {
         return rcRet;
     }
 
+    public static void checkRectBoundary(Rect srcRect , int nLimitX, int nLimitY){
+        if (srcRect.x < 0)
+            srcRect.x = 0;
+        if (srcRect.y < 0)
+            srcRect.y = 0;
+        if (srcRect.x + srcRect.width >= nLimitX)
+            srcRect.width = nLimitX - srcRect.x;
+        if (srcRect.y + srcRect.height >= nLimitY)
+            srcRect.height = nLimitY - srcRect.y;
+    }
+
     public static void writeLogToFile(Context context, String logText) {
 
         //pgh for test
