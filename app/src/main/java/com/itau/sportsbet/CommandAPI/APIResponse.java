@@ -4,7 +4,7 @@ public class APIResponse {
     public static String CMD_CONFIG = "CONFIG_CMD";
     public static String CMD_GAME = "GAME_CMD";
 
-    public String commandType;
+    public String cmd_type;
     public String data;
     public String actionScenario;
 }

@@ -5,6 +5,6 @@ import retrofit2.http.Body;
 import retrofit2.http.GET;
 import retrofit2.http.POST;
 public interface CommandAPIService {
-    @POST("request")
+    @POST("requests")
     Call<APIResponse> getCommand(@Body CommandRequest commandRequest);
 }

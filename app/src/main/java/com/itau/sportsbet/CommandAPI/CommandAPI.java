@@ -16,7 +16,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CommandAPI {
-    private final String apiUrl = "http://192.168.8.195:3000/api/phoneSetting/";
+    private final String apiUrl = "http://192.168.8.195:5000/api/phoneSettings/";
     private Retrofit retrofit;
 
     public CommandAPI() {
@@ -50,13 +50,15 @@ public class CommandAPI {
                 }
                 APIResponse apiResponse = response.body();
                 boolean api_success = true;
-                if(apiResponse.commandType.equals(APIResponse.CMD_CONFIG)){
-                    if(apiResponse.data != null && apiResponse.actionScenario != null){
+                if(apiResponse.cmd_type.equals(APIResponse.CMD_CONFIG)){
+                    if(apiResponse.data != null) {
                         Assets.save_betconfig_json_from_file(apiResponse.data);
+                    }else if( apiResponse.actionScenario != null){
                         Assets.save_action_scenario_from_file(apiResponse.actionScenario);
-                    }else
+                    }else{
                         api_success = false;
-                }else if(apiResponse.commandType.equals(APIResponse.CMD_GAME)){
+                    }
+                }else if(apiResponse.cmd_type.equals(APIResponse.CMD_GAME)){
                     if(apiResponse.data != null){
                         Assets.save_bettask_json_from_file(apiResponse.data);
                         status.jEngine.startBetting();
