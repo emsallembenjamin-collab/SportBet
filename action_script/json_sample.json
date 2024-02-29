@@ -1,0 +1,23 @@
+{
+  "name": "John Doe",
+  "age": 30,
+  "isStudent": false,
+  "address": {
+    "street": "123 Main St",
+    "city": "Anytown",
+    "country": "USA"
+  },
+  "languages": ["English", "Spanish", "French"],
+  "jobHistory": [
+    {
+      "title": "Software Engineer",
+      "company": "XYZ Corp",
+      "years": 5
+    },
+    {
+      "title": "Web Developer",
+      "company": "ABC Inc",
+      "years": 3
+    }
+  ]
+}

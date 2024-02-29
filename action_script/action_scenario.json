@@ -1,0 +1,162 @@
+{
+  "user_id"               : "Over11",
+  "password"              : "Abcd123",
+  "full_width"            : 960,
+  "full_height"           : 540,
+  
+
+
+  "action_list": [
+
+    {
+      "name"              : "starting go_website",
+      "type"              : "go_website",
+      "string_param_list" : ["https://oxbet.in"],
+      "digit_param_list"  : [],
+      "delay"             : 10000,
+      "branch": {
+        "success" : ["find login button"],
+        "fail"    : []
+      }
+    },
+
+    
+    {
+      "name"              : "find login button",
+      "type"              : "do_ocr",
+      "string_param_list" : ["ĐĂNG NHẬP", "0"],
+      "digit_param_list"  : [235,150, 365, 185, 2],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click login button"],
+        "fail"    : ["find already logined"]
+      }
+    },
+
+
+
+    {
+      "name"              : "click login button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [270,170],
+      "delay"             : 500,
+      "branch": {
+        "success" : ["click and focus user_id edit"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "click and focus user_id edit",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [260,320, 2],
+      "delay"             : 200,
+      "branch": {
+        "success" : ["paste user_id", "$user_id"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "paste user_id",
+      "type"              : "do_serial_input",
+      "string_param_list" : [],
+      "digit_param_list"  : [],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click and focus password edit"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"              : "click and focus password edit",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [320, 450],
+      "delay"             : 200,
+      "branch": {
+        "success" : ["paste password", "$password"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "paste password",
+      "type"              : "do_serial_input",
+      "string_param_list" : [],
+      "digit_param_list"  : [],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click enter site button"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "click enter site button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [240, 620],
+      "delay"             : 2000,
+      "branch": {
+        "success" : ["the end process", "ok"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"              : "find already logined",
+      "type"              : "do_ocr",
+      "string_param_list" : ["$user_id", "2"],
+      "digit_param_list"  : [350, 140, 475, 195, 2],
+      "branch": {
+        "success" : ["the end process", "ok"],
+        "fail"    : ["click user_id region"]
+      }
+    },
+
+    {
+      "name"              : "click user_id region",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [430, 160],
+      "delay"             : 500,
+      "branch": {
+        "success" : ["click logout menu button"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"              : "click logout menu button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [250, 740],
+      "delay"             : 1000,
+      "branch": {
+        "success" : ["find login button"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"              : "the end process",
+      "type"              : "the_end",
+      "string_param_list" : [],
+      "digit_param_list"  : [],
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
+    },
+    
+    
+  ]
+  
+}

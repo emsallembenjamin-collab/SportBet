@@ -1,0 +1,411 @@
+
+Date: 2024-2-20
+Written by PGH
+Revision: 1.0
+
+
+<<<============ action_scenario file structure ==============>>>
+
+action_scenario 화일의 전체 구조는 다음과 같다.
+{
+  "user_id"               : "xxx",
+  "password"              : "yyy",
+
+  "action_list": [
+    {
+      "name"              : "xxx",
+      "type"              : "xxx",
+      "string_param_list" : [xxx],
+      "digit_param_list"  : [],
+      "delay"             : 10000,
+      "branch": {
+        "success" : [xxx],
+        "fail"    : []
+      }
+    },
+    ...
+ }
+
+
+<<<============ action type list ==============>>>
+
+ @==== "user_id" && "password"
+  	이것은 다른 의문이 없다고 본다. 
+
+ @==== "full_width" && "full_height"
+  	기준 가로와 세로 픽셀값을 준다.
+  	장치들의 해상도가 각이하므로 ScreenShot한 화상은 이 크기로 resize된다.  
+
+
+ @==== "name"
+ 	is the name of action node, It is a unique identifier for the entire actions.
+ 	action의 의미를 알수 있게 충분한 길이의 평문으로 준다.
+
+ @==== "type"
+ 	action의 종류이다. 체계와 미리 약속된 예약어들이다.
+ 	이 문서의 아래에 서술한다.
+
+ @==== "string_param_list"
+ 	문자렬목록의 파라메터렬이다.
+ 	구제적인 의미는 type에 의존한다. 아래의 <action type list>단락에서 서술한다.
+
+ @==== "digit_param_list"
+ 	수자형식의 파라메터렬이다.
+ 	구제적인 의미는 type에 의존한다. 아래의 <action type list>단락에서 서술한다.
+ @==== "delay"
+ 	거의 모든 action들은 delay가 필요하다.
+ 	
+
+ @==== "branch"
+ 	action의 진행후 workflow를 서술한다.
+ 	당연히 success와 fail이 다 빈 목록일수는 없다.
+
+ 	@==== "success"
+ 		action의 결과가 긍정적일때 계속하여 집행해야 할 action의 name을 준다.
+ 		기타 요구되는 파라메터들을 목록형식으로 추가한다.
+
+ 	@==== "fail"
+ 		action의 결과가 부정적일때 계속하여 집행해야 할 action의 name을 준다.
+ 		기타 요구되는 파라메터들을 목록형식으로 추가한다.
+
+ %* 특별히 지정할 필요가 없는 파라메터목록들은 빈목록 []을 준다.
+
+
+
+
+
+<<<============ action type list ==============>>>
+
+1. go_website : 
+	
+	Desc: 
+		lauch webbrowser and goto website...
+	Params:
+		string_param_list: 
+			size = 1;
+			[0] = url string.
+
+	Ex:
+		{
+      		"name"              : "starting go_website",
+      		"type"              : "go_website",
+      		"string_param_list" : ["https://oxbet.in"],
+      		...      
+      	}
+
+
+2. do_ocr : 
+	
+	Desc: 
+		 do ocr in specified region and find specified string using specified compare method...
+	Params:
+		string_param_list: 
+			찾으려는 문자렬과 문자렬비교방법을 목록화한다.
+			찾으려는 문자렬이 여러개 있을수 있다.
+			ocr의 결과는 문자렬에 대응하는 Rect 배렬이다. 만일 찾지 못한 경우에는 Rect(0,0,0,0)을 돌린다.
+
+			ex:
+			"string_param_list" : ["ĐĂNG NHẬP", "0"],
+			문자렬비교방법표식에 대한 설명은 단락 <compare string type list>에 서술한다.
+
+		"digit_param_list"  : 
+			ocr를 진행하려는 구역을 준다. 
+			5개의 수값이 주어진다. 
+			ex: 
+			"digit_param_list"  : [235,150, 365, 185, 2],
+			"digit_param_list"  : [0.5, 0, 1, 0.3, 2],
+			앞의 4수자는 Rect령역의 left, top, right, bottom값이다.
+			만일 이 값들중 어느 하나라도 1보다 작은 소수이면 전체 화면에 대한 비례를 나타낸다.
+			또한 right or bottom이 0이라면 전체 화면을 대상한다.
+			5번째 수자는 ocr를 위한 확대배수이다.
+
+			주의: 4각형의 령역은 960*540으로 resize된 화상에서 육안으로 확인하고 대체적인 령역으로 설정한다.
+			정확히는 960*540이 아닐수 있다. 실례로 960*499 등. aspect ratio를 유지한다.
+			
+
+			
+	Ex:
+	{
+      "name"              : "find login button",
+      "type"              : "do_ocr",
+      "string_param_list" : ["ĐĂNG NHẬP", "0"],
+      "digit_param_list"  : [235,150, 365, 185, 2],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click login button"],
+        "fail"    : ["find already logined"]
+      }
+    },
+
+
+3. do_click : 
+	
+	Desc: 
+		 click event in special position...
+	Params:
+		"string_param_list": 
+			no use.
+
+		"digit_param_list"  : 
+			position for click,
+			3개의 수값을 주는 경우도 있는데...
+			마지막 수자는 반복수이다. 즉 동일한 click을 n번 하라는 뜻이다.
+			이때 delay는 hardcording 200 이다.
+
+			만일 digit_param_list 도 역시 한개 일수 있다.
+			이때에는 pixel값이 앞단의 연산결과에 의존하며 1개는 반복수이다.
+			구체적인 코드에서 본다.
+
+			digit_param_list의 개수가 4개이면 3번째, 4번째 수는 .
+			이전 연산결과를 리용하되 그의 편위값이다.
+			ex: 
+			"digit_param_list"  : [1,0, 100, 50], // 편위 x-100, y-50만큼 가라.
+			
+			ex: 
+			"digit_param_list"  : [270,170],
+			"digit_param_list"  : [270,170, 2],
+			
+	Ex:
+	{
+      "name"              : "click login button",
+      "type"              : "do_click",
+      "string_param_list" : [],
+      "digit_param_list"  : [270,170],
+      "delay"             : 500,
+      "branch": {
+        "success" : ["click and focus user_id edit"],
+        "fail"    : []
+      }
+    },
+
+4. do_serial_input : 
+	
+	Desc: 
+		 input text into edit box...
+	Params:
+		"string_param_list": 
+			spec text.
+			if this is empty, app use prev action's branch param.
+			ex:
+			"branch": {
+		        "success" : ["paste user_id", "$user_id"],
+		        "fail"    : []
+		      }
+		    일때 $user_id 가 리용된다. 앞의 $는 Json화일의 key "user_id"의 value를 리용하라는것이다.
+
+		"digit_param_list"  : 
+			no use,
+			
+	Ex:
+	{
+      "name"              : "paste password",
+      "type"              : "do_serial_input",
+      "string_param_list" : [], // 혹은  ["$password"]
+      "digit_param_list"  : [],
+      "delay"             : 100,
+      "branch": {
+        "success" : ["click enter site button"],
+        "fail"    : []
+      }
+    },
+
+5. do_find_color_bar :
+
+	Desc: 
+		 수직 또는 수평방향으로 련속 나타나는 색띠를 찾는다...
+		 련속된 길이는 어떤 한계이상으로 커야 한다.
+	Params:
+		"string_param_list": 
+			no use.
+		"digit_param_list"  : 
+			필요한 정보들을 배렬로 준다. 8개의 수값이다.
+			첫 4수는 탐색의 시작과 끝점이다. 역시 소수인 경우는 전체 화상에서의 척도이다. 
+			다음 3 수는 R, G, B 값이다.
+			마지막 수는 최소련속되는 길이이다. 이 길이보다 작은 토막들은 무시된다.
+
+			검색결과는 action의 result_rects에 보관된다.
+
+		ex:
+		[0.67,0, 0.67, 1, 29, 27, 24, 20 ]
+
+			
+	{
+      "name"              : "find user_id input ctrl",
+      "type"              : "do_find_color_bar",
+      "string_param_list" : [],
+      "digit_param_list"  : [0.67,0, 0.67, 1, 29, 27, 24, 20 ],
+      "delay"             : 200,
+      "branch": {
+        "success" : ["paste user_id", "$user_id"],
+        "fail"    : []
+      }
+    },
+
+6. do_input_user_id_password :
+	Desc: 
+		 앞에서 user_id와 password 칸은 찾았다고 보고 (result_rect)...
+		 user_id와 password의 입력처리를 진행한다.
+	Params:
+		"string_param_list": 
+			no use.
+		"digit_param_list"  : 
+			no use.
+
+	ex:
+	{
+      "name"              : "input user_id and password",
+      "type"              : "do_input_user_id_password",
+      "string_param_list" : [],
+      "digit_param_list"  : [],
+      "delay"             : 200,
+      "branch": {
+        "success" : ["the_end", "ok"],
+        "fail"    : ["the_end", "fail"]
+      }
+    },
+    연산 그자체에서는 실패를 모르지만 입력파라메터가 좋지 않으면 fail로 끝낼수 있다.	
+
+7. do_repeat_scroll : 
+	Desc: 
+		 do screen scroll repeatly.
+
+	Params:
+		"string_param_list": 
+			indicate repeat count.
+			"1" , "$category" => use loadTask's member variable...
+		"digit_param_list"  : 
+			3 members.
+			first 2, is start point x,y
+			third scroll amount...
+			these must be pixel unit...
+			
+			500=> Scroll Up, (down to up)
+			-500=> Scroll Down (up to down)...
+
+	ex:
+	{
+      "name"              : "view sports category",
+      "type"              : "do_repeat_scroll",
+      "string_param_list" : ["$category"],
+      "digit_param_list"  : [-500],
+      "delay"             : 200,
+      "branch": {
+        "success" : ["the_end", "ok"],
+        "fail"    : []
+      }
+    },
+    
+	
+
+7. comment :
+	Desc: 
+		 JSON에는 특별히 comment처리가 없다.
+		 그래서 설명을 위하여 이따금 추가하는 action이다.
+		 parameter들은 리용하지 않는다.
+		 그리고 실행도 되지 않는다.
+
+
+
+8. the_end	: 
+	
+	Desc: 
+		 the end mark...
+	Params:
+		"string_param_list": 
+			no use
+		"digit_param_list"  : 
+			no use,
+		주의: the_end를 호출하는 branch는 꼭 두개의 파라메터를 가져야 한다.
+		하나는 "the_end" 이름 그자체이고 두번째것은 결과를 나타내는 문자렬이다.
+			
+	Ex:
+	{
+      "name"              : "the end process",
+      "type"              : "the_end",
+      "string_param_list" : [],
+      "digit_param_list"  : [],
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
+    },
+			
+
+    
+
+
+<<<============ compare string type list ==============>>>
+
+first, declare enum of Compare String Type like below.
+public enum CompareStringMethod {
+    e_exactly,
+    e_useTable,
+    e_abbreviated_last,
+    e_abbreviated_first
+}
+
+the Meaning of each element:
+
+"0" = e_exactly :
+	compare full string exactly.
+
+"1" = e_useTable :
+	compare string using table.
+	You must ensure that the string and its candidates are already described in the table.
+
+"2" = e_abbreviated_last :
+	compare abbreviated_last string.
+	ex: Over123 and Over1...
+
+"3" = e_abbreviated_first :
+	compare abbreviated_first string.
+	ex: Over123 and ...er123
+
+
+
+***************** about Bet_task *****************
+category : sport의 큰 범주.
+		oxbet.in 에서는 다음과 같다.
+
+		0: Euro area 
+		1: Peak sports
+		2: asia sports
+
+
+sports type:
+	축구, 롱구, ...
+	이름 그대로를 준다. 
+	ex: bóng đá  Bóng đá
+
+progrss date:
+	"Live Now" : "Trực tiếp bây giờ"
+	"2 25"	   : 2월 25일
+
+
+<<<============ some my rules ==============>>>
+
+KSports (Peak) Type...
+
+
+betTypeCategory:
+3가지중 한가지를 준다.
+"Keo chap", "Tai/Xiu", "1X2"
+corner kick일때는 두가지만 가능하다. "Keochap", "TaiXiu",
+
+betType:
+상황에 따라 다르게 준다.
+"Keo chap" 일때: 팀이름을 준다.
+"Tai/Xiu" 일때: Tai 혹은 Xiu를 준다.
+"1X2" 일때: 1 혹은 2 혹은 X를 준다.
+
+betDetail:
+수값렬을 준다:
+"Keo chap", "Tai/Xiu": 1-1.5, 0.5-1
+"1X2" 일때:  줄게 없다.
+
+
+
+
+
+
+
