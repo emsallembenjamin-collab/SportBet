@@ -43,5 +43,8 @@ public class Config {
 	public static int TESS_OCR_MODE = TessBaseAPI.OEM_LSTM_ONLY;
 	public static String OCR_LANG = "vie";
 	public static String OCR_MODEL_NAME = "vie.traineddata";
+	public static String phoneId = "";
+
+	public static String db_name = "SportBet";
 
 }

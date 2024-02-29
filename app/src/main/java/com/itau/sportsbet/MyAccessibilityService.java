@@ -7,6 +7,7 @@ import android.content.ClipData;
 import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
@@ -41,7 +42,6 @@ public class MyAccessibilityService extends AccessibilityService {
         //.for some init.
         doInit();
 
-
         long initialDelay = 1000; // milliseconds
         long interval = 2000; // milliseconds
 
@@ -51,7 +51,6 @@ public class MyAccessibilityService extends AccessibilityService {
         // Schedule the initial execution of the runnable
         handler.postDelayed(runnable, initialDelay);
     }
-
 
     // Override methods for handling accessibility events
     @Override
@@ -75,23 +74,26 @@ public class MyAccessibilityService extends AccessibilityService {
     //. for some init process.
     protected void doInit() {
 
+        loadDataFromDb();
+
         Assets.doInit(this);
 
         //. extract tessmodel data...
         Assets.extractTessData(this);
-
         //. for test. extract some config json files.
 //        Assets.extractAllConfigAssets(this);
-
         //. Init openCV and tesseract...
         JUtilFunctions.doInit();
-
 
         Size szScreen = getScreenSize();
         Log.d("SportsBet Service", "onServiceConnected! " + szScreen.width + "x" + szScreen.height);
 
-    }
 
+    }
+    protected  void loadDataFromDb(){
+        SharedPreferences db = getApplicationContext().getSharedPreferences(Config.db_name, Context.MODE_PRIVATE);
+        Config.phoneId = db.getString("PhoneId", "");
+    }
     //////////////////////////////////////////////////////////
     //. some util functions.
     public Size getScreenSize(){

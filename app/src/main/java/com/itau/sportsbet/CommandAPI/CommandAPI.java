@@ -2,6 +2,8 @@ package com.itau.sportsbet.CommandAPI;
 
 import android.util.Log;
 
+import com.itau.sportsbet.Config;
+
 import java.io.InputStream;
 
 import okhttp3.OkHttpClient;
@@ -35,7 +37,7 @@ public class CommandAPI {
     public String callAPI( APIStatus status ) {
 
         CommandAPIService commandAPIService = retrofit.create(CommandAPIService.class);
-        CommandRequest commandRequest = new CommandRequest("phone_1");
+        CommandRequest commandRequest = new CommandRequest(Config.phoneId);
         Call<APIResponse> call = commandAPIService.getCommand(commandRequest);
 
         call.enqueue(new Callback<APIResponse>() {
