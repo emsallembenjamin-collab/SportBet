@@ -28,7 +28,7 @@ public class Config {
 	public static float tesseractDetaultCharHeight = 40.0f;
 
 	public static String betType_Handicap = "Handicap";
-	public static String betType_TaiXiu = "TaiXiu";
+	public static String betType_TaiXiu = "Tai/Xiu";
 	public static String betType_Europe1X2 = "Europe1X2";
 
 	public static int CalcYSize(int ySize){

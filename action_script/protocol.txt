@@ -390,7 +390,7 @@ KSports (Peak) Type...
 betTypeCategory:
 3가지중 한가지를 준다.
 "Keo chap", "Tai/Xiu", "1X2"
-corner kick일때는 두가지만 가능하다. "Keochap", "TaiXiu",
+corner kick일때는 두가지만 가능하다. "Keochap", "Tai/Xiu",
 
 betType:
 상황에 따라 다르게 준다.

@@ -204,6 +204,13 @@ class JAction {
                             Point ptCenter = JUtilFunctions.getCenterPoint(rc);
 
                             nRepeatCnt = digit_param_list.get(0).intValue();
+                            int nBaseType = digit_param_list.get(1).intValue();
+                            if (nBaseType == 1){
+                                ptCenter.y = rc.y;
+                            }
+                            else if (nBaseType == 2){
+                                ptCenter.y = rc.y + rc.height;
+                            }
                             double offsetX = digit_param_list.get(2).doubleValue();
                             double offsetY = digit_param_list.get(3).doubleValue();
                             pt = new Point(ptCenter.x + offsetX / Config.resizeXRatio, ptCenter.y + offsetY / Config.resizeYRatio);
@@ -286,11 +293,20 @@ class JAction {
                     String strCond = string_param_list.get(0);
                     if (strCond.equals("great")){
                         bGreatCond = true;
+                        bCondBranch = true;
+                        nThres = Integer.parseInt(string_param_list.get(1));
                     }
                     else if (strCond.equals("less")){
-                        bGreatCond = true;
+                        bGreatCond = false;
+                        bCondBranch = true;
+                        nThres = Integer.parseInt(string_param_list.get(1));
+                    }
+                    else{
+                        result_string = "exception";
+                        break;
                     }
                 }
+
 
                 int nDigitCnt = digit_param_list.size();
                 if (nDigitCnt != 11){
@@ -357,12 +373,27 @@ class JAction {
                         }
 
                         int resultRectCnt = result_rects.size();
-                        if (resultRectCnt > 0){
-                            result_string = "success";
+                        if (bCondBranch){
+                            if (bGreatCond){
+                                if (resultRectCnt >= nThres)
+                                    result_string = "success";
+                                else
+                                    result_string = "fail";
+                            }
+                            else {
+                                if (resultRectCnt < nThres)
+                                    result_string = "success";
+                                else
+                                    result_string = "fail";
+                            }
                         }
-                        else {
-                            result_string = "fail";
+                        else{
+                            if (resultRectCnt >0 )
+                                result_string = "success";
+                            else
+                                result_string = "fail";
                         }
+
                         retSegments = null;
                     }
                 }
@@ -670,6 +701,9 @@ class JActionList extends ArrayList<JAction> {
             command = act.branch_success;
             bRunAsPrevSuccess = true;
         }
+        else if (act.result_string.equals("exception")){
+            return null;
+        }
         else{
             command = act.branch_fail;
             bRunAsPrevSuccess = false;
@@ -749,8 +783,8 @@ public class JActionExecutor {
         while(actionNow != null){
 
             boolean bFinished = actionNow.run(actionPrev);
+            result = actionNow.result_string;
             if (bFinished == true){
-                result = actionNow.result_string;
                 break;
             }
 

@@ -290,7 +290,11 @@ public class JBetAction_Euro1 extends JBetAction {
 
         String strRet = "fail findBettingCategorySection";
 
-        String searchKey = loadTask.betType;
+        String searchKey = null;
+        if (loadTask.betTypeCategory.equals("Tai/Xiu"))
+            searchKey = "Cuoc Tai/Xiu toan tran";
+        else if (loadTask.betTypeCategory.equals("Keo chap"))
+            searchKey = "Cuoc chap Chau A toan tran";
 
         int limit = 8;
 
@@ -387,7 +391,8 @@ public class JBetAction_Euro1 extends JBetAction {
                 //. do ocr.
                 Rect rcAnalyseBase = new Rect(0,nStartY, Config.IMAGE_WIDTH, nEndY - nStartY);
                 ArrayList<String> string_param_list_forBetDetail = new ArrayList<String>();
-                string_param_list_forBetDetail.add(loadTask.betDetail);string_param_list_forBetDetail.add("0");
+                String betDetail = loadTask.betTarget + " " + loadTask.betMark;
+                string_param_list_forBetDetail.add(betDetail);string_param_list_forBetDetail.add("0");
 
                 strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list_forBetDetail,
                         rcAnalyseBase, fResizeRate, result_rects, 0, 0);

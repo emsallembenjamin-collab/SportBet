@@ -28,11 +28,11 @@ public class JLoadTask {
     public String progress_date;
     public String team1;
     public String team2;
-    public int corner_kick;
-    public String betType;
+    public int corner_kick = 0;
     public String betTypeCategory;
 
-    public String betDetail;
+    public String betTarget;
+    public String betMark;
     public String betAmount;
 
 
@@ -158,10 +158,9 @@ public class JLoadTask {
             progress_date = jsonObject.getString("progress_date");
             team1 = jsonObject.getString("team1");
             team2 = jsonObject.getString("team2");
-            corner_kick = jsonObject.getInt("corner_kick");
-            betType = jsonObject.getString("betType");
             betTypeCategory = jsonObject.getString("betTypeCategory");
-            betDetail = jsonObject.getString("betDetail");
+            betTarget = jsonObject.getString("betTarget");
+            betMark = jsonObject.getString("betMark");
             betAmount = jsonObject.getString("betAmount");
 
         } catch (JSONException e) {
