@@ -24,7 +24,9 @@ public class JLoadTask {
     public int category = 0;
     public String sports_type;
     public String country_name;
+    public String country_vie_name;
     public String league_name;
+    public String league_vie_name;
     public String progress_date;
     public String team1;
     public String team2;
@@ -54,7 +56,6 @@ public class JLoadTask {
             //. parsing...
             bHasConfig = parse_bet_config(jsonConfigString);
             bHasTask = parse_bet_task(jsonTaskString);
-            Log.d("PPPP read and parse bet_task file", "has_bet_task=" + has_bet_task);
         }
         else{
             Log.d("PPPP fail read_bettask_json_from_file", "error");
@@ -69,14 +70,6 @@ public class JLoadTask {
     public JActionExecutor loadActionScenario(){
 
         JActionExecutor actionExecutor = null;
-
-        //. first, update avaliable?
-        if (update_site_info.equals("true")){
-            boolean bDownloaded = downloadActionScenario(site);
-            if (bDownloaded == false){
-                return null;
-            }
-        }
 
         //. second, open local actionScenarioFile
         String jsonString = Assets.read_action_scenario_from_file(site);
@@ -128,24 +121,17 @@ public class JLoadTask {
 
         return strRet;
     }
-
-
-
-    public boolean parse_bet_task(String jsonString){
+    public boolean parse_bet_config(String jsonString){
         boolean bRet = false;
         try {
             // Parse JSON string
             JSONObject jsonObject = new JSONObject(jsonString);
 
             // Extract data from JSON object
-            has_bet_task = jsonObject.getString("has_bet_task");
-            user_id = jsonObject.getString("user_id");
+            user_id = jsonObject.getString("username");
             password = jsonObject.getString("password");
-            Config.IMAGE_WIDTH = jsonObject.getInt("full_width");
-            Config.IMAGE_HEIGHT = jsonObject.getInt("full_height");
-            site = jsonObject.getString("site");
-            update_site_info = jsonObject.getString("update_site_info");
-            JActionExecutor.limitTime = jsonObject.getInt("limitTime");
+            site = jsonObject.getString("site_url");
+            bRet = true;
 
         } catch (JSONException e) {
             e.printStackTrace();
@@ -160,12 +146,14 @@ public class JLoadTask {
         try {
             // Parse JSON string
             JSONObject jsonObject = new JSONObject(jsonString);
-
+            Log.d("JsonString_bettask", "jsonString");
             //. 2024-2-24
             category = jsonObject.getInt("category");
             sports_type = jsonObject.getString("sports_type");
             country_name = jsonObject.getString("country_name");
+            country_vie_name = jsonObject.getString("country_vie_name");
             league_name = jsonObject.getString("league_name");
+            league_vie_name = jsonObject.getString("league_vie_name");
             progress_date = jsonObject.getString("progress_date");
             team1 = jsonObject.getString("team1");
             team2 = jsonObject.getString("team2");
@@ -173,6 +161,7 @@ public class JLoadTask {
             betTarget = jsonObject.getString("betTarget");
             betMark = jsonObject.getString("betMark");
             betAmount = jsonObject.getString("betAmount");
+            bRet = true;
 
         } catch (JSONException e) {
             e.printStackTrace();

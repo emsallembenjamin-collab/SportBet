@@ -192,7 +192,7 @@ public class Assets {
         }
     }
     public static String read_action_scenario_from_file(String siteName){
-        String actionScenarioFilePath = getConfigDataPath() + File.separator + "action_scenario.json";
+        String actionScenarioFilePath = getConfigDataPath() + File.separator + "actionScenario.json";
         String json = null;
         try (
                 InputStream in = new FileInputStream(actionScenarioFilePath);

@@ -14,4 +14,6 @@
 .cxx
 local.properties
 /opencv
+/app/release
+/app/build
 local.properties

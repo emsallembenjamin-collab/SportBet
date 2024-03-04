@@ -85,7 +85,6 @@ class JAction {
                 String site_url = string_param_list.get(0);
                 JUtilFunctions.launchChrome(MyAccessibilityService.mainService, site_url);
                 JUtilFunctions.delay_duration(delay);
-
                 result_string = "success";
             }
             break;

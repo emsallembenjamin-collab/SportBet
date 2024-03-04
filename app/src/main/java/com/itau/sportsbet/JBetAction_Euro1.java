@@ -63,7 +63,7 @@ public class JBetAction_Euro1 extends JBetAction {
         JUtilFunctions.delay_duration(200);
 
         //. 4
-        strRet = findFootballLeague(loadTask.league_name);
+        strRet = findFootballLeague(loadTask.league_vie_name);
         if (strRet.equals("success") == false)
             return strRet;
         JUtilFunctions.delay_duration(2000);
@@ -432,7 +432,7 @@ public class JBetAction_Euro1 extends JBetAction {
 
         JUtilFunctions.delay_duration(2000);
         String bet_amount  = loadTask.betAmount;
-        String leagueName = loadTask.league_name;
+        String leagueName = loadTask.league_vie_name;
 ///////////////////////bet amount
         Rect rcAnalyseBase = new Rect(0, 255,  Config.IMAGE_WIDTH, 500);
         JUtilFunctions.takeScreenshot();

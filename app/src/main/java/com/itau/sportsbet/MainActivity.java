@@ -28,15 +28,14 @@ public class MainActivity extends AppCompatActivity {
         phoneSetBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-
                 SharedPreferences sharedPreferences = getApplicationContext().getSharedPreferences(Config.db_name, Context.MODE_PRIVATE);
                 EditText txtInputPhoneId =(EditText) findViewById(R.id.editPhoneId);
-                String phoneId = txtInputPhoneId.toString();
-
+                String phoneId = txtInputPhoneId.getText().toString();
+                Log.d("PhoneID___Sharedpreference", phoneId);
                 SharedPreferences.Editor editor = sharedPreferences.edit();
                 editor.putString("PhoneId", phoneId);
+                editor.apply();
                 Config.phoneId = phoneId;
-
                 setResult(1);
             }
         });

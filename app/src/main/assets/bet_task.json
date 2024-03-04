@@ -1,8 +1,6 @@
 {
   "user_id"               : "Over11",
   "password"              : "Abcd123",
-  "full_width"            : 540,
-  "full_height"           : 960,
   "site"                  : "oxbet.in",
   "update_site_info"      : "false",
   "limitTime"			  : 9000000,

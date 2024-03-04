@@ -46,7 +46,7 @@ public class MyAccessibilityService extends AccessibilityService {
         long interval = 2000; // milliseconds
 
         // Create a runnable to be executed periodically
-        runnable = new JEngine();
+        runnable = new JEngine(loadTask);
 
         // Schedule the initial execution of the runnable
         handler.postDelayed(runnable, initialDelay);
@@ -92,7 +92,9 @@ public class MyAccessibilityService extends AccessibilityService {
     }
     protected  void loadDataFromDb(){
         SharedPreferences db = getApplicationContext().getSharedPreferences(Config.db_name, Context.MODE_PRIVATE);
-        Config.phoneId = db.getString("PhoneId", "");
+        Config.phoneId = db.getString("PhoneId", "phone_");
+        Log.d("LoadDatafromDb PhoneId", Config.phoneId);
+
     }
     //////////////////////////////////////////////////////////
     //. some util functions.

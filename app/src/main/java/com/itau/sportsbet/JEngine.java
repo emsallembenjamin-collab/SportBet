@@ -11,27 +11,31 @@ import com.itau.sportsbet.CommandAPI.CommandRequest;
 import android.os.Handler;
 
 public class JEngine implements Runnable{
-
-    public JLoadTask loadTask = new JLoadTask();
+    public JLoadTask loadTask;
     Handler handler = new Handler(Looper.getMainLooper());
     APIStatus apiStatus = new APIStatus();
     CommandAPI commandAPI = new CommandAPI();
+    boolean isBetingRunning = false;
+    public JEngine(JLoadTask loadTask){
+        this.loadTask = loadTask;
+    }
     @Override
     public void run() {
 
         apiStatus.jEngine  = this;
-        commandAPI.callAPI(apiStatus);
-        Log.d("Game Routine Running", "Loop End");
-        apiStatus.reset();
-
+        if(isBetingRunning == false){
+            commandAPI.callAPI(apiStatus);
+            Log.d("Game Routine Running", "Loop End");
+            apiStatus.reset();
+        }
         handler.postDelayed(this, 5000);
     }
-
 
     public void startBetting () {
         int accumlate = 0;
         // Code to be executed periodically
         Log.d("PPPP SportsBet Service", "Started! ");
+        isBetingRunning =true;
 
         boolean bHasTask = loadTask.hasTask();
         if (bHasTask){
@@ -65,7 +69,7 @@ public class JEngine implements Runnable{
         else {
             //. no task. sleep at home...
         }
-
+        isBetingRunning = false;
         accumlate++;
         Log.d("PPPP SportsBet Service", "finish one iteration! " + accumlate);
         // Reschedule the task

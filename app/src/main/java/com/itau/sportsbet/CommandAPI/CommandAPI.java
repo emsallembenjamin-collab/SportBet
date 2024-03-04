@@ -16,35 +16,27 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
 public class CommandAPI {
-    private final String apiUrl = "http://192.168.8.195:5000/api/phoneSettings/";
+    private final String apiUrl = "http://45.32.127.4:5000/api/phoneSettings/";
     private Retrofit retrofit;
-
     public CommandAPI() {
         HttpLoggingInterceptor logging = new HttpLoggingInterceptor();
         logging.setLevel(HttpLoggingInterceptor.Level.BODY);
-
         OkHttpClient.Builder httpClientBuilder = new OkHttpClient.Builder();
         httpClientBuilder.addInterceptor(logging); // Add logging interceptor
-
         OkHttpClient client = httpClientBuilder.build();
-
         retrofit = new Retrofit.Builder()
                 .baseUrl(apiUrl)
                 .addConverterFactory(GsonConverterFactory.create())
                 .client(client)
                 .build();
     }
-
     public String callAPI( APIStatus status ) {
-
         CommandAPIService commandAPIService = retrofit.create(CommandAPIService.class);
         CommandRequest commandRequest = new CommandRequest(Config.phoneId);
         Call<APIResponse> call = commandAPIService.getCommand(commandRequest);
-
         call.enqueue(new Callback<APIResponse>() {
             @Override
             public void onResponse(Call<APIResponse> call, Response<APIResponse> response) {
-
                 if(response.isSuccessful() == false){
                     return;
                 }
@@ -80,13 +72,11 @@ public class CommandAPI {
     }
 
     public String readStream(InputStream in){
-
         String result = "";
-
-
 
 
         return result;
     }
+
 
 }
