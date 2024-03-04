@@ -308,43 +308,7 @@ public class JBetAction_Peak1 extends JBetAction  {
         else{
             JUtilFunctions.takeScreenshot();
 
-            if (loadTask.betTypeCategory.equals("1X2")){
-
-                boolean bFindOK = true;
-                Rect rcAnalyseBase = new Rect(0, 250, 200, 600);
-                strRet = JUtilFunctions.findText("Đội nhà", rcAnalyseBase, fResizeRate, result_rects, 0, 0);
-                if (strRet.equals("success")) {
-                    Point ptCenter = JUtilFunctions.getCenterPoint(result_rects.get(0));
-                    ptCenter.y += (int)(65 / Config.resizeYRatio);
-                    switch(loadTask.betType){
-                        case "1":
-                            break;
-                        case "2":
-                            ptCenter.x += (int)(180 * 2 / Config.resizeXRatio);
-                            break;
-                        case "X":
-                            ptCenter.x += (int)(180 / Config.resizeXRatio);
-                            break;
-                        default:
-                            bFindOK = false;
-                            break;
-                    }
-                    if (bFindOK){
-                        JUserActions.dispatchTap(ptCenter.x, ptCenter.y);
-                        JUtilFunctions.delay_duration(1000);
-                    }
-                }
-                else{
-                    bFindOK = false;
-                }
-                if (bFindOK){
-                    strRet = "success";
-                }
-                else{
-                    strRet = "fail findBettingTypeSection";
-                }
-            }
-            else if (loadTask.betTypeCategory.equals("Keo chap") || loadTask.betTypeCategory.equals("Tai/Xiu")) {
+            if (loadTask.betTypeCategory.equals("Keo chap") || loadTask.betTypeCategory.equals("Tai/Xiu")) {
 
                 boolean bFindOK = false;
 
@@ -354,8 +318,8 @@ public class JBetAction_Peak1 extends JBetAction  {
                 int nOverlapHeight = 30;
                 int nY = nStartY - 50;
 
-                string_param_list_forDetail.add(loadTask.betType);string_param_list_forDetail.add("0");
-                string_param_list_forDetail.add(loadTask.betDetail);string_param_list_forDetail.add("0");
+                string_param_list_forDetail.add(loadTask.betTarget);string_param_list_forDetail.add("0");
+                string_param_list_forDetail.add(loadTask.betMark);string_param_list_forDetail.add("0");
                 for (int i = 0; i < nTotalSearch; i++){
                     Rect rcAnalyseBase = new Rect(0, nY, Config.IMAGE_WIDTH, nSecHeight);
                     strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list_forDetail, rcAnalyseBase, fResizeRate, result_rects, 0, 0);
