@@ -139,6 +139,20 @@ public class JUtilFunctions {
         rcBase.height = (int)(rcBase.height / Config.resizeYRatio);
     }
 
+    public static void offsetRectList(ArrayList<Rect> rcList, int offsetX, int offsetY){
+        int result_rect_cnt = rcList.size();
+        for (int i = 0; i < result_rect_cnt; i++){
+            Rect rc = rcList.get(i);
+            rc.x += offsetX;
+            rc.y += offsetY;
+        }
+    }
+
+    public static void offsetRect(Rect rcTarget, int offsetX, int offsetY){
+        rcTarget.x += offsetX;
+        rcTarget.y += offsetY;
+    }
+
     public static Point getOrigPointFromBasePoint(double x, double y){
         Point pt = new Point((x / Config.resizeXRatio), (y / Config.resizeYRatio));
         return pt;
@@ -436,6 +450,27 @@ public class JUtilFunctions {
         return pt;
     }
 
+    //.*=================================================================================
+    //.func: findContinuousSegments
+    //.desc:
+    //.
+    public static Mat detectLines(Mat image, int cannyThres1, int threshold, int minLineLength, int maxLineGap){
+
+        // Convert the image to grayscale
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
+
+        // Detect edges using the Canny edge detector
+        Mat edges = new Mat();
+        Imgproc.Canny(gray, edges, cannyThres1, cannyThres1 * 3);
+
+        // Apply Hough transform to detect line segments
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(edges, lines, 1, Math.PI / 180, threshold, minLineLength, maxLineGap);
+
+        return lines;
+    }
+
 
     //.*=================================================================================
     //.func: findContinuousSegments
@@ -569,15 +604,9 @@ public class JUtilFunctions {
 
     //.*=====================================================================================
     //. main function of do_ocr
-    //. there are 2 cases.
-    //. case 1:
-    //.     image is full region. and rcTargets is the result of textDetector, candidate list.
-    //.     ret: ArrayList<Rect> rcRet, the same size of string_param_list.
-    //.         if no find, ret rect is empty rect. and one of these is not empty, return string is "Success"
-    //. case 2:
-    //.     image is sub region. and rcTargets, rcRet is no meaning, must null,
-    //.     ret: if one of string_param_list is exist, then ok.
-    //.
+    //. first, do ocr per rect of rcTargets,
+    //. next, match the result and string of string_param_list...
+    //. according of it... set rcRetList...
     public static String do_ocr(Mat image, ArrayList<Rect> rcTargets, float fResizeRate,
                                 ArrayList<Rect> rcRetList, ArrayList<String> string_param_list, int nPreprocessMethodForOcrString) {
 
@@ -606,39 +635,11 @@ public class JUtilFunctions {
             }
 
             //. do ocr.
-            int limitWidth = image.cols();
-            int limitHeight = image.rows();
-
             int nTargetRectCnt = rcTargets.size();
             for (int i = 0; i < nTargetRectCnt; i++){
                 Rect rc = rcTargets.get(i);
-                Rect rcExtend = ExtendRect(rc , 5, limitWidth, limitHeight);
-                Mat txtAreaMat = image.submat(rcExtend);
-                Mat resizedtxtAreaMat = null;
 
-                //. 2024-2-26.
-                //. I will automatic resize.
-                //. in future, must remove parameter "fResizeRate"
-                int nOrigHeight = txtAreaMat.rows();
-                if (nOrigHeight < Config.tesseractDetaultCharHeight){
-                    float fNewResizeRate = Config.tesseractDetaultCharHeight / nOrigHeight;
-                    resizedtxtAreaMat = new Mat();
-                    Imgproc.resize(txtAreaMat, resizedtxtAreaMat, new Size(), fNewResizeRate, fNewResizeRate);
-                }
-                else{
-                    resizedtxtAreaMat = txtAreaMat;
-                }
-
-                int size = (int) (resizedtxtAreaMat.total() * resizedtxtAreaMat.elemSize());
-                byte[] byteArray = new byte[size];
-                resizedtxtAreaMat.get(0, 0, byteArray);
-
-                int nCols = resizedtxtAreaMat.cols();
-                int nRows = resizedtxtAreaMat.rows();
-                int nChannels = resizedtxtAreaMat.channels();
-                tess.setImage(byteArray, nCols, nRows, nChannels,nCols * nChannels);
-                String ocrStr = tess.getUTF8Text();
-
+                String ocrStr = readStringbyOcrfromFullImage(image, rc);
                 String preprocessOcrStr = preprocessForOcrString(ocrStr, nPreprocessMethodForOcrString);
 
                 for (int j = 0; j < nTargetCnt; j++){
@@ -664,7 +665,6 @@ public class JUtilFunctions {
                     }
 
                 }
-                byteArray = null;
             }
 
             for (int j = 0; j < nTargetCnt; j++) {
@@ -683,6 +683,61 @@ public class JUtilFunctions {
 
         return strRet;
     }
+
+
+    //.*=====================================================================================
+    //. readStringbyOcr
+    //. the simplest case...
+    //.
+    public static String readStringbyOcr(Mat image) {
+
+        String strRet = null;
+
+        int size = (int) (image.total() * image.elemSize());
+        byte[] byteArray = new byte[size];
+        image.get(0, 0, byteArray);
+
+        int nCols = image.cols();
+        int nRows = image.rows();
+        int nChannels = image.channels();
+        tess.setImage(byteArray, nCols, nRows, nChannels,nCols * nChannels);
+        strRet = tess.getUTF8Text();
+        byteArray = null;
+
+        return strRet;
+    }
+
+    //.*=====================================================================================
+    //. readStringbyOcr
+    //. the simplest case...
+    //.
+    public static String readStringbyOcrfromFullImage(Mat fullImage, Rect rcTarget) {
+
+        String strRet = null;
+
+        int limitWidth = fullImage.cols();
+        int limitHeight = fullImage.rows();
+        Rect rcExtend = ExtendRect(rcTarget , 5, limitWidth, limitHeight);
+        Mat txtAreaMat = fullImage.submat(rcExtend);
+        Mat resizedtxtAreaMat = null;
+
+        //. 2024-2-26.
+        //. I will automatic resize.
+        //. in future, must remove parameter "fResizeRate"
+        int nOrigHeight = txtAreaMat.rows();
+        if (nOrigHeight < Config.tesseractDetaultCharHeight){
+            float fNewResizeRate = Config.tesseractDetaultCharHeight / nOrigHeight;
+            resizedtxtAreaMat = new Mat();
+            Imgproc.resize(txtAreaMat, resizedtxtAreaMat, new Size(), fNewResizeRate, fNewResizeRate);
+        }
+        else{
+            resizedtxtAreaMat = txtAreaMat;
+        }
+        strRet = readStringbyOcr(resizedtxtAreaMat);
+
+        return strRet;
+    }
+
 
     public static String getTextAreaFromOcr(ArrayList<String> string_param_list,
                                             Rect rcAnalyseBase, float fResizeRate, ArrayList<Rect> result_rects,

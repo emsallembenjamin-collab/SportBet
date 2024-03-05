@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 
-public class JBetAction_Peak1 extends JBetAction  {
+public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
     public JLoadTask loadTask = null;
 
@@ -18,16 +18,12 @@ public class JBetAction_Peak1 extends JBetAction  {
     ArrayList<Rect> result_rects = new ArrayList<Rect>();
     float fResizeRate = 1.0f;
 
-    JBetAction_Peak1(JLoadTask loadTask){
+    JBetAction_KSports_m_zenandfe(JLoadTask loadTask){
         this.loadTask = loadTask;
     }
     @Override
     String run() {
         String strRet = null;
-
-        strRet = prepareSome();
-        if (strRet.equals("success") == false)
-            return strRet;
 
         strRet = gotoChannelfromDate();
         if (strRet.equals("success") == false)
@@ -45,21 +41,7 @@ public class JBetAction_Peak1 extends JBetAction  {
         if (strRet.equals("success") == false)
             return strRet;
 
-
-
-
         return strRet;
-    }
-
-
-    //.*================================================================
-    //.func: prepareSome
-    //.desc:
-    private String prepareSome(){
-        String result = "success";
-
-        //JUtilFunctions.delay_duration(5000);
-        return result;
     }
 
     //.*================================================================

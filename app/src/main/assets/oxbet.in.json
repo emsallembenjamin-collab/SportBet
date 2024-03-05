@@ -2,37 +2,42 @@
   "action_list": [
 
     {
-      "name"              : "starting go_website",
-      "type"              : "go_website",
-      "string_param_list" : ["https://oxbet.in"],
-      "digit_param_list"  : [],
-      "delay"             : 15000,
+      "name"                  : "starting go_website",
+      "type"                  : "go_website",
+      "string_param_list"     : ["https://oxbet.in"],
+      "digit_param_list"      : [],
+      "time_limit"            : 30000,
+      "delay"                 : 1000,
+      "validator_param_list"  : ["color_px", "neg", "400","200",  "255","255","255"],
+      
       "branch": {
         "success" : ["find login button"],
         "fail"    : []
       }
     },
 
-    
     {
-      "name"              : "find login button",
-      "type"              : "do_ocr",
-      "string_param_list" : ["ĐĂNG NHẬP", "0"],
-      "digit_param_list"  : [0.3,0.1, 0.75, 0.25, 1],
-      "delay"             : 100,
+      "name"                  : "find login button",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["ĐĂNG NHẬP", "0"],
+      "digit_param_list"      : [0.3,0.1, 0.75, 0.25, 1],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["click login button"],
         "fail"    : ["find already logined"]
       }
     },
 
-
     {
-      "name"              : "click login button",
-      "type"              : "do_click",
-      "string_param_list" : [],
-      "digit_param_list"  : [1],
-      "delay"             : 2000,
+      "name"                  : "click login button",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1],
+      "time_limit"            : 0,
+      "delay"                 : 2000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["find user_id and password input ctrl"],
         "fail"    : []
@@ -40,11 +45,13 @@
     },
 
     {
-      "name"              : "find user_id and password input ctrl",
-      "type"              : "do_find_color_bar",
-      "string_param_list" : [],
-      "digit_param_list"  : [0.67,0, 0.67, 1, 29, 27, 24, 29, 27, 24, 20 ],
-      "delay"             : 100,
+      "name"                  : "find user_id and password input ctrl",
+      "type"                  : "do_find_color_bar",
+      "string_param_list"     : [],
+      "digit_param_list"      : [0.67,0, 0.67, 1, 29, 27, 24, 29, 27, 24, 20 ],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["input user_id and password"],
         "fail"    : ["the end process", "fail"]
@@ -52,11 +59,13 @@
     },
 
     {
-      "name"              : "input user_id and password",
-      "type"              : "do_input_user_id_password",
-      "string_param_list" : [],
-      "digit_param_list"  : [],
-      "delay"             : 100,
+      "name"                  : "input user_id and password",
+      "type"                  : "do_input_user_id_password",
+      "string_param_list"     : [],
+      "digit_param_list"      : [],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["find login now button"],
         "fail"    : ["the end process", "fail"]
@@ -64,37 +73,41 @@
     },
 
     {
-      "name"              : "find login now button",
-      "type"              : "do_find_color_bar",
-      "string_param_list" : [],
-      "digit_param_list"  : [0.18,0.5, 0.18, 0.85, 230, 212, 170, 116, 88, 18, 20 ],
-      "delay"             : 100,
+      "name"                  : "find login now button",
+      "type"                  : "do_find_color_bar",
+      "string_param_list"     : [],
+      "digit_param_list"      : [0.18,0.5, 0.18, 0.85, 230, 212, 170, 116, 88, 18, 20 ],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["click enter site button"],
         "fail"    : ["the end process", "fail"]
       }
     },
 
-
     {
-      "name"              : "click enter site button",
-      "type"              : "do_click",
-      "string_param_list" : [],
-      "digit_param_list"  : [1],
-      "delay"             : 6000,
+      "name"                  : "click enter site button",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1],
+      "time_limit"            : 20000,
+      "delay"                 : 1000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : []
       }
     },
 
-
     {
-      "name"              : "find already logined",
-      "type"              : "do_ocr",
-      "string_param_list" : ["$user_id", "2"],
-      "digit_param_list"  : [0.5, 0.1, 1, 0.25, 1],
-      "delay"             : 100,
+      "name"                  : "find already logined",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["$user_id", "2"],
+      "digit_param_list"      : [0.5, 0.1, 1, 0.25, 1],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : ["find prev logined user_id region"]
@@ -102,11 +115,13 @@
     },
 
     {
-      "name"              : "find prev logined user_id region",
-      "type"              : "do_find_color_bar",
-      "string_param_list" : [],
-      "digit_param_list"  : [0.67,0, 0.67, 0.25, 60, 60, 60, 0, 0, 0, 50 ],
-      "delay"             : 100,
+      "name"                  : "find prev logined user_id region",
+      "type"                  : "do_find_color_bar",
+      "string_param_list"     : [],
+      "digit_param_list"      : [0.67,0, 0.67, 0.25, 60, 60, 60, 0, 0, 0, 50 ],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["click user_id region"],
         "fail"    : ["the end process", "fail"]
@@ -114,11 +129,13 @@
     },
 
     {
-      "name"              : "click user_id region",
-      "type"              : "do_click",
-      "string_param_list" : [],
-      "digit_param_list"  : [1,0,100,0],
-      "delay"             : 2000,
+      "name"                  : "click user_id region",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1,0,100,0],
+      "time_limit"            : 0,
+      "delay"                 : 2000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["find logout menu button"],
         "fail"    : []
@@ -126,11 +143,13 @@
     },
 
     {
-      "name"              : "find logout menu button",
-      "type"              : "do_ocr",
-      "string_param_list" : ["ĐĂNG XUẤT", "0"],
-      "digit_param_list"  : [0, 0.65, 0.5, 0.85, 1],
-      "delay"             : 100,
+      "name"                  : "find logout menu button",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["ĐĂNG XUẤT", "0"],
+      "digit_param_list"      : [0, 0.65, 0.5, 0.85, 1],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["click logout menu button"],
         "fail"    : ["the end process", "fail"]
@@ -138,37 +157,41 @@
     },
 
     {
-      "name"              : "click logout menu button",
-      "type"              : "do_click",
-      "string_param_list" : [],
-      "digit_param_list"  : [1],
-      "delay"             : 4000,
+      "name"                  : "click logout menu button",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1],
+      "time_limit"            : 20000,
+      "delay"                 : 1000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["find login button"],
         "fail"    : []
       }
     },
 
-
     {
-      "name"              : "goto sports channel",
-      "type"              : "do_click",
-      "string_param_list" : [],
-      "digit_param_list"  : [0.3,0.95],
-      "delay"             : 4000,
+      "name"                  : "goto sports channel",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [0.3,0.95],
+      "time_limit"            : 0,
+      "delay"                 : 3000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["find sports category"],
         "fail"    : []
       }
     },
 
-
     {
-      "name"              : "find sports category",
-      "type"              : "do_repeat_scroll",
-      "string_param_list" : ["$category"],
-      "digit_param_list"  : [270, 820, 800],
-      "delay"             : 1000,
+      "name"                  : "find sports category",
+      "type"                  : "do_repeat_scroll",
+      "string_param_list"     : ["$category"],
+      "digit_param_list"      : [270, 820, 800],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : ["goto real betting site"],
         "fail"    : []
@@ -176,28 +199,32 @@
     },
 
     {
-      "name"              : "goto real betting site",
-      "type"              : "do_click",
-      "string_param_list" : [],
-      "digit_param_list"  : [0.5,0.5],
-      "delay"             : 7000,
+      "name"                  : "goto real betting site",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [0.5,0.5],
+      "time_limit"            : 30000,
+      "delay"                 : 3000,
+      "validator_param_list"  : ["line_det", "great", "25"],
       "branch": {
         "success" : ["the end process", "success"],
         "fail"    : []
       }
     },
 
-
     {
-      "name"              : "the end process",
-      "type"              : "the_end",
-      "string_param_list" : [],
-      "digit_param_list"  : [],
-      "delay"             : 100,
+      "name"                  : "the end process",
+      "type"                  : "the_end",
+      "string_param_list"     : [],
+      "digit_param_list"      : [],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "validator_param_list"  : [],
       "branch": {
         "success" : [],
         "fail"    : []
       }
     }
+    
   ]
 }

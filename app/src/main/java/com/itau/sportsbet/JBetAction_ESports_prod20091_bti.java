@@ -11,14 +11,14 @@ import org.opencv.core.Rect;
 
 import java.util.ArrayList;
 
-public class JBetAction_Euro1 extends JBetAction {
+public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
     public JLoadTask loadTask = null;
     public Rect sportsMenuRect = null;
     ArrayList<Rect> result_rects = new ArrayList<Rect>();
     float fResizeRate = 1.0f;
 
-    JBetAction_Euro1(JLoadTask loadTask){
+    JBetAction_ESports_prod20091_bti(JLoadTask loadTask){
         this.loadTask = loadTask;
     }
 

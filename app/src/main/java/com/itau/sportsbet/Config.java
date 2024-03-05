@@ -16,6 +16,8 @@ public class Config {
 	public static float resizeXRatio = 0;
 	public static float resizeYRatio = 0;
 
+	public static int   default_limitTime = 90000;	// ms unit...
+
 	public static int vscroll_unit = 600;
 	public static String menu_more_countries  = "Thêm"; // "Thêm nhiều quốc gia"  // "Them nhieu quoc gia";
 	public static String menu_fewer_countries = "quốc" ; // "Ít các quốc gia";  // "It cac quoc gia";

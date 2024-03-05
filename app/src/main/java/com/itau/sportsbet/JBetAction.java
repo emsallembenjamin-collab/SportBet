@@ -11,11 +11,11 @@ abstract public class JBetAction {
             case "oxbet.in":{
                 switch (loadTask.category){
                     case 0:{
-                        pRet = new JBetAction_Euro1(loadTask);
+                        pRet = new JBetAction_ESports_prod20091_bti(loadTask);
                     }
                     break;
                     case 1: {
-                        pRet = new JBetAction_Peak1(loadTask);
+                        pRet = new JBetAction_KSports_m_zenandfe(loadTask);
                     }
                     break;
                     default:

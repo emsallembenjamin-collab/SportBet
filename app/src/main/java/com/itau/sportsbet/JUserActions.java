@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -148,6 +150,26 @@ public class JUserActions {
         if (clipboard != null) {
             clipboard.setPrimaryClip(clip);
         }
+    }
+
+    public static void copyTextToClipboardfromWorkThread(Context context, String text) {
+
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Get the Clipboard Manager
+                ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+
+                // Create a ClipData object holding the text
+                ClipData clip = ClipData.newPlainText("label", text);
+
+                // Set the ClipData to the Clipboard
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
+                }
+            }
+        });
     }
 
     public static boolean pasteTextFromClipboard(Context context) {
