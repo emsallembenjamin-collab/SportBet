@@ -1,5 +1,10 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonLetters;
+import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
+import static com.itau.sportsbet.Config.TextDetMode.e_HasMarkFront;
+import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
+
 import android.app.ActivityManager;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -40,7 +45,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         //. 2.
         /// find football
-        strRet = findStringFromImage(loadTask.sports_type, 1, 0);
+        strRet = findStringFromImage(loadTask.sports_type, e_removeNonLetters, e_NormalTxtDet);
         if (strRet.equals("success") == false)
             return strRet;
         Point ptCenterFootball = JUtilFunctions.getCenterPoint(result_rects.get(0));
@@ -117,7 +122,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
             string_param_list.add(Config.sports_viet);
             string_param_list.add("0");
 
-            strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcBase, fResizeRate, result_rects, 0,0);
+            strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcBase, fResizeRate, result_rects, e_removeSpace,e_NormalTxtDet);
             if (strRet.equals("success") == false)
                 return strRet;
 
@@ -132,7 +137,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         return strRet;
     }
 
-    private String findStringFromImage(String key, int nPreprocessMethodForOcrString, int nTextDetectMode){
+    private String findStringFromImage(String key, Config.StrPreprocessMethod nPreprocessMethodForOcrString, Config.TextDetMode nTextDetectMode){
 
         String strRet = "fail_findStringFromImage: " + key;
 
@@ -161,7 +166,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         return strRet;
     }
 
-    private String findStringFromImage(ArrayList<String> keyList, int nPreprocessMethodForOcrString, int nTextDetectMode){
+    private String findStringFromImage(ArrayList<String> keyList, Config.StrPreprocessMethod nPreprocessMethodForOcrString, Config.TextDetMode nTextDetectMode){
 
         String strRet = "fail_findStringFromImage: " + keyList.get(0);
 
@@ -192,7 +197,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         keyList.add(Config.menu_more_countries);;keyList.add("0");
         keyList.add(Config.menu_fewer_countries);;keyList.add("0");
 
-        strRet = findStringFromImage(keyList, 1, 1);
+        strRet = findStringFromImage(keyList, e_removeNonLetters, e_HasMarkFront);
 
         if(strRet.equals("success")){
             if(result_rects.get(0).width != 0){
@@ -226,7 +231,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         while(limit-- > 0){
             JUtilFunctions.takeScreenshot();
             strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list,
-                    rcAnalyseBase, fResizeRate, result_rects, 1, 0);
+                    rcAnalyseBase, fResizeRate, result_rects, e_removeNonLetters, e_NormalTxtDet);
             if(strRet.equals("success") == false){
                 // Util.writeLogToFile(this.getApplicationContext(), "Failed to find string " + soccerUnion);
                 JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
@@ -261,7 +266,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         while(limit-- >0){
             JUtilFunctions.takeScreenshot();
 
-            strRet = findStringFromImage(string_param_list, 0, 0);
+            strRet = findStringFromImage(string_param_list, e_removeSpace, e_NormalTxtDet);
 
             boolean bOK = false;
             if (strRet.equals("success")){
@@ -298,13 +303,14 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         int limit = 8;
 
-        //. for find color bar...
-        Point3 targetUpColor = new Point3(70,75,88);
-        Point3 targetDownColor = new Point3(70,75,88);
-        int nLimitLen = 30;
-        int fixedVal = 470;
-        int startVal = 150;
-        int endVal = 880;
+        JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
+        colorBarParam.targetUpColor = new Point3(70,75,88);
+        colorBarParam.targetDownColor = colorBarParam.targetUpColor;
+        colorBarParam.nLimitLen = 30;
+        colorBarParam.fixedVal = 470;
+        colorBarParam.startVal = 150;
+        colorBarParam.endVal = 880;
+
         int nStartY = 300;
         int nEndY = 0;
 
@@ -316,15 +322,14 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
             JUtilFunctions.takeScreenshot();
 
             //. first, find color bar RGB(70,75,88);
-            ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot,
-                    fixedVal, startVal, endVal , true, targetUpColor, targetDownColor,nLimitLen);
+            ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
 
             int nSegCnt = retSegments.size();
             for (int i = 0; i < nSegCnt; i++){
                 Point sectionHead = retSegments.get(i);
-                Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, fixedVal, (int)(sectionHead.y - sectionHead.x));
+                Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, colorBarParam.fixedVal, (int)(sectionHead.y - sectionHead.x));
                 strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list,
-                        rcAnalyseBase, fResizeRate, result_rects, 0, 0);
+                        rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
                 if (strRet.equals("success")){
                     bFindSectionHeader = true;
 
@@ -375,8 +380,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
                 JUtilFunctions.takeScreenshot();
 
                 //. find next section.
-                ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot,
-                        fixedVal, nStartY, endVal , true, targetUpColor, targetDownColor,nLimitLen);
+                ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
 
                 int nSegCnt = retSegments.size();
                 if (nSegCnt > 0){
@@ -384,7 +388,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
                     bFindNextSection = true;
                 }
                 else{
-                    nEndY = endVal;
+                    nEndY = colorBarParam.endVal;
                 }
                 retSegments = null;
 
@@ -395,7 +399,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
                 string_param_list_forBetDetail.add(betDetail);string_param_list_forBetDetail.add("0");
 
                 strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list_forBetDetail,
-                        rcAnalyseBase, fResizeRate, result_rects, 0, 0);
+                        rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
                 if(strRet.equals("success") || bFindNextSection){
                    break;
                 }
@@ -438,7 +442,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         JUtilFunctions.takeScreenshot();
 
         string_param_list.add(leagueName);string_param_list.add("0");
-        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcAnalyseBase, fResizeRate, result_rects, 0, 0);
+        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
         if (strRet.equals("success") == false){
             return strRet;
         }
@@ -451,7 +455,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         Rect amountRect = new Rect(Config.IMAGE_WIDTH/2,  leagueNameArea.y  , Config.IMAGE_WIDTH/2-1, 100 );
         string_param_list.clear();
         string_param_list.add(Config.input_unit);string_param_list.add("0");
-        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, amountRect, fResizeRate, result_rects, 0, 0);
+        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, amountRect, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
         if (strRet.equals("success") == false){
             return strRet;
         }
@@ -476,7 +480,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         string_param_list.clear();
         string_param_list.add(Config.bet_btn);string_param_list.add("0");
-        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, betBtnRect, fResizeRate, result_rects, 0, 0);
+        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, betBtnRect, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
         if (strRet.equals("success") == false){
             return strRet;
         }

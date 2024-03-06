@@ -1,12 +1,37 @@
 package com.itau.sportsbet;
 
 
+import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
+import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
+
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Rect;
 
 import java.util.ArrayList;
+
+
+//.*=============================================================
+//.func: JAction_Puseudo
+//.desc: purpose: only create validator without action script
+//.
+class JAction_Puseudo extends JAction{
+
+    JAction_Puseudo(String name, int timeLimit, int delay){
+        this.name = name;
+        this.type = "puseudo";
+        this.time_limit = timeLimit;
+        this.delay = delay;
+    }
+    @Override
+    public boolean run_internel(JAction prevAction){
+        //. always success.
+        result_string = "success";
+        return false;
+    }
+};
+
 
 //.*=============================================================
 //.func: JAction_RunWebBrowser
@@ -47,14 +72,14 @@ class JAction_Do_Ocr extends JAction{
         JUtilFunctions.takeScreenshot();
 
         //. first . get analyse Rect
-        Rect rcForAnalyse = parseRectParam();
+        Rect rcForAnalyse = JUtilFunctions.parseRectParam(digit_param_list, 0);
 
         //. second. get sub rect and mat.
         Mat analyseAreaMat = JUtilFunctions.screenshot.submat(rcForAnalyse);
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, 0);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_NormalTxtDet);
         if (nTextRegionCnt > 0){
             float fResizeRate = digit_param_list.get(4).floatValue();
 
@@ -67,7 +92,7 @@ class JAction_Do_Ocr extends JAction{
             }
 
             result_string = JUtilFunctions.do_ocr(ocrAreaMat, rcTexts, fResizeRate,
-                    result_rects, string_param_list, 0);
+                    result_rects, string_param_list, e_removeSpace);
             //. must do offset operation.
             if (result_string.equals("success")){
                 JUtilFunctions.offsetRectList(result_rects, rcForOcr.x, rcForOcr.y);
@@ -241,21 +266,21 @@ class JAction_Do_Find_ColorBar extends JAction{
         JUtilFunctions.takeScreenshot();
 
         //. first . get analyse Rect
-        Rect rcForAnalyse = parseRectParam();
-        boolean bVert = false;
-        int startVal = 0,endVal = 0;
-        int fixedVal = 0;
+        Rect rcForAnalyse = JUtilFunctions.parseRectParam(digit_param_list, 0);
+
+        JFuncParams_ColorBar param = new JFuncParams_ColorBar();
+        param.bVert = false;
         if (rcForAnalyse.width == 0) {
-            bVert = true;
-            startVal = rcForAnalyse.y;
-            endVal = rcForAnalyse.y + rcForAnalyse.height;
-            fixedVal = rcForAnalyse.x;
+            param.bVert = true;
+            param.startVal = rcForAnalyse.y;
+            param.endVal = rcForAnalyse.y + rcForAnalyse.height;
+            param.fixedVal = rcForAnalyse.x;
         }
         else if (rcForAnalyse.height == 0) {
-            bVert = false;
-            startVal = rcForAnalyse.x;
-            endVal = rcForAnalyse.x + rcForAnalyse.width;
-            fixedVal = rcForAnalyse.y;
+            param.bVert = false;
+            param.startVal = rcForAnalyse.x;
+            param.endVal = rcForAnalyse.x + rcForAnalyse.width;
+            param.fixedVal = rcForAnalyse.y;
         }
         else {
             result_string = "Invalid Param: " + name;
@@ -269,27 +294,26 @@ class JAction_Do_Find_ColorBar extends JAction{
 
         // Define the color to find (RGB: 29, 27, 24)
         // OpenCV uses BGR color ordering but now set param in order "RGB".
-        Point3 targetUpColor = new Point3(digit_param_list.get(4).intValue(),
+        param.targetUpColor = new Point3(digit_param_list.get(4).intValue(),
                 digit_param_list.get(5).intValue(), digit_param_list.get(6).intValue());
-        Point3 targetDownColor = new Point3(digit_param_list.get(7).intValue(),
+        param.targetDownColor = new Point3(digit_param_list.get(7).intValue(),
                 digit_param_list.get(8).intValue(), digit_param_list.get(9).intValue());
 
-        int nLimitLen = digit_param_list.get(10).intValue();
+        param.nLimitLen = digit_param_list.get(10).intValue();
 
-        ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot,
-                fixedVal, startVal, endVal , bVert, targetUpColor, targetDownColor, nLimitLen);
+        ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, param);
 
         //. save to result_rects.
         int nSegCnt = retSegments.size();
         for (int i = 0; i < nSegCnt; i++){
             Point sc = retSegments.get(i);
             Rect rcNew = null;
-            if (bVert == true){
-                Rect rcBase = new Rect(fixedVal, (int)(sc.x), 0, (int)(sc.y - sc.x));
+            if (param.bVert == true){
+                Rect rcBase = new Rect(param.fixedVal, (int)(sc.x), 0, (int)(sc.y - sc.x));
                 rcNew = JUtilFunctions.getOrigRectFromBaseRect(rcBase);
             }
             else{
-                Rect rcBase = new Rect((int)sc.x, fixedVal, (int)(sc.y - sc.x), 0);
+                Rect rcBase = new Rect((int)sc.x, param.fixedVal, (int)(sc.y - sc.x), 0);
                 rcNew = JUtilFunctions.getOrigRectFromBaseRect(rcBase);
             }
             result_rects.add(rcNew);
@@ -545,7 +569,7 @@ class JAction_Do_Input_VerifiCode extends JAction{
         Mat imageForRecog = JUtilFunctions.screenshot.submat(rcForImage);
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(imageForRecog, rcTexts, 0);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(imageForRecog, rcTexts, e_NormalTxtDet);
         if (nTextRegionCnt == 0){
             result_string = "fail Operation: " + name;
             executor.last_result_string = result_string;

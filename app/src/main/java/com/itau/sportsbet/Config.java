@@ -6,6 +6,39 @@ import com.googlecode.tesseract.android.TessBaseAPI;
 public class Config {
 
 	//. define some global data types.
+	enum StrCompMethod {
+		e_PermitIncluding,	// 0
+		e_IncludedBehind,
+		e_BriefType,
+		e_ExactEqual;
+
+		public static StrCompMethod fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_PermitIncluding;
+				case 1:
+					return e_IncludedBehind;
+				case 2:
+					return e_BriefType;
+				case 3:
+					return e_ExactEqual;
+			}
+			return null;
+		}
+	};
+
+	enum StrPreprocessMethod {
+		e_removeSpace,	// 0
+		e_removeNonLetters,
+		e_removeNonAlphanumeric,
+		e_noneProc;
+	};
+
+	enum TextDetMode {
+		e_NormalTxtDet,	// 0
+		e_HasMarkFront;
+	};
+
 
 
 	//. for Image Processing.
@@ -27,9 +60,9 @@ public class Config {
 	public static String bet_btn = "Đat cuoc";
 	public static String sports_viet = "Thể thao";
 
-	public static float tesseractDetaultCharHeight = 40.0f;
+	public static float tesseractDetaultCharHeight = 60.0f;
 
-	public static String betType_Handicap = "Handicap";
+	public static String betType_Handicap = "Keo chap";
 	public static String betType_TaiXiu = "Tai/Xiu";
 	public static String betType_Europe1X2 = "Europe1X2";
 

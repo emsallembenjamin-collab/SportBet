@@ -11,14 +11,14 @@
   "category"			         : 1,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "Giai Serie A, Y",
-  "progress_date"		      : "2 28",
-  "team1"				          : "Sassuolo",
-  "team2"				          : "Napoli",
-  "betType"			  	     : "Sassuolo",
+  "league_name"			      : "England Championship",
+  "progress_date"		      : "3 6",
+  "team1"				          : "Watford",
+  "team2"				          : "Swansea",
+  "betTarget"			  	     : "Xiu",
   "corner_kick"			      : 0,
-  "betTypeCategory"		   : "Keo chap",
-  "betDetail"			      : "-1",
+  "betTypeCategory"		   : "Tai/Xiu",
+  "betMark"			      : "2.5-3",
   "betAmount"			      : "20"
 
 }

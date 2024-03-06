@@ -21,6 +21,8 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.opencv.core.Size;
 
 public class MyAccessibilityService extends AccessibilityService {

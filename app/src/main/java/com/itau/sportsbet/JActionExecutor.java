@@ -30,6 +30,8 @@ abstract class JAction {
     public ArrayList<Double> digit_param_list;
     public int time_limit = 0;
     public int delay = 0;
+    public boolean waitPageload = false;
+
     public ArrayList<String> branch_success;
     public ArrayList<String> branch_fail;
     public JActionValidator validator = null;
@@ -106,6 +108,8 @@ abstract class JAction {
 
             retAction.time_limit = jobject.getInt("time_limit");
             retAction.delay = jobject.getInt("delay");
+            retAction.waitPageload = jobject.getBoolean("waitPageload");
+
 
             //. passing "branch"
             JSONObject branch = jobject.getJSONObject("branch");
@@ -123,45 +127,21 @@ abstract class JAction {
 
             //. 2024-3-4.
             if (retAction.time_limit > 0){
-                retAction.validator = new JActionValidator(retAction);
                 JSONArray validator_param_list = jobject.getJSONArray("validator_param_list");
-                retAction.validator.build(validator_param_list);
+                JActionValidator validator = JActionValidator.createObject(retAction, validator_param_list);
+                boolean bValidParam = validator.build(validator_param_list);
+                if (bValidParam){
+                    retAction.validator = validator;
+                }
+                else{
+                    validator = null;
+                }
             }
         }
 
         return retAction;
     }
 
-    public Rect parseRectParam(){
-        //. make screen shot.
-
-        int limitWidth = JUtilFunctions.screenshot.cols();
-        int limitHeight = JUtilFunctions.screenshot.rows();
-
-        //. first. parsing rect info.
-        int x,y,right,bottom;
-        double dx,dy,dright,dbottom;
-
-        dx = digit_param_list.get(0).doubleValue();
-        dy = digit_param_list.get(1).doubleValue();
-        dright = digit_param_list.get(2).doubleValue();
-        dbottom = digit_param_list.get(3).doubleValue();
-        if (dx < 1 && dy < 1 && dright <= 1 && dbottom <= 1){
-            x = (int)(limitWidth * dx);
-            y = (int)(limitHeight * dy);
-            right = (int)(limitWidth * dright);
-            bottom = (int)(limitHeight * dbottom);
-        }
-        else {
-            x = (int)(dx);
-            y = (int)(dy);
-            right = (int)(dright);
-            bottom = (int)(dbottom);
-        }
-
-        Rect rcForAnalyse = new Rect(x, y, right - x, bottom - y);
-        return rcForAnalyse;
-    }
 
     //.*==========================================================
     //.func: run
