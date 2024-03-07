@@ -39,6 +39,13 @@ public class Config {
 		e_HasMarkFront;
 	};
 
+	enum DoConfirmMode {
+		e_Before,			// 0
+		e_BeforeValidator,	// 1
+		e_AfterDone;		// 2
+	};
+
+
 
 
 	//. for Image Processing.
@@ -60,7 +67,8 @@ public class Config {
 	public static String bet_btn = "Đat cuoc";
 	public static String sports_viet = "Thể thao";
 
-	public static float tesseractDetaultCharHeight = 60.0f;
+	public static float tesseractDetaultCharHeight = 50.0f;
+	public static int max_userid_password_len = 20;
 
 	public static String betType_Handicap = "Keo chap";
 	public static String betType_TaiXiu = "Tai/Xiu";

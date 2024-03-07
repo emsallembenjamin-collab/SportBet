@@ -1,6 +1,10 @@
 package com.itau.sportsbet;
 
 
+import static com.itau.sportsbet.Config.DoConfirmMode.e_AfterDone;
+import static com.itau.sportsbet.Config.DoConfirmMode.e_Before;
+import static com.itau.sportsbet.Config.DoConfirmMode.e_BeforeValidator;
+
 import android.graphics.Bitmap;
 import android.os.SystemClock;
 import android.util.Log;
@@ -28,6 +32,7 @@ abstract class JAction {
     public String type;
     public ArrayList<String> string_param_list;
     public ArrayList<Double> digit_param_list;
+    public ArrayList<String> confirmproc_param_list;
     public int time_limit = 0;
     public int delay = 0;
     public boolean waitPageload = false;
@@ -35,6 +40,8 @@ abstract class JAction {
     public ArrayList<String> branch_success;
     public ArrayList<String> branch_fail;
     public JActionValidator validator = null;
+    public JAction  confirmProc_firstAction = null;
+    public Config.DoConfirmMode  do_confirm_mode = e_Before;
 
     //. important. which param used? mine or prev result?
     boolean run_as_prev_success = true;
@@ -81,6 +88,12 @@ abstract class JAction {
             case "do_input_verification_code":
                 retAction = new JAction_Do_Input_VerifiCode();
                 break;
+            case "do_calc":
+                retAction = new JAction_Do_Calc();
+                break;
+            case "find_close_ad":
+                retAction = new JAction_FindClose_Ad();
+                break;
             case "the_end":
                 retAction = new JAction_TheEnd();
                 break;
@@ -105,6 +118,13 @@ abstract class JAction {
             for (int j = 0; j < jdigit_param_list.length(); j++) {
                 retAction.digit_param_list.add(jdigit_param_list.getDouble(j));
             }
+
+            JSONArray jconfirmproc_param_list = jobject.getJSONArray("confirmproc_param_list");
+            retAction.confirmproc_param_list = new ArrayList<String>();
+            for (int j = 0; j < jconfirmproc_param_list.length(); j++) {
+                retAction.confirmproc_param_list.add(jconfirmproc_param_list.getString(j));
+            }
+
 
             retAction.time_limit = jobject.getInt("time_limit");
             retAction.delay = jobject.getInt("delay");
@@ -137,6 +157,7 @@ abstract class JAction {
                     validator = null;
                 }
             }
+
         }
 
         return retAction;
@@ -153,13 +174,30 @@ abstract class JAction {
 
         MyAccessibilityService.mainService.bPageLoadFlag = false;
 
+        //. 2024-3-7
+        //. process confirm proc...
+        if (confirmProc_firstAction != null && do_confirm_mode == e_Before){
+            executor.run(confirmProc_firstAction);
+        }
+
+
         bFinished = run_internel(prevAction);
+
+        if (confirmProc_firstAction != null && do_confirm_mode == e_BeforeValidator){
+            executor.run(confirmProc_firstAction);
+        }
 
         if (validator != null && bFinished == false){
             bFinished = validator.check();
         }
         else{
             JUtilFunctions.delay_duration(delay);
+        }
+
+        //.2024-3-7
+        //. process confirm proc...
+        if (bFinished == false && confirmProc_firstAction != null && do_confirm_mode == e_AfterDone){
+            executor.run(confirmProc_firstAction);
         }
 
         Log.d("PPPP Action: ", "Ended! : " + name + ": " + result_string);
@@ -270,6 +308,10 @@ public class JActionExecutor {
                 newActionList.add(newAction);
             }
 
+            //. 2024-3-7
+            //. new intro confirm processing.
+            actionExecutor.prepare_confirmProcessing();
+
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -281,15 +323,55 @@ public class JActionExecutor {
     }
 
     //.*=============================================================
+    //.func: prepare_confirmProcessing
+    //.desc:
+    //. 2024-3-7
+    //. new intro confirm process...
+    public int prepare_confirmProcessing(){
+        int nRet = 0;
+
+        int nActionCnt = actionList.size();
+        for (int i = 0; i < nActionCnt; i++){
+            JAction action = actionList.get(i);
+            int nConfirmParamCnt = action.confirmproc_param_list.size();
+            if (nConfirmParamCnt >= 2){
+                String strFirstConfirmProcActName = action.confirmproc_param_list.get(0);
+                action.confirmProc_firstAction = actionList.find(strFirstConfirmProcActName);
+                String confirmProc_do_mode = action.confirmproc_param_list.get(1);
+                switch (confirmProc_do_mode){
+                    case "0":
+                        action.do_confirm_mode = e_Before;
+                        break;
+                    case "1":
+                        action.do_confirm_mode = e_BeforeValidator;
+                        break;
+                    case "2":
+                        action.do_confirm_mode = e_AfterDone;
+                        break;
+                    default:
+                        //. must occure exception
+                        break;
+
+                }
+                nRet++;
+            }
+        }
+
+        return nRet;
+    }
+
+    //.*=============================================================
     //.func: run
     //.desc: run sequential action list.
     //.
-    public String run(){
+    public String run(JAction actionNow){
 
         // Start measuring elapsed time
         final long startTime = SystemClock.elapsedRealtime();
 
-        JAction actionNow = actionList.first();
+        if (actionNow == null){
+            actionNow = actionList.first();
+        }
         JAction actionPrev = null;
         while(actionNow != null){
 

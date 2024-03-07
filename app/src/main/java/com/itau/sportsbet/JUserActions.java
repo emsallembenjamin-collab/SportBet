@@ -172,65 +172,6 @@ public class JUserActions {
         });
     }
 
-    public static boolean pasteTextFromClipboard(Context context) {
-
-        boolean bRet = false;
-
-        // Get reference to the ClipboardManager system service
-        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
-
-        // Check if the clipboard has data
-        if (clipboardManager.hasPrimaryClip()) {
-            // Get the primary clip data item
-            ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
-
-            // Get the text from the clip data item
-            CharSequence pasteData = item.getText();
-
-            // Get the root node info of the current window
-            AccessibilityNodeInfo rootNode = MyAccessibilityService.mainService.getRootInActiveWindow();
-            // Perform the paste action if the root node is not null
-            if (rootNode != null) {
-                // Find the currently focused text field and paste the text
-                AccessibilityNodeInfo focusedNode = findFocusedNode(rootNode);
-                if (focusedNode != null) {
-                    Bundle arguments = new Bundle();
-                    arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pasteData);
-                    focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-
-                    bRet = true;
-                }
-            }
-
-            // You can also perform any other operations with the text
-        } else {
-            // If the clipboard is empty, show a message to the user
-        }
-
-        return bRet;
-    }
-
-    // Method to find the currently focused text field
-    private static AccessibilityNodeInfo findFocusedNode(AccessibilityNodeInfo rootNode) {
-        // Traverse the accessibility tree to find the focused text field
-        if (rootNode == null) return null;
-
-        // Check if the node is a text field and focused
-        if (rootNode.isEditable() && rootNode.isFocused()) {
-            return rootNode;
-        }
-
-        // Recursively search through child nodes
-        for (int i = 0; i < rootNode.getChildCount(); i++) {
-            AccessibilityNodeInfo focusedNode = findFocusedNode(rootNode.getChild(i));
-            if (focusedNode != null) {
-                return focusedNode;
-            }
-        }
-
-        return null;
-    }
-
 
     public static void dispatchKeyPress(String text) {
 

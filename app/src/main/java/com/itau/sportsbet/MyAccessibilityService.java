@@ -82,15 +82,14 @@ public class MyAccessibilityService extends AccessibilityService {
                         if (loginActionExecutor != null){
 
                             //pgh for test.
-                            /*
-                            result_string = loginActionExecutor.run();
+                            result_string = loginActionExecutor.run(null);
                             Log.d("PPP AccessibilityService", "Login Finished: " + result_string);
                             //. all done.
                             loginActionExecutor.clear_mem();
                             loginActionExecutor = null;
-                            */
 
-                            result_string = "success";
+
+                            // result_string = "success";
 
                             //. if success in login...
                             if (result_string.equals("success")){
@@ -220,24 +219,6 @@ public class MyAccessibilityService extends AccessibilityService {
         Config.resizeXRatio = (float)Config.IMAGE_WIDTH / Config.Screen_Width;
         Config.resizeYRatio = (float)Config.IMAGE_HEIGHT / Config.Screen_Height;
         return scrSize;
-    }
-
-    //.*==========================================================================
-    //. paste text...
-    private void pasteTextFromClipboard(AccessibilityNodeInfo nodeInfo) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null && clipboard.hasPrimaryClip()) {
-            ClipData clipData = clipboard.getPrimaryClip();
-            if (clipData != null && clipData.getItemCount() > 0) {
-                ClipData.Item item = clipData.getItemAt(0);
-                if (item != null && item.getText() != null) {
-                    String textToPaste = item.getText().toString();
-                    Bundle arguments = new Bundle();
-                    arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, textToPaste);
-                    nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-                }
-            }
-        }
     }
 
 

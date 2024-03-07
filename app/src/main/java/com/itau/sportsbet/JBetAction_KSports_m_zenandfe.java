@@ -331,7 +331,8 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
                     }
 
-
+                    retSegments2 = null;
+                    retSegments3 = null;
 
                 }
                 retSegments1 = null;

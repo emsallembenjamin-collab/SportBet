@@ -8,18 +8,21 @@ Revision: 1.0
 
 action_scenario 화일의 전체 구조는 다음과 같다.
 {
-  "user_id"               : "xxx",
-  "password"              : "yyy",
 
   "action_list": [
     {
-      "name"              : "xxx",
-      "type"              : "xxx",
-      "string_param_list" : [xxx],
-      "digit_param_list"  : [],
-      "delay"             : 10000,
+      "name"                  : "starting go_website",
+      "type"                  : "go_website",
+      "string_param_list"     : ["https://nn88111.com"],
+      "digit_param_list"      : [],
+      "time_limit"            : 30000,
+      "delay"                 : 1000,
+      "waitPageload"          : true,
+      "validator_param_list"  : ["ocr", "have", "NO HU", "0","520","160","690"],
+      "confirmproc_param_list"  : [],
+
       "branch": {
-        "success" : [xxx],
+        "success" : ["find login button"],
         "fail"    : []
       }
     },
@@ -52,8 +55,29 @@ action_scenario 화일의 전체 구조는 다음과 같다.
  @==== "digit_param_list"
  	수자형식의 파라메터렬이다.
  	구제적인 의미는 type에 의존한다. 아래의 <action type list>단락에서 서술한다.
- @==== "delay"
- 	거의 모든 action들은 delay가 필요하다.
+
+ 	@==== "time_limit"
+ 	 이 action이 완료되기까지 총 허용시간을 ms단위로 준다.
+ 	 완료되였다는것을 어떻게 판정하는가? 시간루적은 어떻게 계수하는가를 validator mechanism이 한다.
+ 	@==== "delay"
+ 	 거의 모든 action들은 delay가 필요하다.
+ 	 action을 실행하고 즉시 실시하는 delay이다.
+ 	 time_limit에 포함된다.
+
+ 	@==== "waitPageload"
+ 	 이 action이 pageload에 관계되는가? Accessiblity Service의 callback 구조에서 
+ 	 일부 페지들의 적제시점을 알수 있다.
+
+ 	@==== "validator_param_list"
+ 	 action에 대응되는 validator들을 창조하기 위한 정보들을 담는다.
+ 	 action이 끝난후에 validator가 true를 돌릴때까지 time_limit시간한계동안 기다리게 된다.
+
+ 	@==== "confirmproc_param_list"
+ 	 광고, confirm (일부 site들은 login 한 후에 조작이 없이 오랜시간 경과하면 confirm창을 현시하고 page를 refresh 하게 한다.)
+ 	 창들의 현시는 나를 혼잡시킨다.
+ 	 광고를 닫거나 confirm창을 close하는 action들을 다로 추가하고 이 정보를 여기에 반영한다.
+ 	 action은 실행되기전, 혹은 실행한 후 이 confirm처리를 진행하게 한다.
+
  	
 
  @==== "branch"
@@ -144,7 +168,9 @@ action_scenario 화일의 전체 구조는 다음과 같다.
 		 click event in special position...
 	Params:
 		"string_param_list": 
-			no use.
+			이전 action의 결과 result_rect의 몇번째것을 리용하는가를 지정할수 있다.
+			"3"
+			no use=> default -> use index 0
 
 		"digit_param_list"  : 
 			position for click,
@@ -249,7 +275,8 @@ action_scenario 화일의 전체 구조는 다음과 같다.
 		"string_param_list": 
 			no use.
 		"digit_param_list"  : 
-			no use.
+			앞단에서 검색한 (result_rect) 결과목록에서 id와 password위치를 지정하는 첨수를 준다.
+			no use- 0,1 
 
 	ex:
 	{
@@ -297,16 +324,41 @@ action_scenario 화일의 전체 구조는 다음과 같다.
     
 	
 
-7. comment :
+8. do_calc :
 	Desc: 
-		 JSON에는 특별히 comment처리가 없다.
-		 그래서 설명을 위하여 이따금 추가하는 action이다.
-		 parameter들은 리용하지 않는다.
-		 그리고 실행도 되지 않는다.
+		 어떤 수값계산이 필요한 경우들이 많다.
+		 앞으로 계속 확장한다.
+	Params:
+		"string_param_list": 
+			set a type of calc, and params.
+			ex: ["rect_growth", "$category"] 
+
+			여기에 따라 digit_param_list의 형식이 달라진다.
+		"digit_param_list"  : 
+			1. "rect_growth":
+				6 params,=>  [x,y,right,bottom, x_step, y-step]
+
+		결과는 result_rects에 보관된다.
+			
+
+9. find_close_ad : 
+
+	Desc: 
+		 find and close ad modal proc.
+		 
+	Params:
+		"string_param_list": 
+			no use.
+		"digit_param_list"  : 
+			[thresBorder, thresCircle, minRadius, maxRadius, R,G,B]
+
+			notice:
+			ad modal may apprear serveral times...
+		
+		
 
 
-
-8. the_end	: 
+10. the_end	: 
 	
 	Desc: 
 		 the end mark...

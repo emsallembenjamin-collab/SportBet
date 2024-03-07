@@ -137,6 +137,10 @@ public class JUtilFunctions {
 
        return rcOrig;
     }
+    public static Point getOrigPointFromBasePoint(Point ptBase){
+        Point ptOrig = new Point(ptBase.x / Config.resizeXRatio, ptBase.y / Config.resizeYRatio);
+        return ptOrig;
+    }
 
     public static void changeToOrigRectFromBaseRect(Rect rcBase){
 
@@ -526,7 +530,7 @@ public class JUtilFunctions {
     }
 
     //.*=================================================================================
-    //.func: findContinuousSegments
+    //.func: detectLines
     //.desc:
     //.
     public static Mat detectLines(Mat image, int cannyThres1, int threshold, int minLineLength, int maxLineGap){
@@ -544,6 +548,24 @@ public class JUtilFunctions {
         Imgproc.HoughLinesP(edges, lines, 1, Math.PI / 180, threshold, minLineLength, maxLineGap);
 
         return lines;
+    }
+
+    //.*=================================================================================
+    //.func: detectCircles
+    //.desc:
+    //.
+    public static Mat detectCircles(Mat image, int thresBorder, int thresCircle, int minRadius, int maxRadius){
+
+        // Convert the image to grayscale
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
+
+        // Parameters for the Hough Circle Transform
+        Mat circles = new Mat();
+
+        // Hough Circle Transform
+        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1, gray.rows()/8, thresBorder, thresCircle, minRadius, maxRadius);
+        return circles;
     }
 
 
@@ -706,8 +728,8 @@ public class JUtilFunctions {
     //. main function of do_ocr
     //. first, do ocr per rect of rcTargets,
     //. next, match the result and string of string_param_list...
-    //. according of it... set rcRetList...
-    public static String do_ocr(Mat image, ArrayList<Rect> rcTargets, float fResizeRate,
+    //. according of it... set rcRetList... find_bestMatched_rectList_fromOcr
+    public static String find_bestMatched_rectList_fromOcr(Mat image, ArrayList<Rect> rcTargets, float fResizeRate,
                                 ArrayList<Rect> rcRetList, ArrayList<String> string_param_list, Config.StrPreprocessMethod nPreprocessMethodForOcrString) {
 
         String strRet = "fail";
@@ -717,6 +739,7 @@ public class JUtilFunctions {
         int nParamCnt = string_param_list.size();
         if (nParamCnt == 0 || nParamCnt % 2 != 0){
             //. invalid params.
+            strRet = "Invalid Param: for Ocr";
         }
         else {
             int nTargetCnt = nParamCnt / 2;
@@ -894,7 +917,7 @@ public class JUtilFunctions {
                 JUtilFunctions.changeToOrigRectFromBaseRect(rc);
             }
 
-            result_string = JUtilFunctions.do_ocr(ocrAreaMat, rcTexts, fResizeRate,
+            result_string = JUtilFunctions.find_bestMatched_rectList_fromOcr(ocrAreaMat, rcTexts, fResizeRate,
                     result_rects, string_param_list, nPreprocessMethodForOcrString);
             //. must do offset operation.
             if (result_string.equals("success")){

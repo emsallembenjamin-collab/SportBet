@@ -1,6 +1,8 @@
 package com.itau.sportsbet;
 
 
+import static android.view.KeyEvent.KEYCODE_BACK;
+import static android.view.KeyEvent.KEYCODE_DEL;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
 import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
 
@@ -31,6 +33,71 @@ class JAction_Puseudo extends JAction{
         return false;
     }
 };
+
+//.*=============================================================
+//.func: JAction_Do_Calc
+//.desc:
+//.
+class JAction_Do_Calc extends JAction{
+
+    @Override
+    public boolean run_internel(JAction prevAction){
+
+        boolean bInvalidParam = false;
+        int strparamCnt = string_param_list.size();
+        if (strparamCnt == 0){
+            bInvalidParam = true;
+        }
+        else{
+            String calc_type = string_param_list.get(0);
+            switch(calc_type){
+                case "rect_growth": {
+
+                    int digitCnt = digit_param_list.size();
+                    if (digitCnt != 6 || strparamCnt != 2){
+                        bInvalidParam = true;
+                        break;
+                    }
+                    Rect rcWork = JUtilFunctions.parseRectParam(digit_param_list,0);
+                    int x_unit = digit_param_list.get(4).intValue();
+                    int y_unit = digit_param_list.get(5).intValue();
+
+                    float growth = 0;
+                    String strSecondParam = string_param_list.get(1);
+                    if (strSecondParam.equals("$category")){
+                        growth = MyAccessibilityService.mainService.loadTask.category;
+                    }
+                    else{
+                        growth = Float.parseFloat(strSecondParam);
+                    }
+
+                    rcWork.x += (int)(growth * x_unit);
+                    rcWork.y += (int)(growth * y_unit);
+                    JUtilFunctions.changeToOrigRectFromBaseRect(rcWork);
+
+                    result_rects.clear();
+                    result_rects.add(rcWork);
+                }
+                break;
+                default:
+                    break;
+            }
+        }
+
+        if (bInvalidParam){
+            result_string = "Invalid Param";
+            executor.last_result_string = "Invalid Param: " + name;
+            return true;
+        }
+        else{
+            result_string = "success";
+            executor.last_result_string = "success do_calc: " + name;
+        }
+
+        return false;
+    }
+};
+
 
 
 //.*=============================================================
@@ -91,7 +158,7 @@ class JAction_Do_Ocr extends JAction{
                 JUtilFunctions.changeToOrigRectFromBaseRect(rc);
             }
 
-            result_string = JUtilFunctions.do_ocr(ocrAreaMat, rcTexts, fResizeRate,
+            result_string = JUtilFunctions.find_bestMatched_rectList_fromOcr(ocrAreaMat, rcTexts, fResizeRate,
                     result_rects, string_param_list, e_removeSpace);
             //. must do offset operation.
             if (result_string.equals("success")){
@@ -371,7 +438,7 @@ class JAction_Do_Input_Id_Password extends JAction{
         int nDigitParamCnt = digit_param_list.size();
         int nMaxRequireRectCnt = 2;
         for (int i = 0; i < nDigitParamCnt; i++){
-            int nRequstIndex = digit_param_list.get(0).intValue();
+            int nRequstIndex = digit_param_list.get(i).intValue();
             if (nRequstIndex + 1 > nMaxRequireRectCnt){
                 nMaxRequireRectCnt = nRequstIndex + 1;
             }
@@ -408,6 +475,11 @@ class JAction_Do_Input_Id_Password extends JAction{
         JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y);
         JUtilFunctions.delay_duration(100);
 
+        //. 2024-3-6. clear previous id
+        for (int i = 0; i < Config.max_userid_password_len; i++){
+            JUserActions.dispatchOneKeyPress(KEYCODE_DEL);
+            JUtilFunctions.delay_duration(10);
+        }
         JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
         JUtilFunctions.delay_duration(100);
 
@@ -421,6 +493,15 @@ class JAction_Do_Input_Id_Password extends JAction{
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
         JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, targetString);
         JUtilFunctions.delay_duration(100);
+
+        JUserActions.dispatchTap(ptPassword.x, ptPassword.y);
+        JUtilFunctions.delay_duration(100);
+
+        //. 2024-3-6. clear previous id
+        for (int i = 0; i < Config.max_userid_password_len; i++){
+            JUserActions.dispatchOneKeyPress(KEYCODE_DEL);
+            JUtilFunctions.delay_duration(10);
+        }
 
         JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y);
         JUtilFunctions.delay_duration(100);
@@ -523,7 +604,7 @@ class JAction_Do_Input_VerifiCode extends JAction{
         int nDigitParamCnt = digit_param_list.size();
         int nMaxRequireRectCnt = 2;
         for (int i = 0; i < nDigitParamCnt; i++){
-            int nRequstIndex = digit_param_list.get(0).intValue();
+            int nRequstIndex = digit_param_list.get(i).intValue();
             if (nRequstIndex + 1 > nMaxRequireRectCnt){
                 nMaxRequireRectCnt = nRequstIndex + 1;
             }
@@ -594,6 +675,99 @@ class JAction_Do_Input_VerifiCode extends JAction{
         return false;
     }
 };
+
+
+//.*=============================================================
+//.func: JAction_FindClose_Ad
+//.desc:
+//.
+class JAction_FindClose_Ad extends JAction{
+
+    public int thresBorder = 100;
+    public int thresCircle = 50;
+    public int minRadius = 15;
+    public int maxRadius = 25;
+    public Point3 borderColor = new Point3(255,255, 255);
+
+    public Rect rcAnalyse = new Rect(220, 540, 100, 400);
+
+    boolean bInitParams = false;
+    Point   ptFindAdCenter = new Point();
+
+    public boolean parseParams(){
+        boolean bInvalidParam = false;
+
+        int digitParamCnt = digit_param_list.size();
+        if (digitParamCnt != 7){
+            bInvalidParam = true;
+        }
+        else{
+            thresBorder = digit_param_list.get(0).intValue();
+            thresCircle = digit_param_list.get(1).intValue();
+            minRadius = digit_param_list.get(2).intValue();
+            maxRadius = digit_param_list.get(3).intValue();
+
+            borderColor.x = digit_param_list.get(4).intValue();
+            borderColor.y = digit_param_list.get(5).intValue();
+            borderColor.z = digit_param_list.get(6).intValue();
+
+        }
+
+        return bInvalidParam;
+    }
+
+    public boolean findAd(){
+
+        boolean bFindAd = false;
+        JUtilFunctions.takeScreenshot();
+        Mat workMat = JUtilFunctions.screenshot.submat(rcAnalyse);
+        Mat detResult = JUtilFunctions.detectCircles(workMat, thresBorder, thresCircle, minRadius, maxRadius);
+
+        int findCircleCnt = detResult.cols();
+        if (findCircleCnt == 1){
+            double[] circle = detResult.get(0, 0);
+            ptFindAdCenter.x = Math.round(circle[0]);
+            ptFindAdCenter.y = Math.round(circle[1]);
+            bFindAd = true;
+        }
+
+        return bFindAd;
+    };
+
+    @Override
+    public boolean run_internel(JAction prevAction){
+
+        boolean bInvalidParam = false;
+        if (bInitParams == false){
+            bInitParams = true;
+            bInvalidParam = parseParams();
+            if (bInvalidParam){
+                result_string = "Invalid Param";
+                executor.last_result_string = "Invalid Param: " + name;
+                return true;
+            }
+        }
+
+        JUtilFunctions.delay_duration(1000);
+
+        boolean bFindAd = true;
+        while(bFindAd) {
+            bFindAd = findAd();
+            if (bFindAd) {
+                //. click proc...
+                Point ptOrg = JUtilFunctions.getOrigPointFromBasePoint(ptFindAdCenter);
+                JUserActions.dispatchTap(ptOrg.x, ptOrg.y);
+                JUtilFunctions.delay_duration(1000);
+            }
+        }
+
+        result_string = "success";
+        executor.last_result_string = "success: " + name;
+        return false;
+    }
+};
+
+
 
 //.*=============================================================
 //.func: JAction_TheEnd

@@ -1,14 +1,14 @@
 {
   "has_bet_task"          : "yes",
-  "user_id"               : "Over11",
-  "password"              : "Abcd123",
+  "user_id"               : "Akingvn016",
+  "password"              : "123456a",
   "full_width"            : 540,
   "full_height"           : 960,
-  "site"                  : "oxbet.in",
+  "site"                  : "nn88111.com",
   "update_site_info"      : "false",
   "limitTime"			        : 9000000,
 
-  "category"			         : 1,
+  "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
   "league_name"			      : "England Championship",
@@ -18,7 +18,7 @@
   "betTarget"			  	     : "Xiu",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			      : "2.5-3",
+  "betMark"			        : "2.5-3",
   "betAmount"			      : "20"
 
 }

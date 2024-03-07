@@ -10,6 +10,7 @@
       "delay"                 : 1000,
       "waitPageload"          : true,
       "validator_param_list"  : ["color_px", "neg", "400","200",  "255","255","255"],
+      "confirmproc_param_list"  : [],
       
       "branch": {
         "success" : ["find login button"],
@@ -26,6 +27,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["click login button"],
         "fail"    : ["find already logined"]
@@ -41,6 +43,7 @@
       "delay"                 : 2000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["find user_id and password input ctrl"],
         "fail"    : []
@@ -56,6 +59,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["input user_id and password"],
         "fail"    : ["the end process", "fail"]
@@ -71,6 +75,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["find login now button"],
         "fail"    : ["the end process", "fail"]
@@ -86,6 +91,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["click enter site button"],
         "fail"    : ["the end process", "fail"]
@@ -101,6 +107,7 @@
       "delay"                 : 1000,
       "waitPageload"          : true,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : []
@@ -116,6 +123,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : ["find prev logined user_id region"]
@@ -131,6 +139,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["click user_id region"],
         "fail"    : ["the end process", "fail"]
@@ -146,6 +155,7 @@
       "delay"                 : 2000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["find logout menu button"],
         "fail"    : []
@@ -161,6 +171,7 @@
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["click logout menu button"],
         "fail"    : ["the end process", "fail"]
@@ -176,6 +187,7 @@
       "delay"                 : 1000,
       "waitPageload"          : true,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["find login button"],
         "fail"    : []
@@ -191,6 +203,7 @@
       "delay"                 : 3000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["find sports category"],
         "fail"    : []
@@ -206,6 +219,7 @@
       "delay"                 : 1000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["goto real betting site"],
         "fail"    : []
@@ -221,6 +235,7 @@
       "delay"                 : 3000,
       "waitPageload"          : true,
       "validator_param_list"  : ["line_det", "great", "25"],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["the end process", "success"],
         "fail"    : []
@@ -236,6 +251,7 @@
       "delay"                 : 1000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
       "branch": {
         "success" : [],
         "fail"    : []

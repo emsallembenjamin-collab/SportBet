@@ -1,5 +1,9 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
+import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
+import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
+
 import android.os.SystemClock;
 
 import org.json.JSONArray;
@@ -43,6 +47,10 @@ public class JActionValidator {
                 break;
                 case "colorbar_det": {
                     retValidator = new JActionValidator_ColorbarDet(action);
+                }
+                break;
+                case "ocr": {
+                    retValidator = new JActionValidator_Ocr(action);
                 }
                 break;
                 default:
@@ -202,8 +210,6 @@ class JActionValidator_ColorbarDet extends JActionValidator {
     public boolean bGreatCond = false;
     public int nBarDetThres = 0;
 
-    public Rect rcForAnalyse = new Rect(0,0,0,0);
-
     JFuncParams_ColorBar param = null;
 
     JActionValidator_ColorbarDet(JAction action){
@@ -214,6 +220,7 @@ class JActionValidator_ColorbarDet extends JActionValidator {
     //.func: build
     //.desc: json type is ex: {\"validator_param_list\"  : ["colorbar_det", "great", "2", "100","0","100","300", "50","50","50", "20","20","20", "limitLen" ]}
     //. "{\"name\":\"John\",\"age\":30,\"city\":\"New York\"}"
+    //
     public boolean build(JSONArray jsonArray) throws JSONException {
         boolean bRet = false;
 
@@ -277,3 +284,68 @@ class JActionValidator_ColorbarDet extends JActionValidator {
         return bCheck;
     }
 };
+
+//.*=================================================================
+//.class: JActionValidator_Ocr
+//.desc: detect target string in specified region, and decide if it exists...
+class JActionValidator_Ocr extends JActionValidator {
+
+    //. for line det.
+    public boolean bHaveCond = false;
+    public String  targetStr = null;
+    public Rect rcForAnalyse = new Rect(0,0,0,0);
+
+    JActionValidator_Ocr(JAction action){
+        super(action);
+    }
+
+    //.*==============================================================
+    //.func: build
+    //.desc: json type is ex:  "validator_param_list"  : ["ocr", "have", "Đ.NHẬP", "0","430","160","530"],
+    //.
+    public boolean build(JSONArray jsonArray) throws JSONException {
+        boolean bRet = false;
+
+        int elementCnt = jsonArray.length();
+        if (elementCnt == 7){
+            String strNeg = jsonArray.getString(1);
+            if (strNeg.equals("have")){
+                bHaveCond = true;
+            }
+            targetStr = jsonArray.getString(2);
+
+            rcForAnalyse.x = jsonArray.getInt(3);
+            rcForAnalyse.y = jsonArray.getInt(4);
+            rcForAnalyse.width = jsonArray.getInt(5);
+            rcForAnalyse.height = jsonArray.getInt(6);
+            rcForAnalyse.width = rcForAnalyse.width - rcForAnalyse.x;
+            rcForAnalyse.height = rcForAnalyse.height - rcForAnalyse.y;
+
+            bRet = true;
+        }
+
+        return bRet;
+    }
+
+    public boolean check_forCond() {
+        boolean bCheck = false;
+
+        JUtilFunctions.takeScreenshot();
+
+        String strRet = JUtilFunctions.findText(targetStr, rcForAnalyse, 1.0f, action.result_rects, e_removeSpace, e_NormalTxtDet);
+        if (strRet.equals("success")){
+            if (bHaveCond){
+                bCheck = true;
+            }
+        }
+        else {
+            if (!bHaveCond){
+                bCheck = true;
+            }
+        }
+
+        return bCheck;
+    }
+};
+
+
