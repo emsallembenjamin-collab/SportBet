@@ -1,6 +1,14 @@
 package com.itau.sportsbet;
 
+import org.opencv.core.Rect;
+
+import java.util.ArrayList;
+
 abstract public class JBetAction {
+
+    public JLoadTask loadTask = null;
+    ArrayList<Rect> result_rects = new ArrayList<Rect>();
+    float fResizeRate = 1.0f;
 
     //. Abstract method
     abstract String run();

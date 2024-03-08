@@ -218,8 +218,8 @@ class JActionValidator_ColorbarDet extends JActionValidator {
 
     //.*==============================================================
     //.func: build
-    //.desc: json type is ex: {\"validator_param_list\"  : ["colorbar_det", "great", "2", "100","0","100","300", "50","50","50", "20","20","20", "limitLen" ]}
-    //. "{\"name\":\"John\",\"age\":30,\"city\":\"New York\"}"
+    //.desc: json type is ex: "[\"colorbar_det\", \"great\", \"1\", \"470\",\"400\",\"470\",\"900\",    \"70\",\"75\",\"88\", \"70\",\"75\",\"88\", \"20\" ]";
+    //.
     //
     public boolean build(JSONArray jsonArray) throws JSONException {
         boolean bRet = false;
@@ -288,6 +288,8 @@ class JActionValidator_ColorbarDet extends JActionValidator {
 //.*=================================================================
 //.class: JActionValidator_Ocr
 //.desc: detect target string in specified region, and decide if it exists...
+//.      json type: "[\"ocr\", \"have\", \"Đ.NHẬP\", \"0\",\"430\",\"160\",\"530\"]"
+//.
 class JActionValidator_Ocr extends JActionValidator {
 
     //. for line det.

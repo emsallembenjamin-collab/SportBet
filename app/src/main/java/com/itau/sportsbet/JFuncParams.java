@@ -1,6 +1,8 @@
 package com.itau.sportsbet;
 
 
+import static com.itau.sportsbet.Config.StrCompMethod.e_PermitIncluding;
+
 import org.opencv.core.Point3;
 
 class JFuncParams_ColorBar {
@@ -17,6 +19,7 @@ class JFuncParams_ColorBar {
 
 class JFuncParams_FindSectionIncluding2Targets {
     public String sectionTarget = null;
+    public Config.StrCompMethod eSecTargetComMethod = e_PermitIncluding;
     public String target1 = null;
     public Config.StrCompMethod  strCompMethod1;
     public Config.StrPreprocessMethod  strPreprocessMethod1;
@@ -30,6 +33,8 @@ class JFuncParams_FindSectionIncluding2Targets {
     public boolean bFindedLeagueSection = false;
 
     public JFuncParams_ColorBar nextSectionInfo = null;
+    //.2024-3-8
+    Point3  ptBetPannelBackColor = null;
 };
 
 

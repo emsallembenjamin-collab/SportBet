@@ -476,10 +476,8 @@ class JAction_Do_Input_Id_Password extends JAction{
         JUtilFunctions.delay_duration(100);
 
         //. 2024-3-6. clear previous id
-        for (int i = 0; i < Config.max_userid_password_len; i++){
-            JUserActions.dispatchOneKeyPress(KEYCODE_DEL);
-            JUtilFunctions.delay_duration(10);
-        }
+        JUserActions.deleteContentofInput(Config.max_userid_password_len);
+
         JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
         JUtilFunctions.delay_duration(100);
 
@@ -498,10 +496,7 @@ class JAction_Do_Input_Id_Password extends JAction{
         JUtilFunctions.delay_duration(100);
 
         //. 2024-3-6. clear previous id
-        for (int i = 0; i < Config.max_userid_password_len; i++){
-            JUserActions.dispatchOneKeyPress(KEYCODE_DEL);
-            JUtilFunctions.delay_duration(10);
-        }
+        JUserActions.deleteContentofInput(Config.max_userid_password_len);
 
         JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y);
         JUtilFunctions.delay_duration(100);

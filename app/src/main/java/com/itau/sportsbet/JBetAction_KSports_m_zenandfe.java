@@ -21,11 +21,7 @@ import java.util.Calendar;
 
 public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
-    public JLoadTask loadTask = null;
-
     public Rect sportsMenuRect = null;
-    ArrayList<Rect> result_rects = new ArrayList<Rect>();
-    float fResizeRate = 1.0f;
     boolean bFindedLeagueSection = false;
 
     JBetAction_KSports_m_zenandfe(JLoadTask loadTask){
@@ -42,16 +38,16 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
             return strRet;
 
 
-        Log.d("PPPPP", "Start findBettingCategorySection_new.");
-        strRet = findBettingCategorySection_new();
-        Log.d("PPPPP", "findBettingCategorySection_new return: " + strRet);
+        Log.d("PPPPP", "Start findBettingCategorySection.");
+        strRet = findBettingCategorySection();
+        Log.d("PPPPP", "findBettingCategorySection return: " + strRet);
         if (strRet.equals("success") == false) {
             //. 2024-3-6
             //. once again. because hot matchss.
             if (bFindedLeagueSection){
                 //. try to find another matched league section.
                 JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
-                strRet = findBettingCategorySection_new();
+                strRet = findBettingCategorySection();
                 if (strRet.equals("success") == false) {
                     return strRet;
                 }
@@ -127,7 +123,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
     //.*================================================================
     //.func: findLeagureSection
     //.desc:
-    private String findBettingCategorySection_new(){
+    private String findBettingCategorySection(){
         String strRet = null;
 
         //. for find color bar...

@@ -626,6 +626,32 @@ public class JUtilFunctions {
         return continuousSegments;
     }
 
+    //.*=================================================================================
+    //.func: findContinuousSegments
+    //.desc:
+    //.
+    public static boolean hasSpecialColorPointInRegion(Mat image, Rect rcWork, Point3 color) {
+
+        boolean bHas = false;
+        // Iterate through the vertical line
+        for (int y = rcWork.y; y < rcWork.y + rcWork.height; y++) {
+            if (bHas)
+                break;
+            for (int x = rcWork.x; x < rcWork.x + rcWork.width; x++) {
+                double[] pixelsVals = image.get(y, x);
+
+                if ((pixelsVals[0] == color.x) && (pixelsVals[1] == color.y) && (pixelsVals[2] == color.z) ) {
+                    bHas = true;
+                    break;
+                }
+                pixelsVals = null;
+
+            }
+        }
+
+        return bHas;
+    }
+
 
     public static String removeNonLetters(String input) {
         StringBuilder result = new StringBuilder();
@@ -1018,33 +1044,48 @@ public class JUtilFunctions {
                     rcArrayTarget1, param.target1, param.strCompMethod1, param.strPreprocessMethod1);
 
             if (result_string1.equals("success")){
-                String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTexts, fResizeRate,
-                        rcArrayTarget2, param.target2, param.strCompMethod2, param.strPreprocessMethod2);
-                if (result_string2.equals("success")){
 
-                    //. condition...
-                    int nCnt1 = rcArrayTarget1.size();
-                    int nCnt2 = rcArrayTarget2.size();
+                //. 2024-3-8
+                //. maybe target2 is null, so we must use target1 only
+                boolean bTarget2Null = (param.target2 == null);
+                if (bTarget2Null == true){
+                    //. use first rect.
+                    Point ptCenter = getCenterPoint(rcArrayTarget1.get(0));
+                    //. and must think offset.
+                    ptOutClickPos.x = ptCenter.x + rcForOcr.x;
+                    ptOutClickPos.y = ptCenter.y + rcForOcr.y;
+                    bFinded = true;
+                }
+                else{
+                    String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTexts, fResizeRate,
+                            rcArrayTarget2, param.target2, param.strCompMethod2, param.strPreprocessMethod2);
+                    if (result_string2.equals("success")){
+
+                        //. condition...
+                        int nCnt1 = rcArrayTarget1.size();
+                        int nCnt2 = rcArrayTarget2.size();
 
 
-                    for (int i = 0; i < nCnt1; i++){
-                        if (bFinded)
-                            break;
-                        Rect rc1 = rcArrayTarget1.get(i);
-                        for (int j = 0; j < nCnt2; j++){
-                            Rect rc2 = rcArrayTarget2.get(j);
-                            boolean bMatch = match2RectsforNeighbourCond(rc1, rc2, param.neighborCond2Targets);
-                            if (bMatch){
-                                Point ptCenter = getCenterPoint(rc2);
-                                //. and must think offset.
-                                ptOutClickPos.x = ptCenter.x + rcForOcr.x;
-                                ptOutClickPos.y = ptCenter.y + rcForOcr.y;
-
-                                bFinded = true;
+                        for (int i = 0; i < nCnt1; i++){
+                            if (bFinded)
                                 break;
+                            Rect rc1 = rcArrayTarget1.get(i);
+                            for (int j = 0; j < nCnt2; j++){
+                                Rect rc2 = rcArrayTarget2.get(j);
+                                boolean bMatch = match2RectsforNeighbourCond(rc1, rc2, param.neighborCond2Targets);
+                                if (bMatch){
+                                    Point ptCenter = getCenterPoint(rc2);
+                                    //. and must think offset.
+                                    ptOutClickPos.x = ptCenter.x + rcForOcr.x;
+                                    ptOutClickPos.y = ptCenter.y + rcForOcr.y;
+
+                                    bFinded = true;
+                                    break;
+                                }
                             }
                         }
                     }
+
                 }
             }
 
@@ -1062,26 +1103,11 @@ public class JUtilFunctions {
     }
 
 
-    public static int getNextBetCategorySection(Rect rcFind) {
-        int ret = 0;
-        for(int row =(int) rcFind.y + 40; row< Config.Screen_Height; row++){
-            double[] pixelColor = screenshot.get(row, 10);
-            int redValue =(int) pixelColor[0];
-            int greenValue = (int) pixelColor[1];
-            int blueValue =(int) pixelColor[2];
-            if(redValue == 70 && greenValue== 75 && blueValue == 88){
-                return row;
-            }
-        }
-        return ret;
-    }
-
-
     //.*=====================================================================================
     //.func: findColorBarSectionAndTopScroll
     //.desc:
     //.
-    public static boolean findColorBarSection(String searchKey, JFuncParams_ColorBar colorBarParam,
+    public static boolean findColorBarSection(String searchKey, Config.StrCompMethod eComMethod, JFuncParams_ColorBar colorBarParam,
                                               Point ptFindPos, Point ptNextSecPos){
         boolean bResult = false;
 
@@ -1090,7 +1116,8 @@ public class JUtilFunctions {
         ptNextSecPos.x = -1; ptNextSecPos.y = -1;
 
         ArrayList<String> string_param_list = new ArrayList<String>();
-        string_param_list.add(searchKey);string_param_list.add("0");
+        int nCompMethod = Config.StrCompMethod.toInteger(eComMethod);
+        string_param_list.add(searchKey);string_param_list.add(Integer.toString(nCompMethod));
         ArrayList<Rect> result_rects = new ArrayList<Rect>();
 
         JUtilFunctions.takeScreenshot();
@@ -1147,11 +1174,12 @@ public class JUtilFunctions {
         boolean bAlreadyFindedTargetSection = false;
         boolean bFindedNextSection = false;
 
-        while(param.tryScrollCnt-- >0 ){
+        int nScrollCnt = param.tryScrollCnt;
+        while(nScrollCnt-- >0 ){
 
             Point ptFindPos = new Point(-1, -1);
             Point ptNextSecPos = new Point(-1, -1);
-            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.eSecTargetComMethod, param.nextSectionInfo, ptFindPos, ptNextSecPos);
             if (bFindTargetSection == false){
                 if (bAlreadyFindedTargetSection == false){
                     JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
@@ -1214,7 +1242,6 @@ public class JUtilFunctions {
                     JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
                     continue;
                 }
-
             }
         }
 
@@ -1222,52 +1249,53 @@ public class JUtilFunctions {
     }
 
 
-
-
-
-
-
-
     //.*=====================================================================================
-    //.func: findBetCell
-    //.desc:
-    //.
-    public static boolean findBetCell(String betTarget, String betMark, int tryScrollCnt, int topBase, int totalSearch, int nUnitY, int nOverlapHeight,
-                                      Point ptOutClickPos){
-
+    //.func: findSectionandExpanding
+    //.desc: in some case, section is collapsed so, we must it expand...
+    //.return: if find target section, return true, else false.
+    public static boolean findSectionandExpanding(JFuncParams_FindSectionIncluding2Targets param){
         boolean bResult = false;
-        int nEndY = 850;
+        int nLimitY = 700;
 
-        ArrayList<String> string_param_list = new ArrayList<String>();
-        string_param_list.add(betTarget);string_param_list.add("0");
-        string_param_list.add(betMark);string_param_list.add("0");
-        ArrayList<Rect> result_rects = new ArrayList<Rect>();
         float fResizeRate = 1.0f;
 
-        //. find action.
-        while(tryScrollCnt-- >0 ) {
-            JUtilFunctions.takeScreenshot();
+        int nScrollCnt = param.tryScrollCnt;
+        while(nScrollCnt-- >0 ){
 
-            int nY = topBase - 20;
-            for (int i = 0; i < totalSearch; i++) {
-                Rect rcAnalyseBase = new Rect(0, nY, Config.IMAGE_WIDTH, nUnitY);
-                String strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
-                if (strRet.equals("success") && result_rects.get(0).width > 0 && result_rects.get(1).width > 0) {
-
-                    Point ptCenter = JUtilFunctions.getCenterPoint(result_rects.get(1));
-                    ptOutClickPos.x = ptCenter.x;
-                    ptOutClickPos.y = ptCenter.y;
-
-                    bResult = true;
-                    break;
+            Point ptFindPos = new Point(-1, -1);
+            Point ptNextSecPos = new Point(-1, -1);
+            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.eSecTargetComMethod, param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            if (bFindTargetSection){
+                if (ptFindPos.y > nLimitY){
+                    //. too down pos...
+                    //. so need to some up scrolling...
+                    JUserActions.scrollUpPage((int)(200 / Config.resizeYRatio));
+                    continue;
                 }
-                nY += (nUnitY - nOverlapHeight);
-            }
-            if (bResult) {
+
+                //. judge if collpased ???
+                double[] pixelsVals = JUtilFunctions.screenshot.get((int)ptFindPos.y + 20, param.nextSectionInfo.fixedVal);
+                // Check if the current pixel color matches the target color
+                if ((pixelsVals[0] == param.ptBetPannelBackColor.x) &&
+                        (pixelsVals[1] == param.ptBetPannelBackColor.y) &&
+                        (pixelsVals[2] == param.ptBetPannelBackColor.z)){
+                    //. none collapsed case...
+                }
+                else{
+                    //. need expanding...
+                    Point ptCenter = new Point(param.nextSectionInfo.fixedVal / Config.resizeXRatio,
+                            (ptFindPos.x + ptFindPos.y) / 2 / Config.resizeYRatio);
+                    JUserActions.dispatchTap(ptCenter.x, ptCenter.y);
+                    JUtilFunctions.delay_duration(500);
+                    ptCenter = null;
+                }
+
+                bResult = true;
                 break;
             }
-
-            JUserActions.scrollUpPage((int)(400 / Config.resizeYRatio));
+            else{
+                JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+            }
         }
 
         return bResult;

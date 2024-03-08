@@ -25,6 +25,20 @@ public class Config {
 			}
 			return null;
 		}
+
+		public static int toInteger(StrCompMethod eType) {
+			switch(eType) {
+				case e_PermitIncluding:
+					return 0;
+				case e_IncludedBehind:
+					return 1;
+				case e_BriefType:
+					return 2;
+				case e_ExactEqual:
+					return 3;
+			}
+			return -1;
+		}
 	};
 
 	enum StrPreprocessMethod {
@@ -32,17 +46,90 @@ public class Config {
 		e_removeNonLetters,
 		e_removeNonAlphanumeric,
 		e_noneProc;
+
+		public static StrPreprocessMethod fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_removeSpace;
+				case 1:
+					return e_removeNonLetters;
+				case 2:
+					return e_removeNonAlphanumeric;
+				case 3:
+					return e_noneProc;
+			}
+			return null;
+		}
+
+		public static int toInteger(StrPreprocessMethod eType) {
+			switch(eType) {
+				case e_removeSpace:
+					return 0;
+				case e_removeNonLetters:
+					return 1;
+				case e_removeNonAlphanumeric:
+					return 2;
+				case e_noneProc:
+					return 3;
+			}
+			return -1;
+		}
+
 	};
 
 	enum TextDetMode {
 		e_NormalTxtDet,	// 0
 		e_HasMarkFront;
+
+		public static TextDetMode fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_NormalTxtDet;
+				case 1:
+					return e_HasMarkFront;
+			}
+			return null;
+		}
+
+		public static int toInteger(TextDetMode eType) {
+			switch(eType) {
+				case e_NormalTxtDet:
+					return 0;
+				case e_HasMarkFront:
+					return 1;
+			}
+			return -1;
+		}
 	};
 
 	enum DoConfirmMode {
 		e_Before,			// 0
 		e_BeforeValidator,	// 1
 		e_AfterDone;		// 2
+
+		public static DoConfirmMode fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_Before;
+				case 1:
+					return e_BeforeValidator;
+				case 2:
+					return e_AfterDone;
+			}
+			return null;
+		}
+
+		public static int toInteger(DoConfirmMode eType) {
+			switch(eType) {
+				case e_Before:
+					return 0;
+				case e_BeforeValidator:
+					return 1;
+				case e_AfterDone:
+					return 2;
+			}
+			return -1;
+		}
 	};
 
 
@@ -68,7 +155,7 @@ public class Config {
 	public static String sports_viet = "Thể thao";
 
 	public static float tesseractDetaultCharHeight = 50.0f;
-	public static int max_userid_password_len = 20;
+	public static int max_userid_password_len = 16;
 
 	public static String betType_Handicap = "Keo chap";
 	public static String betType_TaiXiu = "Tai/Xiu";
