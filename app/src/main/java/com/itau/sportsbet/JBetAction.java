@@ -31,7 +31,19 @@ abstract public class JBetAction {
 
                 }
             }
-                break;
+            break;
+            case "nn88111.com":{
+                switch (loadTask.category){
+                    case 0:{
+                        pRet = new JBetAction_SABA_Gr(loadTask);
+                    }
+                    break;
+                    default:
+                        break;
+
+                }
+            }
+            break;
             default:
                 break;
         }

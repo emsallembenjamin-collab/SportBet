@@ -1,5 +1,7 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_FarHorizNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
@@ -145,7 +147,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         param.strPreprocessMethod2 = e_removeSpace;
         param.tryScrollCnt = 30;
         param.nAnalyseWidth = 200;
-        param.neighborCond2Targets = 0; //. Up/ down layout...
+        param.neighborCond2Targets = e_UpDownDenseNeighborCond; //. Up/ down layout...
         param.nextSectionInfo = colorBarParam;
 
         Point ptOutClickPos = new Point();
@@ -198,7 +200,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         param.strPreprocessMethod2 = e_removeNonAlphanumeric;
         param.tryScrollCnt = 3;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
-        param.neighborCond2Targets = 1; //. Up/ down layout...
+        param.neighborCond2Targets = e_FarHorizNeighborCond; //. Up/ down layout...
         param.nextSectionInfo = colorBarParam;
 
 
@@ -239,7 +241,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         //. 1. find green title bar...
         JFuncParams_ColorBar param = new JFuncParams_ColorBar();
         param.targetUpColor = new Point3(54,192,101);
-        param.targetDownColor = new Point3(54,192,101);
+        param.targetDownColor = param.targetUpColor;
         param.nLimitLen = 50;
         param.bVert = true;
         param.fixedVal = 400; param.startVal = 100; param.endVal = 400;
@@ -249,11 +251,30 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
             nStartY_TitleBar = (int)retSegments.get(0).x; nEndY_TitleBar = (int)retSegments.get(0).y;
 
             //. 2. find bet now button...
+            //. 2024-3-9
+            //. why? msg "Superuser granted to..." is overfit button, so...
+            //. attention, ocr in bottom area, avoid...
+
+            /*
             Rect rcAnalyseBase = new Rect(260, 800, 270, 160);
             strRet = JUtilFunctions.findText(Config.bet_btn, rcAnalyseBase, fResizeRate,
                     result_rects, e_removeSpace, e_NormalTxtDet);
             if (strRet.equals("success")){
-                ptBetNowBnt_Center = JUtilFunctions.getCenterPoint(result_rects.get(0));
+            */
+
+            //. so I do it that find color bar...
+            param.targetUpColor = new Point3(69,137,200);
+            param.targetDownColor = param.targetUpColor;
+            param.nLimitLen = 45;
+            param.bVert = true;
+            param.fixedVal = 490; param.startVal = 730; param.endVal = 950;
+
+            ArrayList<Point> retSegments5 = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, param);
+            if (retSegments5.size() == 1){
+
+                // ptBetNowBnt_Center = JUtilFunctions.getCenterPoint(result_rects.get(0));
+                Point ptTmp = retSegments5.get(0);
+                ptBetNowBnt_Center = new Point(param.fixedVal, (ptTmp.x + ptTmp.y) / 2);
 
                 param.targetUpColor = new Point3(255,255,255);
                 param.targetDownColor = new Point3(255,255,255);

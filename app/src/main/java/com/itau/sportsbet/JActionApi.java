@@ -170,6 +170,11 @@ class JAction_Do_Ocr extends JAction{
                 executor.last_result_string = result_string;
             }
         }
+        else{
+            result_string = "fail do_ocr: Text Detector fail " + name;
+            executor.last_result_string = result_string;
+            // return true;
+        }
         return false;
     }
 };

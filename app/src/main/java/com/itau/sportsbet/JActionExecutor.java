@@ -338,21 +338,9 @@ public class JActionExecutor {
                 String strFirstConfirmProcActName = action.confirmproc_param_list.get(0);
                 action.confirmProc_firstAction = actionList.find(strFirstConfirmProcActName);
                 String confirmProc_do_mode = action.confirmproc_param_list.get(1);
-                switch (confirmProc_do_mode){
-                    case "0":
-                        action.do_confirm_mode = e_Before;
-                        break;
-                    case "1":
-                        action.do_confirm_mode = e_BeforeValidator;
-                        break;
-                    case "2":
-                        action.do_confirm_mode = e_AfterDone;
-                        break;
-                    default:
-                        //. must occure exception
-                        break;
+                int nConfirmMode = Integer.parseInt(confirmProc_do_mode);
+                action.do_confirm_mode = Config.DoConfirmMode.fromInteger(nConfirmMode);
 
-                }
                 nRet++;
             }
         }

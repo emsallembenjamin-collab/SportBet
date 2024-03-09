@@ -2,6 +2,11 @@ package com.itau.sportsbet;
 
 import static com.googlecode.tesseract.android.TessBaseAPI.OEM_LSTM_ONLY;
 import static com.googlecode.tesseract.android.TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_FarHorizNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_FarVerticalNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_Merge2TargetNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_TableTypeNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
 import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
 
@@ -140,6 +145,14 @@ public class JUtilFunctions {
     public static Point getOrigPointFromBasePoint(Point ptBase){
         Point ptOrig = new Point(ptBase.x / Config.resizeXRatio, ptBase.y / Config.resizeYRatio);
         return ptOrig;
+    }
+
+    public static Point getTargetSectionfromBorderSection(Point borderSec, int secWidthforUsingBorder){
+        if (secWidthforUsingBorder > 0){
+            borderSec.x = borderSec.y;
+            borderSec.y = borderSec.x + secWidthforUsingBorder;
+        }
+        return borderSec;
     }
 
     public static void changeToOrigRectFromBaseRect(Rect rcBase){
@@ -630,7 +643,7 @@ public class JUtilFunctions {
     //.func: findContinuousSegments
     //.desc:
     //.
-    public static boolean hasSpecialColorPointInRegion(Mat image, Rect rcWork, Point3 color) {
+    public static boolean hasSpecialColorPointInRegion(Mat image, Rect rcWork, Point3 upColor, Point3 downColor) {
 
         boolean bHas = false;
         // Iterate through the vertical line
@@ -639,11 +652,13 @@ public class JUtilFunctions {
                 break;
             for (int x = rcWork.x; x < rcWork.x + rcWork.width; x++) {
                 double[] pixelsVals = image.get(y, x);
-
-                if ((pixelsVals[0] == color.x) && (pixelsVals[1] == color.y) && (pixelsVals[2] == color.z) ) {
+                if ((pixelsVals[0] >= downColor.x) && (pixelsVals[0] <= upColor.x) &&
+                        (pixelsVals[1] >= downColor.y) && (pixelsVals[1] <= upColor.y) &&
+                        (pixelsVals[2] >= downColor.z) && (pixelsVals[2] <= upColor.z)){
                     bHas = true;
                     break;
                 }
+
                 pixelsVals = null;
 
             }
@@ -936,7 +951,7 @@ public class JUtilFunctions {
             Mat ocrAreaMat = JUtilFunctions.originScreenShot.submat(rcForOcr);
 
             //.for test.
-            JUtilFunctions.SaveMatFile(ocrAreaMat, MyAccessibilityService.mainService);
+            // JUtilFunctions.SaveMatFile(ocrAreaMat, MyAccessibilityService.mainService);
 
             for (int k = 0; k < rcTexts.size(); k++){
                 Rect rc = rcTexts.get(k);
@@ -979,25 +994,56 @@ public class JUtilFunctions {
     //.func: match2RectsforNeighbourCond
     //.desc:
     //.
-    public static boolean match2RectsforNeighbourCond(Rect rc1, Rect rc2, int neighborCond2Targets){
+    public static boolean match2RectsforNeighbourCond(Rect rc1, Rect rc2, Config.NeighborCond2Targets neighborCond2Targets){
         boolean bRet = false;
         switch (neighborCond2Targets){
-            case 0: { //. up-down layout.
+            case e_UpDownDenseNeighborCond: { //. up-down layout.
                 Point ptCenter1 = getCenterPoint(rc1);
                 Point ptCenter2 = getCenterPoint(rc2);
-                int nGap = Math.abs((int)(ptCenter1.y - ptCenter2.y));
-                if (nGap * Config.resizeYRatio < 80){
+                int nGapX = Math.abs((int)(ptCenter1.x - ptCenter2.x));
+                int nGapY = Math.abs((int)(ptCenter1.y - ptCenter2.y));
+                if (nGapX * Config.resizeXRatio < 50 && nGapY * Config.resizeYRatio < 80){
                     bRet = true;
                 }
+                ptCenter1 = null; ptCenter2 = null;
             }
             break;
-            case 1: { //. horz layout.
+            case e_FarHorizNeighborCond: { //. horz layout.
                 Point ptCenter1 = getCenterPoint(rc1);
                 Point ptCenter2 = getCenterPoint(rc2);
-                int nGap = Math.abs((int)(ptCenter1.y - ptCenter2.y));
-                if (nGap * Config.resizeYRatio < 20){
+                int nGapX = Math.abs((int)(ptCenter1.x - ptCenter2.x));
+                int nGapY = Math.abs((int)(ptCenter1.y - ptCenter2.y));
+                if (nGapX * Config.resizeXRatio > 100 && nGapY * Config.resizeYRatio < 50){
                     bRet = true;
                 }
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            case e_Merge2TargetNeighborCond: {
+                //. impossible case.
+                bRet = true;
+            }
+            break;
+            case e_FarVerticalNeighborCond: {
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                int nGapX = Math.abs((int)(ptCenter1.x - ptCenter2.x));
+                int nGapY = Math.abs((int)(ptCenter1.y - ptCenter2.y));
+                if (nGapX * Config.resizeXRatio < 50 && nGapY * Config.resizeYRatio < 150){
+                    bRet = true;
+                }
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            case e_TableTypeNeighborCond: {
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                int nGapX = (int) (Math.abs((int)(ptCenter1.x - ptCenter2.x)) * Config.resizeXRatio);
+                int nGapY = (int) (Math.abs((int)(ptCenter1.y - ptCenter2.y)) * Config.resizeYRatio);
+                if (nGapX > 100 && nGapX < 300 && nGapY > 40 && nGapY < 150){
+                    bRet = true;
+                }
+                ptCenter1 = null; ptCenter2 = null;
             }
             break;
             default:
@@ -1006,6 +1052,42 @@ public class JUtilFunctions {
 
         return bRet;
     }
+
+    //.*===========================================================================================
+    //.func: match2RectsforNeighbourCond
+    //.desc:
+    //.
+    public static Point decideFocuspointforNeighbourCond(Rect rc1, Rect rc2, Config.NeighborCond2Targets neighborCond2Targets){
+        boolean bRet = false;
+
+        Point ptClick = null;
+        switch (neighborCond2Targets){
+            case e_UpDownDenseNeighborCond:
+            case e_FarHorizNeighborCond:
+            case e_FarVerticalNeighborCond:
+            { //. up-down layout.
+                ptClick = getCenterPoint(rc2);
+            }
+            break;
+            case e_Merge2TargetNeighborCond: {
+                ptClick = getCenterPoint(rc1);
+            }
+            break;
+            case e_TableTypeNeighborCond: {
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                ptClick = new Point(ptCenter1.x , ptCenter2.x);
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            default:
+                break;
+        }
+
+        return ptClick;
+    }
+
+
     //.*===========================================================================================
     //.func: find2TargetsArea
     //.desc:
@@ -1050,10 +1132,13 @@ public class JUtilFunctions {
                 boolean bTarget2Null = (param.target2 == null);
                 if (bTarget2Null == true){
                     //. use first rect.
-                    Point ptCenter = getCenterPoint(rcArrayTarget1.get(0));
+                    Rect rc1 = rcArrayTarget1.get(0);
+                    Point ptClick = decideFocuspointforNeighbourCond(rc1, null, param.neighborCond2Targets);
                     //. and must think offset.
-                    ptOutClickPos.x = ptCenter.x + rcForOcr.x;
-                    ptOutClickPos.y = ptCenter.y + rcForOcr.y;
+                    ptOutClickPos.x = ptClick.x + rcForOcr.x;
+                    ptOutClickPos.y = ptClick.y + rcForOcr.y;
+
+                    ptClick = null;
                     bFinded = true;
                 }
                 else{
@@ -1065,7 +1150,6 @@ public class JUtilFunctions {
                         int nCnt1 = rcArrayTarget1.size();
                         int nCnt2 = rcArrayTarget2.size();
 
-
                         for (int i = 0; i < nCnt1; i++){
                             if (bFinded)
                                 break;
@@ -1074,11 +1158,13 @@ public class JUtilFunctions {
                                 Rect rc2 = rcArrayTarget2.get(j);
                                 boolean bMatch = match2RectsforNeighbourCond(rc1, rc2, param.neighborCond2Targets);
                                 if (bMatch){
-                                    Point ptCenter = getCenterPoint(rc2);
-                                    //. and must think offset.
-                                    ptOutClickPos.x = ptCenter.x + rcForOcr.x;
-                                    ptOutClickPos.y = ptCenter.y + rcForOcr.y;
 
+                                    Point ptClick = decideFocuspointforNeighbourCond(rc1, rc2, param.neighborCond2Targets);
+                                    //. and must think offset.
+                                    ptOutClickPos.x = ptClick.x + rcForOcr.x;
+                                    ptOutClickPos.y = ptClick.y + rcForOcr.y;
+
+                                    ptClick = null;
                                     bFinded = true;
                                     break;
                                 }
@@ -1107,7 +1193,7 @@ public class JUtilFunctions {
     //.func: findColorBarSectionAndTopScroll
     //.desc:
     //.
-    public static boolean findColorBarSection(String searchKey, Config.StrCompMethod eComMethod, JFuncParams_ColorBar colorBarParam,
+    public static boolean findColorBarSection(String searchKey, Config.StrCompMethod eComMethod, int secWidthforUsingBorder, JFuncParams_ColorBar colorBarParam,
                                               Point ptFindPos, Point ptNextSecPos){
         boolean bResult = false;
 
@@ -1128,6 +1214,13 @@ public class JUtilFunctions {
         float fResizeRate = 1.0f;
         for (int i = 0; i < nSegCnt; i++){
             Point sectionHead = retSegments.get(i);
+
+            //.2024-3-9
+            //. for detecting using border color...
+            JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
+            if (sectionHead.x > 850)
+                break;
+
             Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, colorBarParam.fixedVal, (int)(sectionHead.y - sectionHead.x));
 
             String strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list,
@@ -1140,6 +1233,7 @@ public class JUtilFunctions {
                 //. set next section pos.
                 if (i != nSegCnt - 1){
                     Point sectionHeadNext = retSegments.get(i + 1);
+                    JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
                     ptNextSecPos.x = sectionHeadNext.x;
                     ptNextSecPos.y = sectionHeadNext.y;
                 }
@@ -1149,6 +1243,7 @@ public class JUtilFunctions {
 
         if (bResult == false && nSegCnt > 0){
             Point sectionHeadNext = retSegments.get(0);
+            JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
             ptNextSecPos.x = sectionHeadNext.x;
             ptNextSecPos.y = sectionHeadNext.y;
         }
@@ -1179,7 +1274,8 @@ public class JUtilFunctions {
 
             Point ptFindPos = new Point(-1, -1);
             Point ptNextSecPos = new Point(-1, -1);
-            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.eSecTargetComMethod, param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.eSecTargetComMethod, param.secWidthforUsingBorder,
+                    param.nextSectionInfo, ptFindPos, ptNextSecPos);
             if (bFindTargetSection == false){
                 if (bAlreadyFindedTargetSection == false){
                     JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
@@ -1264,8 +1360,10 @@ public class JUtilFunctions {
 
             Point ptFindPos = new Point(-1, -1);
             Point ptNextSecPos = new Point(-1, -1);
-            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.eSecTargetComMethod, param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.eSecTargetComMethod, param.secWidthforUsingBorder,
+                    param.nextSectionInfo, ptFindPos, ptNextSecPos);
             if (bFindTargetSection){
+
                 if (ptFindPos.y > nLimitY){
                     //. too down pos...
                     //. so need to some up scrolling...
@@ -1276,18 +1374,22 @@ public class JUtilFunctions {
                 //. judge if collpased ???
                 double[] pixelsVals = JUtilFunctions.screenshot.get((int)ptFindPos.y + 20, param.nextSectionInfo.fixedVal);
                 // Check if the current pixel color matches the target color
-                if ((pixelsVals[0] == param.ptBetPannelBackColor.x) &&
-                        (pixelsVals[1] == param.ptBetPannelBackColor.y) &&
-                        (pixelsVals[2] == param.ptBetPannelBackColor.z)){
+                Rect rcDecide = new Rect(param.nextSectionInfo.fixedVal + param.rcDecideforCollapseCond.x,
+                        (int)ptFindPos.y + param.rcDecideforCollapseCond.y, param.rcDecideforCollapseCond.width, param.rcDecideforCollapseCond.height);
+                boolean bHasPoint = JUtilFunctions.hasSpecialColorPointInRegion(JUtilFunctions.screenshot, rcDecide,
+                        param.ptBetPannelBackUpColor, param.ptBetPannelBackDownColor);
+                if (bHasPoint){
                     //. none collapsed case...
                 }
                 else{
                     //. need expanding...
-                    Point ptCenter = new Point(param.nextSectionInfo.fixedVal / Config.resizeXRatio,
-                            (ptFindPos.x + ptFindPos.y) / 2 / Config.resizeYRatio);
-                    JUserActions.dispatchTap(ptCenter.x, ptCenter.y);
+                    Point ptforClick = new Point(param.nextSectionInfo.fixedVal + param.ptPosClickforExpanding.x,
+                            (ptFindPos.x + ptFindPos.y) / 2 + param.ptPosClickforExpanding.y);
+                    Point ptRealforClick = JUtilFunctions.getOrigPointFromBasePoint(ptforClick);
+                    JUserActions.dispatchTap(ptRealforClick.x, ptRealforClick.y);
                     JUtilFunctions.delay_duration(500);
-                    ptCenter = null;
+                    ptforClick = null;
+                    ptRealforClick = null;
                 }
 
                 bResult = true;

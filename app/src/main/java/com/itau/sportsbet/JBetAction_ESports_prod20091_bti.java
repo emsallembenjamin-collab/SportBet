@@ -1,5 +1,7 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_Merge2TargetNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrCompMethod.e_PermitIncluding;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
@@ -85,18 +87,33 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         strRet = JUtilFunctions.findText("Phieu cuoc", rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
         if (strRet.equals("success")){
             Point ptCenter = JUtilFunctions.getCenterPoint(result_rects.get(0));
-            Rect rcWork = new Rect((int)ptCenter.x, (int)ptCenter.y - 70, 50, 70);
-            Point3 color = new Point3(242, 0, 0);
-            boolean bHasRedColor = JUtilFunctions.hasSpecialColorPointInRegion(JUtilFunctions.screenshot, rcWork, color);
-            if (bHasRedColor){
+
+            //. first click it.
+            JUserActions.dispatchTap(ptCenter.x, ptCenter.y + 5);
+            JUtilFunctions.delay_duration(500);
+
+            JUtilFunctions.takeScreenshot();
+            //. 2. find back color bar...
+            JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
+            colorBarParam.targetUpColor = new Point3(14,14,14);
+            colorBarParam.targetDownColor = colorBarParam.targetUpColor;
+            colorBarParam.nLimitLen = 30;
+            colorBarParam.fixedVal = 470;
+            colorBarParam.startVal = 670;
+            colorBarParam.endVal = 850;
+
+            ArrayList<Point> findRet = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
+            if (findRet.size() > 0){
+                //. normal state...
                 JUserActions.dispatchTap(ptCenter.x, ptCenter.y);
                 JUtilFunctions.delay_duration(500);
-
+            }
+            else{
                 JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
 
                 Point ptRemove = new Point(505 / Config.resizeXRatio, 815 / Config.resizeYRatio);
                 JUserActions.dispatchTap(ptRemove.x, ptRemove.y);
-                JUtilFunctions.delay_duration(300);
+                JUtilFunctions.delay_duration(500);
             }
 
             strRet = "success";
@@ -188,16 +205,19 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         param.sectionTarget = loadTask.league_name;
         param.eSecTargetComMethod = e_PermitIncluding;
         param.target1 = loadTask.team1;
-        param.strCompMethod1 = e_ExactEqual;
-        param.strPreprocessMethod1 = e_removeSpace;
+        param.strCompMethod1 = e_PermitIncluding;
+        param.strPreprocessMethod1 = e_removeNonAlphanumeric;
         param.target2 = loadTask.team2;
-        param.strCompMethod2 = e_ExactEqual;
-        param.strPreprocessMethod2 = e_removeSpace;
+        param.strCompMethod2 = e_PermitIncluding;
+        param.strPreprocessMethod2 = e_removeNonAlphanumeric;
         param.tryScrollCnt = 30;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
-        param.neighborCond2Targets = 0; //. Up/ down layout...
+        param.neighborCond2Targets = e_UpDownDenseNeighborCond; //. Up/ down layout...
         param.nextSectionInfo = colorBarParam;
-        param.ptBetPannelBackColor = new Point3(255,255,255);
+        param.ptBetPannelBackUpColor = new Point3(255,255,255);
+        param.ptBetPannelBackDownColor = param.ptBetPannelBackUpColor;
+        param.rcDecideforCollapseCond = new Rect(0, 20, 5,5);
+        param.ptPosClickforExpanding = new Point(-100, 0);
 
         //. 1. find league Section and expand it.
         boolean bFindSeciton = JUtilFunctions.findSectionandExpanding(param);
@@ -243,7 +263,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
         colorBarParam.nLimitLen = 30;
         colorBarParam.fixedVal = 470;
-        colorBarParam.startVal = 300;
+        colorBarParam.startVal = 120;
         colorBarParam.endVal = 850;
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
@@ -262,13 +282,13 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         //. in this case. two target must added.
         String strTarget = loadTask.betTarget + " " + loadTask.betMark;
-        param.target1 = loadTask.betTarget;
+        param.target1 = strTarget;
         param.strCompMethod1 = e_ExactEqual;
-        param.strPreprocessMethod1 = e_removeSpace;
+        param.strPreprocessMethod1 = e_removeNonAlphanumeric;
         param.target2 = null;   //. must null
         param.tryScrollCnt = 5;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
-        param.neighborCond2Targets = 1; //. horz layout...
+        param.neighborCond2Targets = e_Merge2TargetNeighborCond; //. horz layout...
         param.nextSectionInfo = colorBarParam;
 
         Point ptOutClickPos = new Point();
@@ -303,7 +323,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         colorBarParam.nLimitLen = 30;
         colorBarParam.fixedVal = 320;
         colorBarParam.startVal = 250;
-        colorBarParam.endVal = 500;
+        colorBarParam.endVal = 700;
         ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
         int nSecCnt = retSegments.size();
         if (nSecCnt != 1){

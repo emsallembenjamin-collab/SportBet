@@ -360,6 +360,7 @@ public class TextNormalDetector {
         //. and do some decides...
         do_build_text_region(total_labels, outRcArray, nDetectMode);
 
+        /*
         //pgh. for test.
         //. draw rect into text bound.
         nSizeLabels = outRcArray.size();
@@ -369,6 +370,8 @@ public class TextNormalDetector {
             Imgproc.rectangle(_image, rect, new Scalar(255, 0, 0, 255), 1);
         }
         JUtilFunctions.SaveMatFile(_image, context );
+        */
+
 
         nRet = outRcArray.size();
         return nRet;

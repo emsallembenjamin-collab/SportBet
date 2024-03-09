@@ -72,6 +72,19 @@ action_scenario 화일의 전체 구조는 다음과 같다.
  	 action에 대응되는 validator들을 창조하기 위한 정보들을 담는다.
  	 action이 끝난후에 validator가 true를 돌릴때까지 time_limit시간한계동안 기다리게 된다.
 
+ 	 2024-3-9.
+ 	 ex: "validator_param_list"  : ["ocr", "have", "Giải đấu", "30","480","180","760"],
+
+ 	 validator_param_list 는 여러개의 validator들의 모임일수 있다.
+ 	 실례로 $category에 따라서 validator가 달라지는 실례이다.
+ 	 $category == 0 => E-SPORTS일때에는,,,
+ 	 $category == 1 => K-SPORTS일때에는,,,
+ 	 이 경우에는 validator_param_list의 첫 항목으로 "$category"를 준다.
+
+
+
+
+
  	@==== "confirmproc_param_list"
  	 광고, confirm (일부 site들은 login 한 후에 조작이 없이 오랜시간 경과하면 confirm창을 현시하고 page를 refresh 하게 한다.)
  	 창들의 현시는 나를 혼잡시킨다.

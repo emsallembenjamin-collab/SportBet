@@ -132,6 +132,46 @@ public class Config {
 		}
 	};
 
+	enum NeighborCond2Targets {
+		e_UpDownDenseNeighborCond,			// 0
+		e_FarHorizNeighborCond,				// 1
+		e_Merge2TargetNeighborCond,			// 2
+		e_FarVerticalNeighborCond,			// 3
+		e_TableTypeNeighborCond;			// 4
+
+		public static NeighborCond2Targets fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_UpDownDenseNeighborCond;
+				case 1:
+					return e_FarHorizNeighborCond;
+				case 2:
+					return e_Merge2TargetNeighborCond;
+				case 3:
+					return e_FarVerticalNeighborCond;
+				case 4:
+					return e_TableTypeNeighborCond;
+			}
+			return null;
+		}
+
+		public static int toInteger(NeighborCond2Targets eType) {
+			switch(eType) {
+				case e_UpDownDenseNeighborCond:
+					return 0;
+				case e_FarHorizNeighborCond:
+					return 1;
+				case e_Merge2TargetNeighborCond:
+					return 2;
+				case e_FarVerticalNeighborCond:
+					return 3;
+				case e_TableTypeNeighborCond:
+					return 4;
+			}
+			return -1;
+		}
+	};
+
 
 
 
