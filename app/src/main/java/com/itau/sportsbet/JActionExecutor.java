@@ -191,8 +191,9 @@ abstract class JAction {
             bFinished = validator.check();
         }
         else{
-            JUtilFunctions.delay_duration(delay);
+            // JUtilFunctions.delay_duration(delay);
         }
+        JUtilFunctions.delay_duration(delay);
 
         //.2024-3-7
         //. process confirm proc...

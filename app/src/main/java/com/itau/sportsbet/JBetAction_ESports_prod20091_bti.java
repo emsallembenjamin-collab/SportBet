@@ -1,5 +1,6 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
 import static com.itau.sportsbet.Config.NeighborCond2Targets.e_Merge2TargetNeighborCond;
 import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
@@ -84,7 +85,8 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         JUtilFunctions.takeScreenshot();
 
         Rect rcAnalyseBase = new Rect(200,870, 150, 85);
-        strRet = JUtilFunctions.findText("Phieu cuoc", rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
+        JParamsForTextDet textDetMode = JParamsForTextDet.fromInteger(1);
+        strRet = JUtilFunctions.findText("Phieu cuoc", 0, rcAnalyseBase, result_rects, textDetMode);
         if (strRet.equals("success")){
             Point ptCenter = JUtilFunctions.getCenterPoint(result_rects.get(0));
 
@@ -140,7 +142,8 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         //.1. find "Som (Earyly)" button...
         Rect rcAnalyseBase = new Rect(0,400 ,180, 90);
-        strRet = JUtilFunctions.findText("Truc tiep", rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
+        JParamsForTextDet textDetMode = JParamsForTextDet.fromInteger(1);
+        strRet = JUtilFunctions.findText("Truc tiep", 0, rcAnalyseBase, result_rects, textDetMode);
         if (strRet.equals("success") == false)
             return strRet;
 
@@ -157,7 +160,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         else{
             //. 2. find "Hom nay(Today)" button
             rcAnalyseBase.x = 0; rcAnalyseBase.y = 550; rcAnalyseBase.width = 130; rcAnalyseBase.height = 100;
-            strRet = JUtilFunctions.findText("Hom nay", rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
+            strRet = JUtilFunctions.findText("Hom nay", 0, rcAnalyseBase, result_rects, textDetMode);
             if (strRet.equals("success")){
                 Point ptCenterToday = JUtilFunctions.getCenterPoint(result_rects.get(0));
                 if (bToday == false){
@@ -203,13 +206,16 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
         param.sectionTarget = loadTask.league_name;
-        param.eSecTargetComMethod = e_PermitIncluding;
+        param.secTargetIntOcrParam = 0;
+
+
         param.target1 = loadTask.team1;
-        param.strCompMethod1 = e_PermitIncluding;
-        param.strPreprocessMethod1 = e_removeNonAlphanumeric;
+        param.target1OcrParam.strCompMethod = e_PermitIncluding;
+        param.target1OcrParam.strPreprocessMethod = e_removeNonAlphanumeric;
         param.target2 = loadTask.team2;
-        param.strCompMethod2 = e_PermitIncluding;
-        param.strPreprocessMethod2 = e_removeNonAlphanumeric;
+        param.target2OcrParam.strCompMethod = e_PermitIncluding;
+        param.target2OcrParam.strPreprocessMethod = e_removeNonAlphanumeric;
+
         param.tryScrollCnt = 30;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
         param.neighborCond2Targets = e_UpDownDenseNeighborCond; //. Up/ down layout...
@@ -220,7 +226,8 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         param.ptPosClickforExpanding = new Point(-100, 0);
 
         //. 1. find league Section and expand it.
-        boolean bFindSeciton = JUtilFunctions.findSectionandExpanding(param);
+        Point ptFindSecPos = new Point();
+        boolean bFindSeciton = JUtilFunctions.findSectionandExpanding(param, ptFindSecPos);
         if (bFindSeciton == false){
             strRet = "fail findSection";
             return strRet;
@@ -278,13 +285,14 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
             return strRet;
         }
         param.sectionTarget = searchKey;
-        param.eSecTargetComMethod = e_PermitIncluding;
+        param.secTargetIntOcrParam = 4;
 
         //. in this case. two target must added.
         String strTarget = loadTask.betTarget + " " + loadTask.betMark;
         param.target1 = strTarget;
-        param.strCompMethod1 = e_ExactEqual;
-        param.strPreprocessMethod1 = e_removeNonAlphanumeric;
+        param.target1OcrParam.strCompMethod = e_ExactEqual;
+        param.target1OcrParam.strPreprocessMethod = e_removeNonAlphanumeric;
+
         param.target2 = null;   //. must null
         param.tryScrollCnt = 5;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
@@ -332,7 +340,8 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         }
 
         //. 2, click it.
-        Point ptCenter = new Point(colorBarParam.fixedVal, (retSegments.get(0).x + retSegments.get(0).y) / 2);
+        Point ptCenterBase = new Point(colorBarParam.fixedVal, (retSegments.get(0).x + retSegments.get(0).y) / 2);
+        Point ptCenter = JUtilFunctions.getOrigPointFromBasePoint(ptCenterBase);
         JUserActions.dispatchTap(ptCenter.x,  ptCenter.y );
         JUtilFunctions.delay_duration(100);
         JUserActions.deleteContentofInput(8);
@@ -346,7 +355,8 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
         JUtilFunctions.takeScreenshot();
         Rect rcAnalyseBase = new Rect(100, 750, 250, 110 );
-        strRet = JUtilFunctions.findText("Đat cuoc", rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
+        JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
+        strRet = JUtilFunctions.findText("Đat cuoc", 0, rcAnalyseBase, result_rects, textDetParam);
         if (strRet.equals("success")) {
             Point ptCenterBetBtn = JUtilFunctions.getCenterPoint(result_rects.get(0));
             //pgh JUserActions.dispatchTap(ptCenterBetBtn.x,  ptCenterBetBtn.y );

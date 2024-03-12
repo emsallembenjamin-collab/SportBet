@@ -1,7 +1,9 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
 import static com.itau.sportsbet.Config.NeighborCond2Targets.e_FarHorizNeighborCond;
 import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
+import static com.itau.sportsbet.Config.OcrPattern.e_DigitOnly;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
@@ -89,7 +91,8 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         JUtilFunctions.takeScreenshot();
 
         Rect rcAnalyseBase = new Rect(400,180 ,140, 160);
-        strRet = JUtilFunctions.findText("Yeu thich", rcAnalyseBase, fResizeRate, result_rects, e_removeSpace, e_NormalTxtDet);
+        JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
+        strRet = JUtilFunctions.findText("Yeu thich", 0, rcAnalyseBase, result_rects, textDetParam);
         if (strRet.equals("success") == false)
             return strRet;
 
@@ -139,12 +142,13 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
         param.sectionTarget = loadTask.league_name;
+        param.secTargetIntOcrParam = 3;
+
         param.target1 = loadTask.team1;
-        param.strCompMethod1 = e_ExactEqual;
-        param.strPreprocessMethod1 = e_removeSpace;
+        param.target1OcrParam.strCompMethod = e_ExactEqual;
         param.target2 = loadTask.team2;
-        param.strCompMethod2 = e_ExactEqual;
-        param.strPreprocessMethod2 = e_removeSpace;
+        param.target2OcrParam.strCompMethod = e_ExactEqual;
+
         param.tryScrollCnt = 30;
         param.nAnalyseWidth = 200;
         param.neighborCond2Targets = e_UpDownDenseNeighborCond; //. Up/ down layout...
@@ -193,11 +197,12 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
         param.sectionTarget = loadTask.betTypeCategory;
         param.target1 = loadTask.betTarget;
-        param.strCompMethod1 = e_ExactEqual;
-        param.strPreprocessMethod1 = e_removeSpace;
+        param.target1OcrParam.strCompMethod = e_ExactEqual;
         param.target2 = loadTask.betMark;
-        param.strCompMethod2 = e_ExactEqual;
-        param.strPreprocessMethod2 = e_removeNonAlphanumeric;
+        param.target2OcrParam.ocrPattern = e_DigitOnly;
+        param.target2OcrParam.strCompMethod = e_ExactEqual;
+        param.target2OcrParam.bNeedMoreContrast = true;
+
         param.tryScrollCnt = 3;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
         param.neighborCond2Targets = e_FarHorizNeighborCond; //. Up/ down layout...
@@ -274,7 +279,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
                 // ptBetNowBnt_Center = JUtilFunctions.getCenterPoint(result_rects.get(0));
                 Point ptTmp = retSegments5.get(0);
-                ptBetNowBnt_Center = new Point(param.fixedVal, (ptTmp.x + ptTmp.y) / 2);
+                ptBetNowBnt_Center = JUtilFunctions.getOrigPointFromBasePoint(new Point(param.fixedVal, (ptTmp.x + ptTmp.y) / 2));
 
                 param.targetUpColor = new Point3(255,255,255);
                 param.targetDownColor = new Point3(255,255,255);
@@ -302,8 +307,8 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
                     if (retSegments2.size() == 1 && retSegments3.size() == 1){
 
-                        int nY1 = (int)retSegments2.get(0).y;
-                        int nY2 = (int)(retSegments3.get(0).x - 10 / Config.resizeYRatio);
+                        int nY1 = (int)(retSegments2.get(0).y / Config.resizeYRatio);
+                        int nY2 = (int)((retSegments3.get(0).x - 10) / Config.resizeYRatio);
                         int nMidY = (nY1 + nY2) / 2;
                         int nMidY1 = (nMidY + nY1) / 2;
                         int nMidY2 = (nMidY + nY2) / 2;

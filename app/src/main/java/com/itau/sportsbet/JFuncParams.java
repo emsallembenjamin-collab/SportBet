@@ -2,6 +2,7 @@ package com.itau.sportsbet;
 
 
 import static com.itau.sportsbet.Config.StrCompMethod.e_PermitIncluding;
+import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
 
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
@@ -20,8 +21,10 @@ class JFuncParams_ColorBar {
 };
 
 class JFuncParams_FindSectionIncluding2Targets {
-    public String sectionTarget = null;
-    public Config.StrCompMethod eSecTargetComMethod = e_PermitIncluding;
+
+    public String   sectionTarget = null;
+    public int      secTargetIntOcrParam = 0;
+
     //. 2024-3-9
     //. for find League section.
     //. in some case (SABA_Gr)... league and bet body's color is same...
@@ -29,11 +32,9 @@ class JFuncParams_FindSectionIncluding2Targets {
     int    secWidthforUsingBorder = 0;
 
     public String target1 = null;
-    public Config.StrCompMethod  strCompMethod1;
-    public Config.StrPreprocessMethod  strPreprocessMethod1;
+    public JParamsForOcr target1OcrParam = new JParamsForOcr();
     public String target2 = null;
-    public Config.StrCompMethod  strCompMethod2;
-    public Config.StrPreprocessMethod  strPreprocessMethod2;
+    public JParamsForOcr target2OcrParam = new JParamsForOcr();
     public int tryScrollCnt = 0;
     public int nAnalyseWidth = 0;
 
@@ -46,6 +47,11 @@ class JFuncParams_FindSectionIncluding2Targets {
     Point3  ptBetPannelBackDownColor = null;
     Rect    rcDecideforCollapseCond = null;
     Point   ptPosClickforExpanding = null;
+    boolean bScrollPosChanged = false;
+
+    public JFuncParams_FindSectionIncluding2Targets(){
+
+    }
 
 };
 

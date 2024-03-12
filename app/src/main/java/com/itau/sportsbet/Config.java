@@ -45,6 +45,7 @@ public class Config {
 		e_removeSpace,	// 0
 		e_removeNonLetters,
 		e_removeNonAlphanumeric,
+		e_caseNumberic,
 		e_noneProc;
 
 		public static StrPreprocessMethod fromInteger(int x) {
@@ -56,6 +57,8 @@ public class Config {
 				case 2:
 					return e_removeNonAlphanumeric;
 				case 3:
+					return e_caseNumberic;
+				case 4:
 					return e_noneProc;
 			}
 			return null;
@@ -69,12 +72,39 @@ public class Config {
 					return 1;
 				case e_removeNonAlphanumeric:
 					return 2;
-				case e_noneProc:
+				case e_caseNumberic:
 					return 3;
+				case e_noneProc:
+					return 4;
 			}
 			return -1;
 		}
 
+	};
+
+	enum OcrPattern {
+		e_NormalPattern,	// 0
+		e_DigitOnly;
+
+		public static OcrPattern fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_NormalPattern;
+				case 1:
+					return e_DigitOnly;
+			}
+			return null;
+		}
+
+		public static int toInteger(OcrPattern eType) {
+			switch(eType) {
+				case e_NormalPattern:
+					return 0;
+				case e_DigitOnly:
+					return 1;
+			}
+			return -1;
+		}
 	};
 
 	enum TextDetMode {
@@ -101,6 +131,33 @@ public class Config {
 			return -1;
 		}
 	};
+
+	enum IgnorePartMode {
+		e_NormalIgnore,	// 0
+		e_IgnoreMode1;
+
+		public static IgnorePartMode fromInteger(int x) {
+			switch(x) {
+				case 0:
+					return e_NormalIgnore;
+				case 1:
+					return e_IgnoreMode1;
+			}
+			return null;
+		}
+
+		public static int toInteger(IgnorePartMode eType) {
+			switch(eType) {
+				case e_NormalIgnore:
+					return 0;
+				case e_IgnoreMode1:
+					return 1;
+			}
+			return -1;
+		}
+	};
+
+
 
 	enum DoConfirmMode {
 		e_Before,			// 0
@@ -191,10 +248,10 @@ public class Config {
 
 	public static int bet_item_height = 85;
 	public static String input_unit = "K VND";
-	public static String bet_btn = "Đat cuoc";
+	public static String bet_btn = "Đặt cược";
 	public static String sports_viet = "Thể thao";
 
-	public static float tesseractDetaultCharHeight = 50.0f;
+	//pgh public static float tesseractDetaultCharHeight = 70.0f;
 	public static int max_userid_password_len = 16;
 
 	public static String betType_Handicap = "Keo chap";

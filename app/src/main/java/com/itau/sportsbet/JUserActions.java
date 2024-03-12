@@ -70,7 +70,7 @@ public class JUserActions {
     }
     public static void scrollToRight(Point p, int w){
         Point p2 = new Point(p.x + w, p.y);
-        touchEventLong(p, p2, 700);
+        touchEventLong(p, p2, 1100);
     }
     public static void touchEvent(Point p1, Point p2){
         try {
@@ -99,7 +99,7 @@ public class JUserActions {
         }
     }
     public static void touchEventLong(Point p1, Point p2){
-        touchEventLong(p1, p2, 1500);
+        touchEventLong(p1, p2, 1000);
     }
 
     public static void dispatchTap(double x, double y) {

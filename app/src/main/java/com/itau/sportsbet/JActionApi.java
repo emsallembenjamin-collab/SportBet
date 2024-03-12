@@ -3,6 +3,7 @@ package com.itau.sportsbet;
 
 import static android.view.KeyEvent.KEYCODE_BACK;
 import static android.view.KeyEvent.KEYCODE_DEL;
+import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
 import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
 
@@ -146,7 +147,7 @@ class JAction_Do_Ocr extends JAction{
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_NormalTxtDet);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
         if (nTextRegionCnt > 0){
             float fResizeRate = digit_param_list.get(4).floatValue();
 
@@ -158,8 +159,7 @@ class JAction_Do_Ocr extends JAction{
                 JUtilFunctions.changeToOrigRectFromBaseRect(rc);
             }
 
-            result_string = JUtilFunctions.find_bestMatched_rectList_fromOcr(ocrAreaMat, rcTexts, fResizeRate,
-                    result_rects, string_param_list, e_removeSpace);
+            result_string = JUtilFunctions.find_bestMatched_rectList_fromOcr(ocrAreaMat, rcTexts, result_rects, string_param_list);
             //. must do offset operation.
             if (result_string.equals("success")){
                 JUtilFunctions.offsetRectList(result_rects, rcForOcr.x, rcForOcr.y);
@@ -650,7 +650,7 @@ class JAction_Do_Input_VerifiCode extends JAction{
         Mat imageForRecog = JUtilFunctions.screenshot.submat(rcForImage);
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(imageForRecog, rcTexts, e_NormalTxtDet);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(imageForRecog, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
         if (nTextRegionCnt == 0){
             result_string = "fail Operation: " + name;
             executor.last_result_string = result_string;
@@ -658,17 +658,15 @@ class JAction_Do_Input_VerifiCode extends JAction{
         }
         //. I believe our ocr and text detector...
         //. I use first rect.
-        float fResizeRate = 1.0f;
+        float fResizeRate = 2.0f;
         Rect rcTarget = rcTexts.get(0);
         Rect rcOriginal = JUtilFunctions.getOrigRectFromBaseRect(rcForImage);
         Rect rcForOcr = JUtilFunctions.getOrigRectFromBaseRect(rcTarget);
         JUtilFunctions.offsetRect(rcForOcr, rcOriginal.x, rcOriginal.y);
 
-        String ocrStr = JUtilFunctions.readStringbyOcrfromFullImage(JUtilFunctions.originScreenShot, rcForOcr);
-
+        String ocrStr = JUtilFunctions.readStringbyOcrfromFullImage(JUtilFunctions.originScreenShot, rcForOcr, fResizeRate);
         //. input serial text.
         JUserActions.dispatchKeyPress(ocrStr);
-
         result_string = "success";
         executor.last_result_string = "success do_input_verifiCode: " + name;
 
@@ -721,7 +719,7 @@ class JAction_FindClose_Ad extends JAction{
         boolean bFindAd = false;
         JUtilFunctions.takeScreenshot();
         Mat workMat = JUtilFunctions.screenshot.submat(rcAnalyse);
-        Mat detResult = JUtilFunctions.detectCircles(workMat, thresBorder, thresCircle, minRadius, maxRadius);
+        Mat detResult = JUtilFunctions.detectCircles(workMat, rcAnalyse, thresBorder, thresCircle, minRadius, maxRadius);
 
         int findCircleCnt = detResult.cols();
         if (findCircleCnt == 1){

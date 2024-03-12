@@ -8,7 +8,6 @@ abstract public class JBetAction {
 
     public JLoadTask loadTask = null;
     ArrayList<Rect> result_rects = new ArrayList<Rect>();
-    float fResizeRate = 1.0f;
 
     //. Abstract method
     abstract String run();

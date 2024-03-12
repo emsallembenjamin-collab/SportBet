@@ -80,6 +80,8 @@ action_scenario 화일의 전체 구조는 다음과 같다.
  	 $category == 0 => E-SPORTS일때에는,,,
  	 $category == 1 => K-SPORTS일때에는,,,
  	 이 경우에는 validator_param_list의 첫 항목으로 "$category"를 준다.
+ 	 다음과 같이 될것이다.
+ 	 ex: "validator_param_list"  : ["$category",      "ocr", "have", "Giải đấu", "30","480","180","760"  "ocr", "have", "Giải đấu", "30","480","180","760"   ],
 
 
 

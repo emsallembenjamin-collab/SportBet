@@ -1,19 +1,26 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
 import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
+
+import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_NONE;
+import static org.opencv.imgproc.Imgproc.RETR_LIST;
 
 import android.os.SystemClock;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Rect;
+import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
+import java.util.List;
 
 //.*=================================================================
 //.class: JActionValidator
@@ -59,6 +66,10 @@ public class JActionValidator {
                         retValidator = new JActionValidator_Ocr(action);
                     }
                     break;
+                    case "contour_det": {
+                        retValidator = new JActionValidator_ContourDet(action);
+                    }
+                    break;
                     case "$category": {
                         //. 2024-3-9
                         int nIters = MyAccessibilityService.mainService.loadTask.category;  //. first 0.
@@ -71,7 +82,7 @@ public class JActionValidator {
                                 }
                                 break;
                                 case "line_det": {
-                                    nSkipCnt += 3;
+                                    nSkipCnt += 7;
                                 }
                                 break;
                                 case "colorbar_det": {
@@ -79,6 +90,10 @@ public class JActionValidator {
                                 }
                                 break;
                                 case "ocr": {
+                                    nSkipCnt += 7;
+                                }
+                                break;
+                                case "contour_det": {
                                     nSkipCnt += 7;
                                 }
                                 break;
@@ -203,13 +218,14 @@ class JActionValidator_ColorPx extends JActionValidator{
 //.*=================================================================
 //.class: JActionValidator_LineDet
 //.desc: detect lines, and decide using it's count...
-//.      ex: [\"line_det\", \"great\", \"10\"]"
-//.         param Cnt = 3;
+//.      ex: [\"line_det\", \"great\", \"10\",  \"0\", \"100\",\"300\",\"500\"]"
+//.         param Cnt = 7;
 class JActionValidator_LineDet extends JActionValidator {
 
     //. for line det.
     public boolean bGreatCond = false;
     public int nLineDetThres = 0;
+    public Rect rcForAnalyse = null;
 
     JActionValidator_LineDet(JAction action){
         super(action);
@@ -220,12 +236,18 @@ class JActionValidator_LineDet extends JActionValidator {
 
         int elementCnt = jsonArray.length();
         int nRemainCnt = elementCnt - startIdxforJsonStringArray;
-        if (nRemainCnt >= 3){
+        if (nRemainCnt >= 7){
             String strNeg = jsonArray.getString(startIdxforJsonStringArray + 1);
             if (strNeg.equals("great")){
                 bGreatCond = true;
             }
             nLineDetThres = jsonArray.getInt(startIdxforJsonStringArray + 2);
+
+            rcForAnalyse = new Rect(jsonArray.getInt(startIdxforJsonStringArray + 3), jsonArray.getInt(startIdxforJsonStringArray + 4),
+                    jsonArray.getInt(startIdxforJsonStringArray + 5),jsonArray.getInt(startIdxforJsonStringArray + 6));
+            rcForAnalyse.width = rcForAnalyse.width - rcForAnalyse.x;
+            rcForAnalyse.height = rcForAnalyse.height - rcForAnalyse.y;
+
             bRet = true;
         }
 
@@ -236,7 +258,9 @@ class JActionValidator_LineDet extends JActionValidator {
         boolean bCheck = false;
 
         JUtilFunctions.takeScreenshot();
-        Mat lines = JUtilFunctions.detectLines(JUtilFunctions.screenshot, 30, 30, 30, 1);
+        Mat matWork = JUtilFunctions.screenshot.submat(rcForAnalyse);
+
+        Mat lines = JUtilFunctions.detectLines(matWork, 30, 30, 30, 1);
         int nLineCnt = lines.rows();
         if (bGreatCond){
             bCheck = (nLineCnt >= nLineDetThres);
@@ -389,7 +413,8 @@ class JActionValidator_Ocr extends JActionValidator {
 
         JUtilFunctions.takeScreenshot();
 
-        String strRet = JUtilFunctions.findText(targetStr, rcForAnalyse, 1.0f, action.result_rects, e_removeSpace, e_NormalTxtDet);
+        JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
+        String strRet = JUtilFunctions.findText(targetStr, 0, rcForAnalyse, action.result_rects, textDetParam);
         if (strRet.equals("success")){
             if (bHaveCond){
                 bCheck = true;
@@ -399,6 +424,66 @@ class JActionValidator_Ocr extends JActionValidator {
             if (!bHaveCond){
                 bCheck = true;
             }
+        }
+
+        return bCheck;
+    }
+};
+
+
+//.*=================================================================
+//.class: JActionValidator_ContourDet
+//.desc: detect Labels (Contours), and decide using it's count...
+//.      ex: [\"contour_det\", \"great\", \"10\",  \"0\", \"100\",\"300\",\"500\"]"
+//.         param Cnt = 7;
+class JActionValidator_ContourDet extends JActionValidator {
+
+    //. for line det.
+    public boolean bGreatCond = false;
+    public int nContourDetThres = 0;
+    public Rect rcForAnalyse = null;
+
+    JActionValidator_ContourDet(JAction action){
+        super(action);
+    }
+
+    public boolean build(JSONArray jsonArray) throws JSONException {
+        boolean bRet = false;
+
+        int elementCnt = jsonArray.length();
+        int nRemainCnt = elementCnt - startIdxforJsonStringArray;
+        if (nRemainCnt >= 7){
+            String strNeg = jsonArray.getString(startIdxforJsonStringArray + 1);
+            if (strNeg.equals("great")){
+                bGreatCond = true;
+            }
+            nContourDetThres = jsonArray.getInt(startIdxforJsonStringArray + 2);
+
+            rcForAnalyse = new Rect(jsonArray.getInt(startIdxforJsonStringArray + 3), jsonArray.getInt(startIdxforJsonStringArray + 4),
+                    jsonArray.getInt(startIdxforJsonStringArray + 5),jsonArray.getInt(startIdxforJsonStringArray + 6));
+            rcForAnalyse.width = rcForAnalyse.width - rcForAnalyse.x;
+            rcForAnalyse.height = rcForAnalyse.height - rcForAnalyse.y;
+
+            bRet = true;
+        }
+
+        return bRet;
+    }
+
+    public boolean check_forCond() {
+        boolean bCheck = false;
+
+        JUtilFunctions.takeScreenshot();
+        Mat matWork = JUtilFunctions.screenshot.submat(rcForAnalyse);
+
+        List<MatOfPoint> contours = JUtilFunctions.detectContours(matWork);
+        int nSizeCont = (int)contours.size();
+
+        if (bGreatCond){
+            bCheck = (nSizeCont >= nContourDetThres);
+        }
+        else{
+            bCheck = (nSizeCont < nContourDetThres);
         }
 
         return bCheck;

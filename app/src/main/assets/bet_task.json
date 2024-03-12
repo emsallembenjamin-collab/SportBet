@@ -11,14 +11,14 @@
   "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "England Championship",
-  "progress_date"		      : "3 6",
-  "team1"				          : "Watford",
-  "team2"				          : "Swansea",
+  "league_name"			      : "CUP C2 CHAU AU",
+  "progress_date"		      : "3 14",
+  "team1"				          : "Slavia Praha",
+  "team2"				          : "AC Milan",
   "betTarget"			  	     : "Xiu",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			        : "2.5-3",
+  "betMark"			        : "3",
   "betAmount"			      : "20"
 
 }
