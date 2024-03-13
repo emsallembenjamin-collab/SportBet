@@ -133,7 +133,6 @@ public class JLoadTask {
 
     public boolean parse_bet_task(String jsonString){
         boolean bRet = false;
-
         try {
             // Parse JSON string
             JSONObject jsonObject = new JSONObject(jsonString);
@@ -142,9 +141,7 @@ public class JLoadTask {
             category = jsonObject.getInt("category");
             sports_type = jsonObject.getString("sports_type");
             country_name = jsonObject.getString("country_name");
-            country_vie_name = jsonObject.getString("country_vie_name");
             league_name = jsonObject.getString("league_name");
-            league_vie_name = jsonObject.getString("league_vie_name");
             progress_date = jsonObject.getString("progress_date");
             team1 = jsonObject.getString("team1");
             team2 = jsonObject.getString("team2");
@@ -157,7 +154,6 @@ public class JLoadTask {
         } catch (JSONException e) {
             e.printStackTrace();
         }
-
         return bRet;
     }
 
