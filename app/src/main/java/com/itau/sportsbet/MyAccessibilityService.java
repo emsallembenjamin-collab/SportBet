@@ -2,6 +2,7 @@ package com.itau.sportsbet;
 
 
 import android.accessibilityservice.AccessibilityService;
+import android.accessibilityservice.AccessibilityServiceInfo;
 import android.content.ActivityNotFoundException;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -11,13 +12,18 @@ import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
+import android.view.View;
 import android.view.accessibility.AccessibilityEvent;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.webkit.WebView;
+import android.webkit.WebViewClient;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.opencv.core.Size;
 
 public class MyAccessibilityService extends AccessibilityService {
@@ -28,6 +34,10 @@ public class MyAccessibilityService extends AccessibilityService {
     public JLoadTask loadTask = new JLoadTask();
     public static MyAccessibilityService mainService;
 
+    private static final String TAG = "MyAccessibilityService";
+
+    public boolean  bPageLoadFlag = false;
+
 
 
     @Override
@@ -36,20 +46,24 @@ public class MyAccessibilityService extends AccessibilityService {
 	    // aren't passed to this service.
         // Set up the initial delay and interval
 
+        Log.d("PPPPP", "onServiceConnected occurred.");
+        // System.out.println("onServiceConnected");
+
         super.onServiceConnected();
         MyAccessibilityService.mainService = this;
 
-        //.for some init.
+        AccessibilityServiceInfo info = new AccessibilityServiceInfo();
+        // info.eventTypes = AccessibilityEvent.TYPE_NOTIFICATION_STATE_CHANGED | AccessibilityEvent.TYPE_VIEW_TEXT_CHANGED;
+        info.eventTypes=AccessibilityEvent.TYPES_ALL_MASK;
+        info.feedbackType = AccessibilityServiceInfo.FEEDBACK_ALL_MASK;
+        info.notificationTimeout = 100;
+        info.packageNames = null;
+        setServiceInfo(info);
+
         doInit();
-
-        long initialDelay = 1000; // milliseconds
-        long interval = 2000; // milliseconds
-
-        // Create a runnable to be executed periodically
         runnable = new JEngine(loadTask);
 
-        // Schedule the initial execution of the runnable
-        handler.postDelayed(runnable, initialDelay);
+
     }
 
     // Override methods for handling accessibility events
@@ -57,16 +71,56 @@ public class MyAccessibilityService extends AccessibilityService {
     public void onAccessibilityEvent(AccessibilityEvent event) {
         // Handle accessibility events here
         // For demonstration purposes, we'll generate a touch event when a specific package is in the foreground
-        // if ("com.example.targetapp".equals(event.getPackageName())) { }
+        // Handle accessibility events here
+        if (event == null) {
+            return;
+        }
 
+        if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED) {
+
+            //Log.d("PPP AccessibilityService", "Event: " + event.toString());
+            String packageName = event.getPackageName() != null ? event.getPackageName().toString() : "";
+            // Check if the event is from Chrome
+            boolean isFromChrome = "com.android.chrome".equals(packageName) ||
+                    "com.chrome.beta".equals(packageName) ||
+                    "com.chrome.dev".equals(packageName) ||
+                    "com.chrome.canary".equals(packageName);
+
+            if (isFromChrome) {
+                String className = event.getClassName() != null ? event.getClassName().toString() : "";
+                if (className.equals("android.widget.ProgressBar")) {
+                    int nCurrentVal = event.getCurrentItemIndex();
+                    // Log.d("PPP AccessibilityService", "ProgressBar Event: " + nCurrentVal);
+
+                    if (nCurrentVal == 100) {
+                        Log.d("PPP AccessibilityService", "Event: All Done");
+                        bPageLoadFlag = true;
+                    }
+                }
+            }
+        }
     }
+
     @Override
     public void onInterrupt() {
         // This method is called when the service is interrupted
 
         // Remove the runnable when the activity is destroyed to prevent memory leaks
         Log.d("SportsBet Service", "onInterrupt!");
+        // handler.removeCallbacks(runnable);
+    }
+
+    @Override
+    public void onDestroy() {
+        int aa = 100;
+        Log.d("SportsBet Service", "onDestroy!");
         handler.removeCallbacks(runnable);
+    }
+
+    @Override
+    public boolean onUnbind(Intent intent){
+        Log.d("SportsBet Service", "onUnbind!");
+        return false;
     }
 
 
@@ -108,24 +162,6 @@ public class MyAccessibilityService extends AccessibilityService {
         Config.resizeXRatio = (float)Config.IMAGE_WIDTH / Config.Screen_Width;
         Config.resizeYRatio = (float)Config.IMAGE_HEIGHT / Config.Screen_Height;
         return scrSize;
-    }
-
-    //.*==========================================================================
-    //. paste text...
-    private void pasteTextFromClipboard(AccessibilityNodeInfo nodeInfo) {
-        ClipboardManager clipboard = (ClipboardManager) getSystemService(Context.CLIPBOARD_SERVICE);
-        if (clipboard != null && clipboard.hasPrimaryClip()) {
-            ClipData clipData = clipboard.getPrimaryClip();
-            if (clipData != null && clipData.getItemCount() > 0) {
-                ClipData.Item item = clipData.getItemAt(0);
-                if (item != null && item.getText() != null) {
-                    String textToPaste = item.getText().toString();
-                    Bundle arguments = new Bundle();
-                    arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, textToPaste);
-                    nodeInfo.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-                }
-            }
-        }
     }
 
 

@@ -4,14 +4,14 @@
     {
       "name"                  : "starting go_website_",
       "type"                  : "go_website",
-      "string_param_list"     : ["https://oxbet.in"],
+      "string_param_list"     : ["https://nn88111.com"],
       "digit_param_list"      : [],
-      "time_limit"            : 30000,
-      "delay"                 : 5000,
+      "time_limit"            : 50000,
+      "delay"                 : 1000,
       "waitPageload"          : false,
-      "validator_param_list"  : ["ocr", "have", "Menu","0",  "890","100","950"],
-      "confirmproc_param_list"  : [],
-      
+      "validator_param_list"  : ["ocr", "have", "Tai Ngay", "400","100","530","200"],
+      "confirmproc_param_list"  : ["find and close ad modal", "2"],
+
       "branch": {
         "success" : ["find login button"],
         "fail"    : []
@@ -21,8 +21,8 @@
     {
       "name"                  : "find login button",
       "type"                  : "do_ocr",
-      "string_param_list"     : ["ĐĂNG NHẬP", "0"],
-      "digit_param_list"      : [0.3,0.1, 0.75, 0.25, 2],
+      "string_param_list"     : ["Đ.NHẬP", "0"],
+      "digit_param_list"      : [0, 400, 160, 530, 2],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -34,6 +34,7 @@
       }
     },
 
+
     {
       "name"                  : "click login button",
       "type"                  : "do_click",
@@ -43,7 +44,7 @@
       "delay"                 : 2000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
+      "confirmproc_param_list"  :[],
       "branch": {
         "success" : ["find user_id and password input ctrl"],
         "fail"    : []
@@ -54,7 +55,7 @@
       "name"                  : "find user_id and password input ctrl",
       "type"                  : "do_find_color_bar",
       "string_param_list"     : [],
-      "digit_param_list"      : [0.67,0, 0.67, 1, 29, 27, 24, 29, 27, 24, 20 ],
+      "digit_param_list"      : [400,210, 400, 660, 34, 103, 75, 34, 103, 75, 20 ],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -70,7 +71,7 @@
       "name"                  : "input user_id and password",
       "type"                  : "do_input_user_id_password",
       "string_param_list"     : [],
-      "digit_param_list"      : [],
+      "digit_param_list"      : [1, 3],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -86,39 +87,44 @@
       "name"                  : "find login now button",
       "type"                  : "do_find_color_bar",
       "string_param_list"     : [],
-      "digit_param_list"      : [0.18,0.5, 0.18, 0.85, 230, 212, 170, 116, 88, 18, 20 ],
+      "digit_param_list"      : [400,500, 400, 720, 250, 207, 32, 250, 207, 32, 20 ],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
       "validator_param_list"  : [],
       "confirmproc_param_list"  : [],
       "branch": {
-        "success" : ["click enter site button_"],
+        "success" : ["click enter site button"],
         "fail"    : ["the end process", "fail"]
       }
     },
 
     {
-      "name"                  : "click enter site button_",
+      "name"                  : "click enter site button",
       "type"                  : "do_click",
       "string_param_list"     : [],
       "digit_param_list"      : [1],
-      "time_limit"            : 20000,
-      "delay"                 : 1000,
+      "time_limit"            : 0,
+      "delay"                 : 3000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
+      "confirmproc_param_list"  : ["find and close ad modal", "2"],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : []
       }
     },
 
+
+
+
+
+
     {
       "name"                  : "find already logined",
       "type"                  : "do_ocr",
       "string_param_list"     : ["$user_id", "2"],
-      "digit_param_list"      : [0.5, 0.1, 1, 0.25, 2],
+      "digit_param_list"      : [0, 400, 160, 530, 2],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -126,23 +132,7 @@
       "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["goto sports channel"],
-        "fail"    : ["find prev logined user_id region"]
-      }
-    },
-
-    {
-      "name"                  : "find prev logined user_id region",
-      "type"                  : "do_find_color_bar",
-      "string_param_list"     : [],
-      "digit_param_list"      : [0.67,0, 0.67, 0.25, 60, 60, 60, 0, 0, 0, 50 ],
-      "time_limit"            : 0,
-      "delay"                 : 100,
-      "waitPageload"          : false,
-      "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
-      "branch": {
-        "success" : ["click user_id region"],
-        "fail"    : ["the end process", "fail"]
+        "fail"    : ["click user_id region"]
       }
     },
 
@@ -150,70 +140,22 @@
       "name"                  : "click user_id region",
       "type"                  : "do_click",
       "string_param_list"     : [],
-      "digit_param_list"      : [1,0,100,0],
+      "digit_param_list"      : [485, 905],
       "time_limit"            : 0,
-      "delay"                 : 2000,
-      "waitPageload"          : false,
-      "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
-      "branch": {
-        "success" : ["find logout menu button"],
-        "fail"    : []
-      }
-    },
-
-    {
-      "name"                  : "find logout menu button",
-      "type"                  : "do_ocr",
-      "string_param_list"     : ["ĐĂNG XUẤT", "0"],
-      "digit_param_list"      : [0, 0.65, 0.5, 0.85, 2],
-      "time_limit"            : 0,
-      "delay"                 : 100,
-      "waitPageload"          : false,
-      "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
-      "branch": {
-        "success" : ["click logout menu button_"],
-        "fail"    : ["the end process", "fail"]
-      }
-    },
-
-    {
-      "name"                  : "click logout menu button_",
-      "type"                  : "do_click",
-      "string_param_list"     : [],
-      "digit_param_list"      : [1],
-      "time_limit"            : 20000,
       "delay"                 : 1000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
+      "confirmproc_param_list"  : ["find refresh modal", "1"],
       "branch": {
-        "success" : ["find login button"],
+        "success" : ["scroll to bottom"],
         "fail"    : []
       }
     },
 
     {
-      "name"                  : "goto sports channel",
-      "type"                  : "do_click",
-      "string_param_list"     : [],
-      "digit_param_list"      : [165, 950],
-      "time_limit"            : 0,
-      "delay"                 : 3000,
-      "waitPageload"          : false,
-      "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
-      "branch": {
-        "success" : ["find sports category"],
-        "fail"    : []
-      }
-    },
-
-    {
-      "name"                  : "find sports category",
+      "name"                  : "scroll to bottom",
       "type"                  : "do_repeat_scroll",
-      "string_param_list"     : ["$category"],
+      "string_param_list"     : ["1"],
       "digit_param_list"      : [270, 820, 800],
       "time_limit"            : 0,
       "delay"                 : 1000,
@@ -221,21 +163,145 @@
       "validator_param_list"  : [],
       "confirmproc_param_list"  : [],
       "branch": {
-        "success" : ["goto real betting site_"],
+        "success" : ["click exit menu button"],
+        "fail"    : []
+      }
+    },
+
+  
+
+    {
+      "name"                  : "click exit menu button",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [270, 820],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["find sign out button"],
         "fail"    : []
       }
     },
 
     {
+      "name"                  : "find sign out button",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["Xac Nhan", "0"],
+      "digit_param_list"      : [50, 500, 270, 670, 2],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["click sign out button_"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+    {
+      "name"                  : "click sign out button_",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1],
+      "time_limit"            : 30000,
+      "delay"                 : 2000,
+      "waitPageload"          : false,
+      "validator_param_list"  : ["ocr", "have", "Tai Ngay", "400","100","530","200"],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["find login button"],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"                  : "goto sports channel",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["THAO", "0"],
+      "digit_param_list"      : [0, 580, 150, 860, 2],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["click sports channel button"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+
+
+    {
+      "name"                  : "click sports channel button",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1],
+      "time_limit"            : 0,
+      "delay"                 : 2000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["calc betting hall region for category"],
+        "fail"    : []
+      }
+    },
+
+    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "name"                  : "calc betting hall region for category",
+      "type"                  : "do_calc",
+      "string_param_list"     : ["rect_growth", "$category"],
+      "digit_param_list"      : [147,312,523, 463, 0, 315],
+      "time_limit"            : 0,
+      "delay"                 : 50,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  :[],
+      "branch": {
+        "success" : ["goto real betting site_"],
+        "fail"    : []
+      }
+    },
+
+    
+    {
       "name"                  : "goto real betting site_",
       "type"                  : "do_click",
       "string_param_list"     : [],
-      "digit_param_list"      : [0.5,0.5],
-      "time_limit"            : 30000,
-      "delay"                 : 3000,
+      "digit_param_list"      : [1],
+      "time_limit"            : 50000,
+      "delay"                 : 5000,
       "waitPageload"          : false,
-      "validator_param_list"  : ["$category", "ocr", "have", "Giải đấu", "30","480","180","760",    
-                                              "colorbar_det", "great", "1", "250","300","250","600",  "69","137","200", "69","137","200", "20" ],
+      "validator_param_list"  : ["ocr", "have", "Truc tiep", "30","280","180","430"],
       "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["the end process", "success"],
@@ -257,7 +323,58 @@
         "success" : [],
         "fail"    : []
       }
+    },
+
+
+    {
+      "name"                  : "find and close ad modal",
+      "type"                  : "find_close_ad",
+      "string_param_list"     : [],
+      "digit_param_list"      : [100, 50, 15,25, 255,255,255],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
+    },
+
+
+    {
+      "name"                  : "find refresh modal",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["Xac Nhan", "0"],
+      "digit_param_list"      : [270, 520, 480, 660, 2],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["click refresh button for site_"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"                  : "click refresh button for site_",
+      "type"                  : "do_click",
+      "string_param_list"     : [],
+      "digit_param_list"      : [1],
+      "time_limit"            : 30000,
+      "delay"                 : 3000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
     }
+
     
   ]
 }

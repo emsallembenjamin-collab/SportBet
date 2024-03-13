@@ -1,4 +1,5 @@
 <resources>
     <string name="app_name">SportsBet</string>
     <string name="accessibility_service_label">SportsBetSvc</string>
+    <string name="accessibility_service_description">SportsBetSvc</string>
 </resources>

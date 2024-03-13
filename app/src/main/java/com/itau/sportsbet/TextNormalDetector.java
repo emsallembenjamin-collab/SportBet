@@ -1,5 +1,7 @@
 package com.itau.sportsbet;
 
+import static com.itau.sportsbet.Config.IgnorePartMode.e_NormalIgnore;
+import static com.itau.sportsbet.Config.TextDetMode.e_HasMarkFront;
 import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_NONE;
 import static org.opencv.imgproc.Imgproc.RETR_LIST;
 
@@ -235,7 +237,7 @@ public class TextNormalDetector {
     public TextNormalDetector(Context context){
         this.context = context;
     }
-    void do_build_text_region(CTotalLabels total_labels, ArrayList<Rect> outRcArray, int nDetectMode){
+    void do_build_text_region(CTotalLabels total_labels, ArrayList<Rect> outRcArray, Config.TextDetMode nDetectMode){
         int nLineCnt = (int)total_labels.size();
         for (int i = 0; i < nLineCnt; i++)
         {
@@ -246,14 +248,14 @@ public class TextNormalDetector {
 
             //. 2024-2-27
             //. if nDetectMode == 1, in case of country name, there is image front of name
-            if (nLabelCnt >= 2 && nDetectMode == 1)
+            if (nLabelCnt >= 2 && nDetectMode == e_HasMarkFront)
             {
                 Rect rcTxt1 = pLineInfo.do_build(1);
                 outRcArray.add(rcTxt1);
             }
         }
     }
-    public  int do_detect(Mat _image, ArrayList<Rect> outRcArray, int nDetectMode){
+    public  int do_detect(Mat _image, ArrayList<Rect> outRcArray, Config.IgnorePartMode ignoreMode ,Config.TextDetMode nDetectMode){
         int nRet = 0;
         // do canny.
         Mat edges = new Mat();
@@ -339,7 +341,7 @@ public class TextNormalDetector {
                 break;
             }
             //. final check.
-            if (pInfo.isIgnore_after_merge())
+            if (ignoreMode == e_NormalIgnore && pInfo.isIgnore_after_merge())
             {
                 pInfo.m_bRemoved = true;
                 pOneLine = null;
@@ -359,6 +361,7 @@ public class TextNormalDetector {
         //. and do some decides...
         do_build_text_region(total_labels, outRcArray, nDetectMode);
 
+        /*
         //pgh. for test.
         //. draw rect into text bound.
         nSizeLabels = outRcArray.size();
@@ -368,6 +371,8 @@ public class TextNormalDetector {
             Imgproc.rectangle(_image, rect, new Scalar(255, 0, 0, 255), 1);
         }
         JUtilFunctions.SaveMatFile(_image, context );
+        */
+
 
         nRet = outRcArray.size();
         return nRet;

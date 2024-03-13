@@ -8,6 +8,8 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.view.KeyEvent;
@@ -68,7 +70,7 @@ public class JUserActions {
     }
     public static void scrollToRight(Point p, int w){
         Point p2 = new Point(p.x + w, p.y);
-        touchEventLong(p, p2, 700);
+        touchEventLong(p, p2, 1100);
     }
     public static void touchEvent(Point p1, Point p2){
         try {
@@ -97,7 +99,7 @@ public class JUserActions {
         }
     }
     public static void touchEventLong(Point p1, Point p2){
-        touchEventLong(p1, p2, 1500);
+        touchEventLong(p1, p2, 1000);
     }
 
     public static void dispatchTap(double x, double y) {
@@ -150,63 +152,24 @@ public class JUserActions {
         }
     }
 
-    public static boolean pasteTextFromClipboard(Context context) {
+    public static void copyTextToClipboardfromWorkThread(Context context, String text) {
 
-        boolean bRet = false;
+        Handler handler = new Handler(Looper.getMainLooper());
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                // Get the Clipboard Manager
+                ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
-        // Get reference to the ClipboardManager system service
-        ClipboardManager clipboardManager = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                // Create a ClipData object holding the text
+                ClipData clip = ClipData.newPlainText("label", text);
 
-        // Check if the clipboard has data
-        if (clipboardManager.hasPrimaryClip()) {
-            // Get the primary clip data item
-            ClipData.Item item = clipboardManager.getPrimaryClip().getItemAt(0);
-
-            // Get the text from the clip data item
-            CharSequence pasteData = item.getText();
-
-            // Get the root node info of the current window
-            AccessibilityNodeInfo rootNode = MyAccessibilityService.mainService.getRootInActiveWindow();
-            // Perform the paste action if the root node is not null
-            if (rootNode != null) {
-                // Find the currently focused text field and paste the text
-                AccessibilityNodeInfo focusedNode = findFocusedNode(rootNode);
-                if (focusedNode != null) {
-                    Bundle arguments = new Bundle();
-                    arguments.putCharSequence(AccessibilityNodeInfo.ACTION_ARGUMENT_SET_TEXT_CHARSEQUENCE, pasteData);
-                    focusedNode.performAction(AccessibilityNodeInfo.ACTION_SET_TEXT, arguments);
-
-                    bRet = true;
+                // Set the ClipData to the Clipboard
+                if (clipboard != null) {
+                    clipboard.setPrimaryClip(clip);
                 }
             }
-
-            // You can also perform any other operations with the text
-        } else {
-            // If the clipboard is empty, show a message to the user
-        }
-
-        return bRet;
-    }
-
-    // Method to find the currently focused text field
-    private static AccessibilityNodeInfo findFocusedNode(AccessibilityNodeInfo rootNode) {
-        // Traverse the accessibility tree to find the focused text field
-        if (rootNode == null) return null;
-
-        // Check if the node is a text field and focused
-        if (rootNode.isEditable() && rootNode.isFocused()) {
-            return rootNode;
-        }
-
-        // Recursively search through child nodes
-        for (int i = 0; i < rootNode.getChildCount(); i++) {
-            AccessibilityNodeInfo focusedNode = findFocusedNode(rootNode.getChild(i));
-            if (focusedNode != null) {
-                return focusedNode;
-            }
-        }
-
-        return null;
+        });
     }
 
 
@@ -265,6 +228,12 @@ public class JUserActions {
             return KeyEvent.class.getField("KEYCODE_" + ch).getInt(null);
         }catch(Exception e){
             return 0;
+        }
+    }
+
+    public static void deleteContentofInput(int len) {
+        for(int i = 0; i<len ; i++){
+            dispatchOneKeyPress(KeyEvent.KEYCODE_DEL);
         }
     }
 

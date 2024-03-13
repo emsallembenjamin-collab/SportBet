@@ -2,8 +2,18 @@ package com.itau.sportsbet;
 
 import static com.googlecode.tesseract.android.TessBaseAPI.OEM_LSTM_ONLY;
 import static com.googlecode.tesseract.android.TessBaseAPI.PageSegMode.PSM_SINGLE_BLOCK;
+import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_FarHorizNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_FarVerticalNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_Merge2TargetNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_TableTypeNeighborCond;
+import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
+import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
+import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
 
 import static org.opencv.imgcodecs.Imgcodecs.imwrite;
+import static org.opencv.imgproc.Imgproc.CHAIN_APPROX_NONE;
+import static org.opencv.imgproc.Imgproc.RETR_LIST;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -17,10 +27,13 @@ import android.util.Log;
 import com.googlecode.tesseract.android.ResultIterator;
 import com.googlecode.tesseract.android.TessBaseAPI;
 
+import org.json.JSONArray;
+import org.json.JSONException;
 import org.opencv.android.OpenCVLoader;
 import org.opencv.android.Utils;
 import org.opencv.core.Core;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfPoint;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
 import org.opencv.core.Rect;
@@ -35,10 +48,13 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.Normalizer;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Iterator;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class JUtilFunctions {
@@ -79,6 +95,45 @@ public class JUtilFunctions {
         bRet = true;
         return bRet;
     }
+
+    //.*======================================================================
+    //.func: disableSuperuserGranteMsg
+    //.desc:
+    //.
+    public static void disableSuperuserGranteMsg() {
+
+        try {
+            // Commands to be executed
+            String[] commands = {
+                    "sqlite3 /data/user_de/0/com.android.settings/databases/superuser.sqlite \"INSERT INTO settings (key, value) VALUES ('notification','0');\"",
+                    "sqlite3 /data/user_de/0/com.android.settings/databases/superuser.sqlite \"INSERT INTO settings (key, value) VALUES ('logging', 'false');\"",
+                    "sqlite3 /data/user_de/0/com.android.settings/databases/superuser.sqlite \"INSERT INTO settings (key, value) VALUES ('automatic_response', '1');\""
+            };
+
+            // Get the runtime
+            Runtime runtime = Runtime.getRuntime();
+
+            // Execute each command with root permissions
+            for (String command : commands) {
+                Process process = runtime.exec(new String[] { "su", "-c", command });
+
+                // Wait for the command to complete
+                int exitValue = process.waitFor();
+                if (exitValue == 0) {
+                    // Command was successful
+                    System.out.println("Command executed successfully: " + command);
+                } else {
+                    // Command failed
+                    System.out.println("Command execution failed: " + command);
+                }
+            }
+
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+
+    }
+
 
     //.*===========================================================================
     public static double min(double x, double y) {
@@ -130,6 +185,18 @@ public class JUtilFunctions {
 
        return rcOrig;
     }
+    public static Point getOrigPointFromBasePoint(Point ptBase){
+        Point ptOrig = new Point(ptBase.x / Config.resizeXRatio, ptBase.y / Config.resizeYRatio);
+        return ptOrig;
+    }
+
+    public static Point getTargetSectionfromBorderSection(Point borderSec, int secWidthforUsingBorder){
+        if (secWidthforUsingBorder > 0){
+            borderSec.x = borderSec.y;
+            borderSec.y = borderSec.x + secWidthforUsingBorder;
+        }
+        return borderSec;
+    }
 
     public static void changeToOrigRectFromBaseRect(Rect rcBase){
 
@@ -139,10 +206,106 @@ public class JUtilFunctions {
         rcBase.height = (int)(rcBase.height / Config.resizeYRatio);
     }
 
+    public static void offsetRectList(ArrayList<Rect> rcList, int offsetX, int offsetY){
+        int result_rect_cnt = rcList.size();
+        for (int i = 0; i < result_rect_cnt; i++){
+            Rect rc = rcList.get(i);
+            rc.x += offsetX;
+            rc.y += offsetY;
+        }
+    }
+
+    public static void offsetRect(Rect rcTarget, int offsetX, int offsetY){
+        rcTarget.x += offsetX;
+        rcTarget.y += offsetY;
+    }
+
+    //.*============================================================================
+    //.func: get today string.
+    //.desc: ex: "3 5"
+    public static String getTodayString(){
+        // Get the current date
+        Calendar currentDate = Calendar.getInstance();
+        // Define the formatter for the date string
+        SimpleDateFormat formatter = new SimpleDateFormat("M d");
+        // Format the current date to a string
+        String todayString = formatter.format(currentDate.getTime());
+        return todayString;
+    }
+
+    //.*============================================================================
+    //.func: getTomorrowString.
+    //.desc: ex: "3 5"
+    public static String getTomorrowString(){
+        // Get the current date
+        Calendar currentDate = Calendar.getInstance();
+        currentDate.add(Calendar.DAY_OF_MONTH, 1);
+        // Define the formatter for the date string
+        SimpleDateFormat formatter = new SimpleDateFormat("M d");
+        // Format the current date to a string
+        String tomorrowString = formatter.format(currentDate.getTime());
+        return tomorrowString;
+    }
+
+    //.*============================================================================
+    //.func: parseRectParam.
+    //.desc:
+    public static Rect parseRectParam(ArrayList<Double> param_list, int nStartIdx){
+        //. make screen shot.
+
+        int limitWidth = Config.IMAGE_WIDTH;
+        int limitHeight = Config.IMAGE_HEIGHT;
+
+        //. first. parsing rect info.
+        int x,y,right,bottom;
+        double dx,dy,dright,dbottom;
+
+        dx = param_list.get(nStartIdx).doubleValue();
+        dy = param_list.get(nStartIdx + 1).doubleValue();
+        dright = param_list.get(nStartIdx + 2).doubleValue();
+        dbottom = param_list.get(nStartIdx + 3).doubleValue();
+        if (dx < 1 && dy < 1 && dright <= 1 && dbottom <= 1){
+            x = (int)(limitWidth * dx);
+            y = (int)(limitHeight * dy);
+            right = (int)(limitWidth * dright);
+            bottom = (int)(limitHeight * dbottom);
+        }
+        else {
+            x = (int)(dx);
+            y = (int)(dy);
+            right = (int)(dright);
+            bottom = (int)(dbottom);
+        }
+
+        Rect rcForAnalyse = new Rect(x, y, right - x, bottom - y);
+        return rcForAnalyse;
+    }
+
+
     public static Point getOrigPointFromBasePoint(double x, double y){
         Point pt = new Point((x / Config.resizeXRatio), (y / Config.resizeYRatio));
         return pt;
     }
+
+    public static boolean checkValidation(String jsonString, int timeLimit, int delay){
+        boolean bTimeOver = false;
+        try {
+            JSONArray jsonArray = new JSONArray(jsonString);
+            JAction action = new JAction_Puseudo("puseudoAction", timeLimit, delay);
+            JActionValidator validator = JActionValidator.createObject(action, jsonArray);
+            validator.build(jsonArray);
+            bTimeOver = validator.check();
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+
+        return bTimeOver;
+    }
+
+
+
+
 
 
     //.*===============================================================================
@@ -220,17 +383,19 @@ public class JUtilFunctions {
         return pattern.matcher(normalized).replaceAll("");
     }
 
-    public static Rect ExtendRect(Rect srcRect , int offset, int limitCols, int limitRows){
+    public static Rect ExtendRect(Rect srcRect , int offset, int limitWidth, int limitHeight){
         Rect rcRet = new Rect(srcRect.x - offset,srcRect.y - offset,
                 srcRect.width + 2 * offset,srcRect.height + 2 * offset);
-        rcRet.x = Math.max(rcRet.x, 0);
-        rcRet.y = Math.max(rcRet.y, 0);
 
-        int right = Math.min(rcRet.x + rcRet.width, limitCols);
-        int bottom = Math.min(rcRet.y + rcRet.height, limitRows);
-        rcRet.width = right - rcRet.x;
-        rcRet.height = bottom - rcRet.y;
+        if (rcRet.x < 0)
+            rcRet.x = 0;
+        if (rcRet.y < 0)
+            rcRet.y = 0;
 
+        if (rcRet.x + rcRet.width >= limitWidth)
+            rcRet.width = limitWidth - rcRet.x - 1;
+        if (rcRet.y + rcRet.height >= limitHeight)
+            rcRet.height = limitHeight - rcRet.y - 1;
         return rcRet;
     }
 
@@ -436,33 +601,133 @@ public class JUtilFunctions {
         return pt;
     }
 
+    //.*=================================================================================
+    //.func: detectLines
+    //.desc:
+    //.
+    public static Mat detectLines(Mat image, int cannyThres1, int threshold, int minLineLength, int maxLineGap){
+
+        // Convert the image to grayscale
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
+
+        // Detect edges using the Canny edge detector
+        Mat edges = new Mat();
+        Imgproc.Canny(gray, edges, cannyThres1, cannyThres1 * 3);
+
+        // Apply Hough transform to detect line segments
+        Mat lines = new Mat();
+        Imgproc.HoughLinesP(edges, lines, 1, Math.PI / 180, threshold, minLineLength, maxLineGap);
+
+        return lines;
+    }
+
+    //.*=================================================================================
+    //.func: detectCircles
+    //.desc:
+    //.
+    public static Mat detectCircles(Mat image, Rect rcAnalyse, int thresBorder, int thresCircle, int minRadius, int maxRadius){
+
+        // Convert the image to grayscale
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
+
+        // Parameters for the Hough Circle Transform
+        Mat circles = new Mat();
+
+        // Hough Circle Transform
+        Imgproc.HoughCircles(gray, circles, Imgproc.HOUGH_GRADIENT, 1, gray.rows()/8, thresBorder, thresCircle, minRadius, maxRadius);
+
+        //. 2024-3-11
+        //. we must offset positions.
+        int findCircleCnt = circles.cols();
+        for (int i = 0; i < findCircleCnt; i++){
+            double[] params = circles.get(0, i);
+            params[0] += rcAnalyse.x;
+            params[1] += rcAnalyse.y;
+            circles.put(0, i, params);
+        }
+
+        return circles;
+    }
+
+    //.*=================================================================================
+    //.func: moreContrastImage.
+    //.desc: alpha : Try different values greater than 1 for higher contrast
+    //.
+    public static Mat moreContrastImage(Mat image, double alpha){
+
+        // Create a Mat to store the result
+        Mat highContrastImage = new Mat();
+/*
+        // Specify the alpha (contrast) and beta (brightness) values
+        double beta = 0; // Keep beta as 0 if only adjusting contrast
+        // Apply the contrast effect
+        image.convertTo(highContrastImage, -1, alpha, beta);
+
+ */
+        // Convert to grayscale
+        Mat gray = new Mat();
+        Imgproc.cvtColor(image, gray, Imgproc.COLOR_BGR2GRAY);
+
+        // Convert to binary using Otsu's threshold
+        Imgproc.threshold(gray, highContrastImage, 0.0, 255.0, Imgproc.THRESH_BINARY | Imgproc.THRESH_OTSU);
+
+        // Save or display the bi
+        return highContrastImage;
+    }
+
+
+
+    //.*=================================================================================
+    //.func: detectLines
+    //.desc:
+    //.
+    public static List<MatOfPoint> detectContours(Mat image){
+
+        // do canny...
+
+        Mat edges = new Mat();
+        double threshold1 = 30;
+        double threshold2 = 100;
+        int apertureSize = 3;
+        Imgproc.Canny(image, edges, threshold1, threshold2, apertureSize);
+
+        // Find contours in the edge image
+        List<MatOfPoint> contours = new ArrayList<MatOfPoint>();
+        Mat hierarchy = new Mat();
+        Imgproc.findContours(edges, contours, hierarchy, RETR_LIST, CHAIN_APPROX_NONE);
+
+        return contours;
+    }
+
+
+
 
     //.*=================================================================================
     //.func: findContinuousSegments
     //.desc:
     //.
-    public static ArrayList<Point> findContinuousSegments(Mat image,
-                                                           int fixedVal, int startVal, int endVal , boolean bVert,
-                                                          Point3 targetUpColor, Point3 targetDownColor, int nLimitLen) {
+    public static ArrayList<Point> findContinuousSegments(Mat image, JFuncParams_ColorBar param) {
         ArrayList<Point> continuousSegments = new ArrayList<Point>();
 
         int currentSegmentStart = -1;
 
         // Iterate through the vertical line
-        for (int v = startVal; v < endVal; v++) {
+        for (int v = param.startVal; v < param.endVal; v++) {
 
             double[] pixelsVals = null;
-            if (bVert){
-                pixelsVals = image.get(v, fixedVal);
+            if (param.bVert){
+                pixelsVals = image.get(v, param.fixedVal);
             }
             else{
-                pixelsVals = image.get(fixedVal, v); // Get the color of the current pixel
+                pixelsVals = image.get(param.fixedVal, v); // Get the color of the current pixel
             }
 
             // Check if the current pixel color matches the target color
-            if ((pixelsVals[0] >= targetDownColor.x) && (pixelsVals[0] <= targetUpColor.x) &&
-                    (pixelsVals[1] >= targetDownColor.y) && (pixelsVals[1] <= targetUpColor.y) &&
-                    (pixelsVals[2] >= targetDownColor.z) && (pixelsVals[2] <= targetUpColor.z))
+            if ((pixelsVals[0] >= param.targetDownColor.x) && (pixelsVals[0] <= param.targetUpColor.x) &&
+                    (pixelsVals[1] >= param.targetDownColor.y) && (pixelsVals[1] <= param.targetUpColor.y) &&
+                    (pixelsVals[2] >= param.targetDownColor.z) && (pixelsVals[2] <= param.targetUpColor.z))
             {
                 // If this is the start of a new segment, record its position
                 if (currentSegmentStart == -1) {
@@ -479,14 +744,14 @@ public class JUtilFunctions {
 
         // If the last segment extends to the end of the line, record it
         if (currentSegmentStart != -1) {
-            continuousSegments.add(new Point(currentSegmentStart, endVal - 1));
+            continuousSegments.add(new Point(currentSegmentStart, param.endVal - 1));
         }
 
         //. filter by limit length.
         int nSegCnt = continuousSegments.size();
         for (int i = 0; i < nSegCnt; i++){
             Point sc = continuousSegments.get(i);
-            if (sc.y - sc.x < nLimitLen){
+            if (sc.y - sc.x < param.nLimitLen){
                 continuousSegments.remove(i);
                 i--;
                 nSegCnt--;
@@ -494,6 +759,34 @@ public class JUtilFunctions {
         }
 
         return continuousSegments;
+    }
+
+    //.*=================================================================================
+    //.func: findContinuousSegments
+    //.desc:
+    //.
+    public static boolean hasSpecialColorPointInRegion(Mat image, Rect rcWork, Point3 upColor, Point3 downColor) {
+
+        boolean bHas = false;
+        // Iterate through the vertical line
+        for (int y = rcWork.y; y < rcWork.y + rcWork.height; y++) {
+            if (bHas)
+                break;
+            for (int x = rcWork.x; x < rcWork.x + rcWork.width; x++) {
+                double[] pixelsVals = image.get(y, x);
+                if ((pixelsVals[0] >= downColor.x) && (pixelsVals[0] <= upColor.x) &&
+                        (pixelsVals[1] >= downColor.y) && (pixelsVals[1] <= upColor.y) &&
+                        (pixelsVals[2] >= downColor.z) && (pixelsVals[2] <= upColor.z)){
+                    bHas = true;
+                    break;
+                }
+
+                pixelsVals = null;
+
+            }
+        }
+
+        return bHas;
     }
 
 
@@ -511,16 +804,61 @@ public class JUtilFunctions {
         return result.toString();
     }
 
-    public static String preprocessForOcrString(String input, int nPreprocessMethodForOcrString){
+    public static String removeNonAlphanumeric(String input) {
+        // Regular expression pattern to match non-alphanumeric characters
+        Pattern pattern = Pattern.compile("[^a-zA-Z0-9]");
+        Matcher matcher = pattern.matcher(input);
+
+        // Replace non-alphanumeric characters with an empty string
+        String result = matcher.replaceAll("");
+
+        return result;
+    }
+    public static String changeConfuseCharForDigits(String input) {
+
+        StringBuilder result = new StringBuilder();
+        for (int i = 0; i < input.length(); i++) {
+            char currentChar = input.charAt(i);
+            if (currentChar == 'O' || currentChar == 'o') {
+                result.append('0'); // Replace 'O' with '0'
+            }
+            else if (currentChar == 'I' || currentChar == 'i' || currentChar == 'l'){
+                result.append('1');
+            }
+            else {
+                result.append(currentChar); // Keep the original character
+            }
+        }
+        return result.toString();
+
+    }
+
+
+
+    public static String preprocessForOcrString(String input, Config.StrPreprocessMethod nPreprocessMethodForOcrString){
+
         String strRet = null;
 
-        //. for find country name...
-        if (nPreprocessMethodForOcrString == 1){
-            //. remove (123)...
-            strRet = removeNonLetters(input).trim();
-        }
-        else{
-            strRet = input;
+        switch(nPreprocessMethodForOcrString){
+            case e_removeSpace:
+                strRet = removeSpaces(input);
+                break;
+            case e_removeNonLetters:
+                //. remove (123)...
+                strRet = removeNonLetters(input);
+                break;
+            case e_removeNonAlphanumeric:
+                //. remove . - /
+                strRet = removeNonAlphanumeric(input);
+                break;
+            case e_caseNumberic:
+                //.
+                strRet = removeSpaces(input);
+                strRet = changeConfuseCharForDigits(strRet);
+                break;
+            default:
+                strRet = input;
+                break;
         }
 
         return strRet;
@@ -530,34 +868,40 @@ public class JUtilFunctions {
         // Using regular expression to replace all spaces with an empty string
         return input.replaceAll("\\s", "");
     }
-    public static boolean compareString(String ocrStr, String exactStr, int nCompareMethod){
+    public static boolean compareString(String ocrStr, String exactStr,
+                                        Config.StrCompMethod nCompareMethod, Config.StrPreprocessMethod nPreprocessMethodForOcrString){
         boolean bRet = false;
 
-        String prep_OcrStr = removeSpaces(removeDiacriticalMarks(ocrStr).toUpperCase());
-        String prep_exactStr = removeSpaces(removeDiacriticalMarks(exactStr).toUpperCase());
+        //.first, default processing...
+        String prep_OcrStr = preprocessForOcrString(removeDiacriticalMarks(ocrStr).toUpperCase(), nPreprocessMethodForOcrString);
+        String prep_exactStr = preprocessForOcrString(removeDiacriticalMarks(exactStr).toUpperCase(), nPreprocessMethodForOcrString);
 
         if (prep_OcrStr.equals(prep_exactStr))
             bRet = true;
         else{
             switch(nCompareMethod){
-                case 0:{
+                case e_PermitIncluding:{
                     if (prep_OcrStr.contains(prep_exactStr))
                         bRet = true;
                 }
                 break;
-                case 1:{
+                case e_IncludedBehind:{
                     if (prep_OcrStr.contains(prep_exactStr))
                         bRet = true;
                 }
                 break;
-                case 2:{
+                case e_BriefType:{
                     String strComp = prep_exactStr;
-                    if (prep_exactStr.length() >= 3) {
+                    if (prep_exactStr.length() >= 5) {
                         // Extract the first three characters using substring
-                        strComp = prep_exactStr.substring(0, 3);
+                        strComp = prep_exactStr.substring(0, 5);
                     }
                     if (prep_OcrStr.contains(strComp))
                         bRet = true;
+                }
+                break;
+                case e_ExactEqual:{
+                    //. 2024-3-6 add. in case of exactly equals...
                 }
                 break;
 
@@ -567,19 +911,103 @@ public class JUtilFunctions {
         return bRet;
     }
 
+
+
+
+
+
+
+
+
+
+
+
+    public static void setOcrPatternToTess(Config.OcrPattern ocrPattern){
+        switch(ocrPattern){
+            case e_NormalPattern:
+                tess.setVariable("tessedit_char_whitelist", "");
+                break;
+            case e_DigitOnly:
+                tess.setVariable("tessedit_char_whitelist", "O0123456789+-.");
+                break;
+        }
+    }
+
+
+    //.*=====================================================================================
+    //. readStringbyOcr
+    //. the simplest case...
+    //.
+    public static String readStringbyOcr(Mat image) {
+
+        String strRet = null;
+
+        int size = (int) (image.total() * image.elemSize());
+        byte[] byteArray = new byte[size];
+        image.get(0, 0, byteArray);
+
+        int nCols = image.cols();
+        int nRows = image.rows();
+        int nChannels = image.channels();
+        tess.setImage(byteArray, nCols, nRows, nChannels,nCols * nChannels);
+        strRet = tess.getUTF8Text();
+        byteArray = null;
+
+        return strRet;
+    }
+
+    //.*=====================================================================================
+    //. readStringbyOcr
+    //. the simplest case...
+    //.
+    public static String readStringbyOcrfromFullImage(Mat fullImage, Rect rcTarget, float fResizeRate) {
+
+        String strRet = null;
+
+        int limitWidth = fullImage.cols();
+        int limitHeight = fullImage.rows();
+        Rect rcExtend = ExtendRect(rcTarget , 5, limitWidth, limitHeight);
+
+        Mat txtAreaMat = fullImage.submat(rcExtend);
+        Mat resizedtxtAreaMat = null;
+
+
+        //. 2024-2-26.
+        //. I will automatic resize.
+        //. in future, must remove parameter "fResizeRate"
+        /*
+        int nOrigHeight = txtAreaMat.rows();
+        if (nOrigHeight < Config.tesseractDetaultCharHeight){
+            float fNewResizeRate = Config.tesseractDetaultCharHeight / nOrigHeight;
+            resizedtxtAreaMat = new Mat();
+            Imgproc.resize(txtAreaMat, resizedtxtAreaMat, new Size(), fNewResizeRate, fNewResizeRate);
+        }
+        else{
+            resizedtxtAreaMat = txtAreaMat;
+        }
+         */
+
+        if (fResizeRate != 1.0f){
+            resizedtxtAreaMat = new Mat();
+            Imgproc.resize(txtAreaMat, resizedtxtAreaMat, new Size(), fResizeRate, fResizeRate);
+        }
+        else{
+            resizedtxtAreaMat = txtAreaMat;
+        }
+
+        strRet = readStringbyOcr(resizedtxtAreaMat);
+
+        return strRet;
+    }
+
+
     //.*=====================================================================================
     //. main function of do_ocr
-    //. there are 2 cases.
-    //. case 1:
-    //.     image is full region. and rcTargets is the result of textDetector, candidate list.
-    //.     ret: ArrayList<Rect> rcRet, the same size of string_param_list.
-    //.         if no find, ret rect is empty rect. and one of these is not empty, return string is "Success"
-    //. case 2:
-    //.     image is sub region. and rcTargets, rcRet is no meaning, must null,
-    //.     ret: if one of string_param_list is exist, then ok.
-    //.
-    public static String do_ocr(Mat image, ArrayList<Rect> rcTargets, float fResizeRate,
-                                ArrayList<Rect> rcRetList, ArrayList<String> string_param_list, int nPreprocessMethodForOcrString) {
+    //. first, do ocr per rect of rcTargets,
+    //. next, match the result and string of string_param_list...
+    //. according of it... set rcRetList... find_bestMatched_rectList_fromOcr
+    public static String find_bestMatched_rectList_fromOcr(Mat image, ArrayList<Rect> rcTargets,
+                                                           ArrayList<Rect> rcRetList, ArrayList<String> string_param_list) {
 
         String strRet = "fail";
 
@@ -588,6 +1016,7 @@ public class JUtilFunctions {
         int nParamCnt = string_param_list.size();
         if (nParamCnt == 0 || nParamCnt % 2 != 0){
             //. invalid params.
+            strRet = "Invalid Param: for Ocr";
         }
         else {
             int nTargetCnt = nParamCnt / 2;
@@ -595,8 +1024,9 @@ public class JUtilFunctions {
             //. 2024-2-26.
             //. avoid including compare weakness, need remember the shortest result.
             //. 2th array, first element is rect's index, and second element is current string's length...
-            int[][] matchRes = new int[nTargetCnt][2];
+
             int nMaxLenInitVal = 10000; // set big value...
+            int[][] matchRes = new int[nTargetCnt][2];
             for (int i = 0; i < nTargetCnt; i++){
                 Rect rcRet = new Rect(0,0,0,0);
                 rcRetList.add(rcRet);
@@ -605,66 +1035,39 @@ public class JUtilFunctions {
                 matchRes[i][1] = nMaxLenInitVal;
             }
 
-            //. do ocr.
-            int limitWidth = image.cols();
-            int limitHeight = image.rows();
+            for (int j = 0; j < nTargetCnt; j++) {
+                String strTarget = string_param_list.get(2 * j);
+                if (strTarget.equals("$user_id"))
+                    strTarget = MyAccessibilityService.mainService.loadTask.user_id;
+                int nOcrParam = Integer.parseInt(string_param_list.get(2 * j + 1));
 
-            int nTargetRectCnt = rcTargets.size();
-            for (int i = 0; i < nTargetRectCnt; i++){
-                Rect rc = rcTargets.get(i);
-                Rect rcExtend = ExtendRect(rc , 5, limitWidth, limitHeight);
-                Mat txtAreaMat = image.submat(rcExtend);
-                Mat resizedtxtAreaMat = null;
+                JParamsForOcr ocrParam = JParamsForOcr.fromInteger(nOcrParam);
 
-                //. 2024-2-26.
-                //. I will automatic resize.
-                //. in future, must remove parameter "fResizeRate"
-                int nOrigHeight = txtAreaMat.rows();
-                if (nOrigHeight < Config.tesseractDetaultCharHeight){
-                    float fNewResizeRate = Config.tesseractDetaultCharHeight / nOrigHeight;
-                    resizedtxtAreaMat = new Mat();
-                    Imgproc.resize(txtAreaMat, resizedtxtAreaMat, new Size(), fNewResizeRate, fNewResizeRate);
+                Mat imageForOcr = image;
+                if (ocrParam.bNeedMoreContrast == true){
+                    imageForOcr = JUtilFunctions.moreContrastImage(image, ocrParam.alphaForMoreContrast);
                 }
-                else{
-                    resizedtxtAreaMat = txtAreaMat;
-                }
+                setOcrPatternToTess(ocrParam.ocrPattern);
 
-                int size = (int) (resizedtxtAreaMat.total() * resizedtxtAreaMat.elemSize());
-                byte[] byteArray = new byte[size];
-                resizedtxtAreaMat.get(0, 0, byteArray);
+                JUtilFunctions.SaveMatFile(imageForOcr, MyAccessibilityService.mainService);
 
-                int nCols = resizedtxtAreaMat.cols();
-                int nRows = resizedtxtAreaMat.rows();
-                int nChannels = resizedtxtAreaMat.channels();
-                tess.setImage(byteArray, nCols, nRows, nChannels,nCols * nChannels);
-                String ocrStr = tess.getUTF8Text();
+                int nTargetRectCnt = rcTargets.size();
+                for (int i = 0; i < nTargetRectCnt; i++) {
+                    Rect rc = rcTargets.get(i);
 
-                String preprocessOcrStr = preprocessForOcrString(ocrStr, nPreprocessMethodForOcrString);
+                    String ocrStr = readStringbyOcrfromFullImage(imageForOcr, rc, ocrParam.fResizeRate);
 
-                for (int j = 0; j < nTargetCnt; j++){
-                    String strTarget = string_param_list.get(2 * j);
-                    if (strTarget.equals("$user_id"))
-                        strTarget = MyAccessibilityService.mainService.loadTask.user_id;
-
-                    int nCmpMethods = Integer.parseInt(string_param_list.get(2 * j + 1));
-
-                    boolean bEqual = compareString(preprocessOcrStr, strTarget, nCmpMethods);
-                    /*
-                    if (bEqual == false){
-                        bEqual = JUtilFunctions.fuzyStringCompare(ocrStr, strTarget);
-                    }
-                    */
-                    int nOcrLen = ocrStr.length();
+                    boolean bEqual = compareString(ocrStr, strTarget, ocrParam.strCompMethod, ocrParam.strPreprocessMethod);
                     if (bEqual == true){
+                        int nOcrLen = ocrStr.length();
                         //. set temporary result.
                         if (nOcrLen < matchRes[j][1]){
                             matchRes[j][0] = i;
                             matchRes[j][1] = nOcrLen;
                         }
                     }
-
                 }
-                byteArray = null;
+                ocrParam = null;
             }
 
             for (int j = 0; j < nTargetCnt; j++) {
@@ -677,16 +1080,56 @@ public class JUtilFunctions {
 
                 }
             }
-
             matchRes = null;
         }
 
         return strRet;
     }
 
+
+    //.*=====================================================================================
+    //. main function of do_ocr_find_all_regions
+    public static String do_ocr_find_all_regions(Mat image, ArrayList<Rect> rcTargets, ArrayList<Rect> rcRetList,
+                                                 String target, JParamsForOcr ocrParam) {
+
+        String strRet = "fail";
+
+        rcRetList.clear();
+
+        Mat imageForOcr = image;
+        if (ocrParam.bNeedMoreContrast == true){
+            imageForOcr = JUtilFunctions.moreContrastImage(image, ocrParam.alphaForMoreContrast);
+        }
+        setOcrPatternToTess(ocrParam.ocrPattern);
+
+
+        //. do ocr.
+        int nTargetRectCnt = rcTargets.size();
+        for (int i = 0; i < nTargetRectCnt; i++){
+            Rect rc = rcTargets.get(i);
+
+            String ocrStr = readStringbyOcrfromFullImage(imageForOcr, rc, ocrParam.fResizeRate);
+
+            boolean bEqual = compareString(ocrStr, target, ocrParam.strCompMethod, ocrParam.strPreprocessMethod);
+
+            if (bEqual == true){
+                Rect rcNew = rc.clone();
+                rcRetList.add(rcNew);
+            }
+        }
+
+        if (rcRetList.size() > 0){
+            strRet = "success";
+        }
+        else{
+            strRet = "fail not find: " + target;
+        }
+
+        return strRet;
+    }
+
     public static String getTextAreaFromOcr(ArrayList<String> string_param_list,
-                                            Rect rcAnalyseBase, float fResizeRate, ArrayList<Rect> result_rects,
-                                            int nPreprocessMethodForOcrString, int nTextDetectMode){
+                                            Rect rcAnalyseBase, ArrayList<Rect> result_rects, JParamsForTextDet textDetParam){
         String result_string = "fail_getTextAreaFromOcr";
 
         Rect rcForOcr = JUtilFunctions.getOrigRectFromBaseRect(rcAnalyseBase);
@@ -694,7 +1137,7 @@ public class JUtilFunctions {
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, nTextDetectMode);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, textDetParam.ignorePartMode, textDetParam.textDetMode);
         if (nTextRegionCnt > 0) {
             Mat ocrAreaMat = JUtilFunctions.originScreenShot.submat(rcForOcr);
 
@@ -706,8 +1149,7 @@ public class JUtilFunctions {
                 JUtilFunctions.changeToOrigRectFromBaseRect(rc);
             }
 
-            result_string = JUtilFunctions.do_ocr(ocrAreaMat, rcTexts, fResizeRate,
-                    result_rects, string_param_list, nPreprocessMethodForOcrString);
+            result_string = JUtilFunctions.find_bestMatched_rectList_fromOcr(ocrAreaMat, rcTexts, result_rects, string_param_list);
             //. must do offset operation.
             if (result_string.equals("success")){
                 int result_rect_cnt = result_rects.size();
@@ -718,39 +1160,441 @@ public class JUtilFunctions {
                     rc.y += rcForOcr.y;
                 }
             }
-
         }
 
         return result_string;
     }
 
-    public static String findText(String strTarget, Rect rcAnalyseBase, float fResizeRate,
-                                  ArrayList<Rect> result_rects, int nPreprocessMethodForOcrString, int nTextDetectMode) {
+    public static String findText(String strTarget, int ocrIntParam, Rect rcAnalyseBase,
+                                  ArrayList<Rect> result_rects, JParamsForTextDet textDetParam) {
 
         String strRet = "fail findText: " + strTarget;
         ArrayList<String> string_param_list = new ArrayList<String>();
         string_param_list.add(strTarget);
-        string_param_list.add("0");
+        string_param_list.add(Integer.toString(ocrIntParam));
 
-        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcAnalyseBase,
-                fResizeRate, result_rects, nPreprocessMethodForOcrString, nTextDetectMode);
+        strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list, rcAnalyseBase, result_rects, textDetParam);
         string_param_list = null;
 
         return strRet;
     }
 
+    //.*===========================================================================================
+    //.func: match2RectsforNeighbourCond
+    //.desc:
+    //.
+    public static boolean match2RectsforNeighbourCond(Rect rc1, Rect rc2, Config.NeighborCond2Targets neighborCond2Targets){
+        boolean bRet = false;
+        switch (neighborCond2Targets){
+            case e_UpDownDenseNeighborCond: { //. up-down layout.
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                int nGapX1 = (int)(Math.abs((int)(rc1.x - rc2.x)) * Config.resizeXRatio);
+                int nGapX2 = (int)(Math.abs((int)((rc1.x + rc1.width) - (rc2.x + rc2.width))) * Config.resizeXRatio);
+                int nGapY = (int)(Math.abs((int)(ptCenter1.y - ptCenter2.y)) * Config.resizeYRatio);
+                if ((nGapX1 < 30 || nGapX2 < 30) && (nGapY < 80)){
+                    bRet = true;
+                }
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            case e_FarHorizNeighborCond: { //. horz layout.
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                int nGapX = Math.abs((int)(ptCenter1.x - ptCenter2.x));
+                int nGapY = Math.abs((int)(ptCenter1.y - ptCenter2.y));
+                if (nGapX * Config.resizeXRatio > 100 && nGapY * Config.resizeYRatio < 50){
+                    bRet = true;
+                }
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            case e_Merge2TargetNeighborCond: {
+                //. impossible case.
+                bRet = true;
+            }
+            break;
+            case e_FarVerticalNeighborCond: {
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                int nGapX = Math.abs((int)(ptCenter1.x - ptCenter2.x));
+                int nGapY = Math.abs((int)(ptCenter1.y - ptCenter2.y));
+                // if (nGapX * Config.resizeXRatio < 50 && nGapY * Config.resizeYRatio < 150){
+                if (nGapX * Config.resizeXRatio < 100){
+                    bRet = true;
+                }
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            case e_TableTypeNeighborCond: {
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                int nGapX = (int) (Math.abs((int)(ptCenter1.x - ptCenter2.x)) * Config.resizeXRatio);
+                int nGapY = (int) (Math.abs((int)(ptCenter1.y - ptCenter2.y)) * Config.resizeYRatio);
+                if (nGapX > 100 && nGapX < 400 && nGapY > 40){
+                    bRet = true;
+                }
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            default:
+                break;
+        }
 
-    public static int getNextBetCategorySection(Rect rcFind) {
-        int ret = 0;
-        for(int row =(int) rcFind.y + 40; row< Config.Screen_Height; row++){
-            double[] pixelColor = screenshot.get(row, 10);
-            int redValue =(int) pixelColor[0];
-            int greenValue = (int) pixelColor[1];
-            int blueValue =(int) pixelColor[2];
-            if(redValue == 70 && greenValue== 75 && blueValue == 88){
-                return row;
+        return bRet;
+    }
+
+    //.*===========================================================================================
+    //.func: match2RectsforNeighbourCond
+    //.desc:
+    //.
+    public static Point decideFocuspointforNeighbourCond(Rect rc1, Rect rc2, Config.NeighborCond2Targets neighborCond2Targets){
+        boolean bRet = false;
+
+        Point ptClick = null;
+        switch (neighborCond2Targets){
+            case e_UpDownDenseNeighborCond:
+            case e_FarHorizNeighborCond:
+            case e_FarVerticalNeighborCond:
+            { //. up-down layout.
+                ptClick = getCenterPoint(rc2);
+            }
+            break;
+            case e_Merge2TargetNeighborCond: {
+                ptClick = getCenterPoint(rc1);
+            }
+            break;
+            case e_TableTypeNeighborCond: {
+                Point ptCenter1 = getCenterPoint(rc1);
+                Point ptCenter2 = getCenterPoint(rc2);
+                ptClick = new Point(ptCenter1.x , ptCenter2.y);
+                ptCenter1 = null; ptCenter2 = null;
+            }
+            break;
+            default:
+                break;
+        }
+
+        return ptClick;
+    }
+
+
+    //.*===========================================================================================
+    //.func: find2TargetsArea
+    //.desc:
+    //.      ptOutClickPos is out value.
+    //.      neighborCond2Targets: 0: (Up/down layout), 1: (horz layout)
+    //.      string compare method is exactly equal method.
+    //. algorithm:
+    //.
+    public static String find2TargetsArea(JFuncParams_FindSectionIncluding2Targets param, Rect rcAnalyseBase, Point ptOutClickPos){
+
+        String strRet = null;
+
+        ArrayList<Rect> rcArrayTarget1 = new ArrayList<Rect>();
+        ArrayList<Rect> rcArrayTarget2 = new ArrayList<Rect>();
+
+        boolean bFinded = false;
+
+        Mat analyseAreaMat = JUtilFunctions.screenshot.submat(rcAnalyseBase);
+
+        //. get text detector...
+        ArrayList<Rect> rcTexts = new ArrayList<Rect>();
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
+        if (nTextRegionCnt == 0) {
+            strRet = "fail no text region";
+        }
+        else {
+            Rect rcForOcr = JUtilFunctions.getOrigRectFromBaseRect(rcAnalyseBase);
+            Mat ocrAreaMat = JUtilFunctions.originScreenShot.submat(rcForOcr);
+
+            for (int k = 0; k < rcTexts.size(); k++){
+                Rect rc = rcTexts.get(k);
+                JUtilFunctions.changeToOrigRectFromBaseRect(rc);
+            }
+
+            String result_string1 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTexts,
+                    rcArrayTarget1, param.target1, param.target1OcrParam);
+
+            if (result_string1.equals("success")){
+
+                //. 2024-3-8
+                //. maybe target2 is null, so we must use target1 only
+                boolean bTarget2Null = (param.target2 == null);
+                if (bTarget2Null == true){
+                    //. use first rect.
+                    Rect rc1 = rcArrayTarget1.get(0);
+                    Point ptClick = decideFocuspointforNeighbourCond(rc1, null, param.neighborCond2Targets);
+                    //. and must think offset.
+                    ptOutClickPos.x = ptClick.x + rcForOcr.x;
+                    ptOutClickPos.y = ptClick.y + rcForOcr.y;
+
+                    ptClick = null;
+                    bFinded = true;
+                }
+                else{
+                    String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTexts,
+                            rcArrayTarget2, param.target2, param.target2OcrParam);
+                    if (result_string2.equals("success")){
+
+                        //. condition...
+                        int nCnt1 = rcArrayTarget1.size();
+                        int nCnt2 = rcArrayTarget2.size();
+
+                        for (int i = 0; i < nCnt1; i++){
+                            if (bFinded)
+                                break;
+                            Rect rc1 = rcArrayTarget1.get(i);
+                            for (int j = 0; j < nCnt2; j++){
+                                Rect rc2 = rcArrayTarget2.get(j);
+                                boolean bMatch = match2RectsforNeighbourCond(rc1, rc2, param.neighborCond2Targets);
+                                if (bMatch){
+
+                                    Point ptClick = decideFocuspointforNeighbourCond(rc1, rc2, param.neighborCond2Targets);
+                                    //. and must think offset.
+                                    ptOutClickPos.x = ptClick.x + rcForOcr.x;
+                                    ptOutClickPos.y = ptClick.y + rcForOcr.y;
+
+                                    ptClick = null;
+                                    bFinded = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+
+                }
+            }
+
+            if (bFinded){
+                strRet = "success";
+            }
+            else{
+                strRet = "fail find 2 Targets";
             }
         }
-        return ret;
+        rcArrayTarget1 = null;
+        rcArrayTarget2 = null;
+
+        return strRet;
     }
+
+
+    //.*=====================================================================================
+    //.func: findColorBarSectionAndTopScroll
+    //.desc:
+    //.
+    public static boolean findColorBarSection(String searchKey, int intOcrParam,
+                                              int secWidthforUsingBorder, JFuncParams_ColorBar colorBarParam,
+                                              Point ptFindPos, Point ptNextSecPos){
+        boolean bResult = false;
+
+        //. init out points.
+        ptFindPos.x = -1; ptFindPos.y = -1;
+        ptNextSecPos.x = -1; ptNextSecPos.y = -1;
+
+        ArrayList<String> string_param_list = new ArrayList<String>();
+        ArrayList<Rect> result_rects = new ArrayList<Rect>();
+        string_param_list.add(searchKey);
+        string_param_list.add(Integer.toString(intOcrParam));
+
+        JUtilFunctions.takeScreenshot();
+        //. first, find color bar;
+        ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
+
+        int nSegCnt = retSegments.size();
+        for (int i = 0; i < nSegCnt; i++){
+            Point sectionHead = retSegments.get(i);
+
+            //.2024-3-9
+            //. for detecting using border color...
+            JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
+            if (sectionHead.x > 850)
+                break;
+
+            Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, colorBarParam.fixedVal, (int)(sectionHead.y - sectionHead.x));
+
+            JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
+            String strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list,
+                    rcAnalyseBase, result_rects, textDetParam);
+            if (strRet.equals("success")){
+                bResult = true;
+                ptFindPos.x = sectionHead.x;
+                ptFindPos.y = sectionHead.y;
+
+                //. set next section pos.
+                if (i != nSegCnt - 1){
+                    Point sectionHeadNext = retSegments.get(i + 1);
+                    JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
+                    ptNextSecPos.x = sectionHeadNext.x;
+                    ptNextSecPos.y = sectionHeadNext.y;
+                }
+                break;
+            }
+        }
+
+        if (bResult == false && nSegCnt > 0){
+            Point sectionHeadNext = retSegments.get(0);
+            JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
+            ptNextSecPos.x = sectionHeadNext.x;
+            ptNextSecPos.y = sectionHeadNext.y;
+        }
+        retSegments = null;
+        string_param_list = null;
+
+        return bResult;
+    }
+
+
+
+    //.*=====================================================================================
+    //.func: findSectionIncluding2Targets
+    //.desc:
+    //.
+    public static boolean findSectionIncluding2Targets(JFuncParams_FindSectionIncluding2Targets param, Point ptOutClickPos){
+
+        boolean bResult = false;
+        int nLimitY = 850;
+
+        boolean bAlreadyFindedTargetSection = false;
+        boolean bFindedNextSection = false;
+
+        int nScrollCnt = param.tryScrollCnt;
+        while(nScrollCnt-- >0 ){
+
+            Point ptFindPos = new Point(-1, -1);
+            Point ptNextSecPos = new Point(-1, -1);
+            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.secTargetIntOcrParam,
+                    param.secWidthforUsingBorder, param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            if (bFindTargetSection == false){
+                if (bAlreadyFindedTargetSection == false){
+                    JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+                    param.bScrollPosChanged = true;
+                    continue;
+                }
+                else{
+                    //. do ocr proc.
+                    int nStartY = param.nextSectionInfo.startVal;
+                    int nEndY = nLimitY;
+                    if (ptNextSecPos.x >= 0){
+                        nEndY = (int)ptNextSecPos.x;
+                        bFindedNextSection = true;
+                    }
+
+                    int height = nEndY - nStartY;
+                    if (height > 10){
+                        Rect rcAnalyseBase = new Rect(0, nStartY, param.nAnalyseWidth, height);
+                        String strRet = JUtilFunctions.find2TargetsArea(param, rcAnalyseBase, ptOutClickPos );
+                        if(strRet.equals("success")){
+                            bResult = true;
+                            break;
+                        }
+                    }
+
+                    if (bFindedNextSection)
+                        break;
+                    else{
+                        JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+                        param.bScrollPosChanged = true;
+                        continue;
+                    }
+                }
+            }
+            else{
+                param.bFindedLeagueSection = true;
+                bAlreadyFindedTargetSection = true;
+
+                //. do ocr proc.
+                int nStartY = (int)ptFindPos.y;
+                int nEndY = nLimitY;
+                if (ptNextSecPos.x >= 0){
+                    nEndY = (int)ptNextSecPos.x;
+                    bFindedNextSection = true;
+                }
+
+                int height = nEndY - nStartY;
+                if (height > 10){
+                    Rect rcAnalyseBase = new Rect(0, nStartY, param.nAnalyseWidth, height);
+                    //. do ocr.
+                    String strRet = JUtilFunctions.find2TargetsArea(param, rcAnalyseBase, ptOutClickPos );
+                    if(strRet.equals("success")){
+                        bResult = true;
+                        break;
+                    }
+                }
+
+                if (bFindedNextSection)
+                    break;
+                else{
+                    JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+                    param.bScrollPosChanged = true;
+                    continue;
+                }
+            }
+        }
+
+        return bResult;
+    }
+
+
+    //.*=====================================================================================
+    //.func: findSectionandExpanding
+    //.desc: in some case, section is collapsed so, we must it expand...
+    //.return: if find target section, return true, else false.
+    public static boolean findSectionandExpanding(JFuncParams_FindSectionIncluding2Targets param, Point ptFindSecPos){
+        boolean bResult = false;
+        int nLimitY = 700;
+
+        int nScrollCnt = param.tryScrollCnt;
+        while(nScrollCnt-- >0 ){
+
+            Point ptFindPos = new Point(-1, -1);
+            Point ptNextSecPos = new Point(-1, -1);
+            boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.secTargetIntOcrParam, param.secWidthforUsingBorder,
+                    param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            if (bFindTargetSection){
+
+                if (ptFindPos.y > nLimitY){
+                    //. too down pos...
+                    //. so need to some up scrolling...
+                    JUserActions.scrollUpPage((int)(200 / Config.resizeYRatio));
+                    continue;
+                }
+
+                //. judge if collapsed ???
+                double[] pixelsVals = JUtilFunctions.screenshot.get((int)ptFindPos.y + 20, param.nextSectionInfo.fixedVal);
+                // Check if the current pixel color matches the target color
+                Rect rcDecide = new Rect(param.nextSectionInfo.fixedVal + param.rcDecideforCollapseCond.x,
+                        (int)ptFindPos.y + param.rcDecideforCollapseCond.y, param.rcDecideforCollapseCond.width, param.rcDecideforCollapseCond.height);
+                boolean bHasPoint = JUtilFunctions.hasSpecialColorPointInRegion(JUtilFunctions.screenshot, rcDecide,
+                        param.ptBetPannelBackUpColor, param.ptBetPannelBackDownColor);
+                if (bHasPoint){
+                    //. none collapsed case...
+                }
+                else{
+                    //. need expanding...
+                    Point ptforClick = new Point(param.nextSectionInfo.fixedVal + param.ptPosClickforExpanding.x,
+                            (ptFindPos.x + ptFindPos.y) / 2 + param.ptPosClickforExpanding.y);
+                    Point ptRealforClick = JUtilFunctions.getOrigPointFromBasePoint(ptforClick);
+                    JUserActions.dispatchTap(ptRealforClick.x, ptRealforClick.y);
+                    JUtilFunctions.delay_duration(500);
+                    ptforClick = null;
+                    ptRealforClick = null;
+                }
+
+                //. set result pos.
+                ptFindSecPos.x = (ptFindPos.x / Config.resizeYRatio);
+                ptFindSecPos.y = (ptFindPos.y  / Config.resizeYRatio);
+
+                bResult = true;
+                break;
+            }
+            else{
+                JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+            }
+        }
+
+        return bResult;
+    }
+
 }

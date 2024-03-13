@@ -21,8 +21,8 @@ public class JEngine implements Runnable{
     }
     @Override
     public void run() {
-
         apiStatus.jEngine  = this;
+        JUtilFunctions.disableSuperuserGranteMsg();
         if(isBetingRunning == false){
             commandAPI.callAPI(apiStatus);
             Log.d("Game Routine Running", "Loop End");
@@ -34,33 +34,41 @@ public class JEngine implements Runnable{
     public void startBetting () {
         int accumlate = 0;
         // Code to be executed periodically
-        Log.d("PPPP SportsBet Service", "Started! ");
+        String result_string = "unknown result";
+
         isBetingRunning =true;
 
         boolean bHasTask = loadTask.hasTask();
         if (bHasTask){
-            JActionExecutor actionExecutor = loadTask.loadActionScenario();
-            if (actionExecutor != null){
+
+            JActionExecutor loginActionExecutor = loadTask.load_siteActionScenario();
+            if (loginActionExecutor != null){
                 //. start really...
-                String bet_result_string = null;
-                String login_result = actionExecutor.run();
-//                        String login_result = "success";
-                if (login_result.equals("success")){
-                    JBetAction pBetAction = JBetAction.createObject(loadTask);
-                    if (pBetAction != null){
-                        bet_result_string = pBetAction.run();
+
+                result_string = loginActionExecutor.run(null);
+                Log.d("PPP AccessibilityService", "Login Finished: " + result_string);
+
+                // all done
+                loginActionExecutor.clear_mem();
+                loginActionExecutor = null;
+
+                if (result_string.equals("success")){
+
+                    JBetAction betActionExecutor = JBetAction.createObject(loadTask);
+
+                    if (betActionExecutor != null){
+                        result_string = betActionExecutor.run();
+                        Log.d("PPP AccessibilityService", "Bet Finished: " + result_string);
+                        betActionExecutor = null;
                     }
                     else{
-                        bet_result_string = "fail_unknown_site";
+                        result_string = "error: don't prepare betAction executor";
                     }
                 }
                 else{
-                    bet_result_string = "fail_login";
+                    result_string = "error parsing login Action Scenario";
                 }
-                loadTask.reportResult(bet_result_string);
-                //. all done.
-                actionExecutor.clear_mem();
-                actionExecutor = null;
+
             }
             else{
                 //. parsing error.
@@ -68,10 +76,14 @@ public class JEngine implements Runnable{
         }
         else {
             //. no task. sleep at home...
+            result_string = "Now have no task";
         }
-        isBetingRunning = false;
+        loadTask.reportResult(result_string);
+
         accumlate++;
         Log.d("PPPP SportsBet Service", "finish one iteration! " + accumlate);
+
+        isBetingRunning = false;
         // Reschedule the task
         //pgh for test.
         //handler.postDelayed(this, interval);

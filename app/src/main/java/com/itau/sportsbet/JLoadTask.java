@@ -64,10 +64,10 @@ public class JLoadTask {
     }
 
     //.*=============================================================
-    //.func: loadActionScenario
-    //.desc: load action script file and create actionExecutor object.
+    //.func: load_siteActionScenario
+    //.desc: load action script file for login to site and create actionExecutor object.
     //.
-    public JActionExecutor loadActionScenario(){
+    public JActionExecutor load_siteActionScenario(){
 
         JActionExecutor actionExecutor = null;
 
@@ -77,23 +77,14 @@ public class JLoadTask {
         if (jsonString != null){
             //. parsing...
             actionExecutor = JActionExecutor.build(jsonString);
-            if (actionExecutor != null){
-                Log.d("PPPP build actionExcecutor", "success");
-            }
-            else{
-                Log.d("PPPP build actionExcecutor", "fail");
-            }
-        }
-        else{
-            Log.d("PPPP fail read_action_scenario_from_file", "error");
         }
 
         return actionExecutor;
     }
 
     //.*=============================================================
-    //.func: loadActionScenario
-    //.desc: load action script file and create actionExecutor object.
+    //.func: downloadActionScenario
+    //.desc:
     //.
     public boolean downloadActionScenario(String siteName) {
         boolean bRet = false;
@@ -169,7 +160,5 @@ public class JLoadTask {
 
         return bRet;
     }
-
-
 
 }
