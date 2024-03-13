@@ -41,7 +41,7 @@ public class JLoadTask {
     //.func: hasTask
     //.desc: communication to server and download "bet_task.json" data...
     //.
-    public boolean hasTask(){
+    public boolean hasTask(String strTag){
         boolean bHasTask = false;
 
         //. communication to server and download "bet_task.json" data...
@@ -50,7 +50,7 @@ public class JLoadTask {
 
 
         //. now for test, use a test json file in assets.
-        String jsonString = Assets.read_bettask_json_from_file();
+        String jsonString = Assets.read_bettask_json_from_file(strTag);
 
         if (jsonString != null){
             //. parsing...

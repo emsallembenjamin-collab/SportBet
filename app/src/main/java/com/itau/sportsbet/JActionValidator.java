@@ -134,10 +134,10 @@ public class JActionValidator {
         boolean bInitFlag = true;
         while(true){
             if (action.waitPageload == true && MyAccessibilityService.mainService.bPageLoadFlag == false){
-                JUtilFunctions.delay_duration(100);
+                JUtilFunctions.delay_duration(500);
             }
             else{
-                JUtilFunctions.delay_duration(200);
+                JUtilFunctions.delay_duration(700);
                 boolean bCheckResult = check_forCond();
                 if (bInitFlag){
                     JUtilFunctions.delay_duration(action.delay);

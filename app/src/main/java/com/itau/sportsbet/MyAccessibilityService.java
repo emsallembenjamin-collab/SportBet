@@ -66,19 +66,16 @@ public class MyAccessibilityService extends AccessibilityService {
         // Creating a work thread
         Thread workThread = new Thread(new Runnable() {
             int  accumlate = 0;
-            @Override
-            public void run() {
 
+            public String do_test(String strTag){
                 String result_string = "unknown result";
-
-                JUtilFunctions.disableSuperuserGranteMsg();
 
                 // Perform work here asynchronously
                 while (true) {
                     // Code to be executed periodically
                     Log.d("PPPP SportsBet Service", "Started! ");
 
-                    boolean bHasTask = loadTask.hasTask();
+                    boolean bHasTask = loadTask.hasTask(strTag);
                     if (bHasTask){
                         JActionExecutor loginActionExecutor = loadTask.load_siteActionScenario();
                         if (loginActionExecutor != null){
@@ -90,7 +87,7 @@ public class MyAccessibilityService extends AccessibilityService {
                             loginActionExecutor.clear_mem();
                             loginActionExecutor = null;
 
-                            //result_string = "success";
+                            // result_string = "success";
 
                             //. if success in login...
                             if (result_string.equals("success")){
@@ -122,6 +119,17 @@ public class MyAccessibilityService extends AccessibilityService {
                     Log.d("PPPP SportsBet Service", "finish one iteration! " + accumlate);
                     break;
                 }
+
+                return result_string;
+            }
+            @Override
+            public void run() {
+
+                JUtilFunctions.disableSuperuserGranteMsg();
+
+                do_test("1");
+                do_test("2");
+                do_test("3");
             }
         });
 

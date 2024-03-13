@@ -482,6 +482,7 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         //. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
+        JUtilFunctions.delay_duration(3000);
 
         JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
         JUtilFunctions.delay_duration(100);
@@ -489,7 +490,7 @@ class JAction_Do_Input_Id_Password extends JAction{
         //. offset point
         Point ptOffset = JUtilFunctions.getOrigPointFromBasePoint(80, -60);
         JUserActions.dispatchTap(ptOffset.x, ptUser_id.y + ptOffset.y);
-        JUtilFunctions.delay_duration(100);
+        JUtilFunctions.delay_duration(1000);
 
         //. second, paste password...
         targetString = MyAccessibilityService.mainService.loadTask.password;
@@ -502,11 +503,12 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         //. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
+        JUtilFunctions.delay_duration(3000);
 
         JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y);
         JUtilFunctions.delay_duration(100);
         JUserActions.dispatchTap(ptOffset.x, ptPassword.y + ptOffset.y);
-        JUtilFunctions.delay_duration(100);
+        JUtilFunctions.delay_duration(1000);
 
         //. 2024-2-29.
         //. clone prev prevAction.result_rects for me...
@@ -681,6 +683,11 @@ class JAction_Do_Input_VerifiCode extends JAction{
 //.
 class JAction_FindClose_Ad extends JAction{
 
+    //. 2024-3-13
+    //. customize ad types.
+    public int type = 0;
+
+    //. for 0.  white cross (X) mark in circle. in the middle and bottom position...
     public int thresBorder = 100;
     public int thresCircle = 50;
     public int minRadius = 15;
@@ -689,28 +696,58 @@ class JAction_FindClose_Ad extends JAction{
 
     public Rect rcAnalyse = new Rect(220, 540, 100, 400);
 
+    //. for 1. white cross (X) mark in right top part, but background image is shadowed...
+    Point3  colorNormalBack = null;
+    Point   pixelforBase = null;
+
+
+
+
     boolean bInitParams = false;
     Point   ptFindAdCenter = new Point();
 
-    public boolean parseParams(){
+    public boolean parseParamFromConfirmList(ArrayList<String> master_Confirmproc_params){
         boolean bInvalidParam = false;
 
-        int digitParamCnt = digit_param_list.size();
-        if (digitParamCnt != 7){
-            bInvalidParam = true;
+        type = Integer.parseInt(string_param_list.get(0));
+
+        switch(type){
+            case 0:{
+                int digitParamCnt = digit_param_list.size();
+                if (digitParamCnt != 7){
+                    bInvalidParam = true;
+                }
+                else{
+                    thresBorder = digit_param_list.get(0).intValue();
+                    thresCircle = digit_param_list.get(1).intValue();
+                    minRadius = digit_param_list.get(2).intValue();
+                    maxRadius = digit_param_list.get(3).intValue();
+
+                    borderColor.x = digit_param_list.get(4).intValue();
+                    borderColor.y = digit_param_list.get(5).intValue();
+                    borderColor.z = digit_param_list.get(6).intValue();
+
+                }
+            }
+            break;
+            case 1:{
+                int digitParamCnt = digit_param_list.size();
+                if (digitParamCnt != 0){
+                    bInvalidParam = true;
+                }
+                else{
+                    int R = Integer.parseInt(master_Confirmproc_params.get(2));
+                    int G = Integer.parseInt(master_Confirmproc_params.get(3));
+                    int B = Integer.parseInt(master_Confirmproc_params.get(4));
+                    int pX = Integer.parseInt(master_Confirmproc_params.get(5));
+                    int pY = Integer.parseInt(master_Confirmproc_params.get(6));
+
+                    colorNormalBack = new Point3(R, G, B);
+                    pixelforBase = new Point(pX, pY);
+                }
+            }
+            break;
         }
-        else{
-            thresBorder = digit_param_list.get(0).intValue();
-            thresCircle = digit_param_list.get(1).intValue();
-            minRadius = digit_param_list.get(2).intValue();
-            maxRadius = digit_param_list.get(3).intValue();
-
-            borderColor.x = digit_param_list.get(4).intValue();
-            borderColor.y = digit_param_list.get(5).intValue();
-            borderColor.z = digit_param_list.get(6).intValue();
-
-        }
-
         return bInvalidParam;
     }
 
@@ -718,44 +755,65 @@ class JAction_FindClose_Ad extends JAction{
 
         boolean bFindAd = false;
         JUtilFunctions.takeScreenshot();
-        Mat workMat = JUtilFunctions.screenshot.submat(rcAnalyse);
-        Mat detResult = JUtilFunctions.detectCircles(workMat, rcAnalyse, thresBorder, thresCircle, minRadius, maxRadius);
 
-        int findCircleCnt = detResult.cols();
-        if (findCircleCnt == 1){
-            double[] circle = detResult.get(0, 0);
-            ptFindAdCenter.x = Math.round(circle[0]);
-            ptFindAdCenter.y = Math.round(circle[1]);
-            bFindAd = true;
+        switch(type){
+            case 0:{
+                Mat workMat = JUtilFunctions.screenshot.submat(rcAnalyse);
+                Mat detResult = JUtilFunctions.detectCircles(workMat, rcAnalyse, thresBorder, thresCircle, minRadius, maxRadius);
+
+                int findCircleCnt = detResult.cols();
+                if (findCircleCnt == 1){
+                    double[] circle = detResult.get(0, 0);
+                    ptFindAdCenter.x = Math.round(circle[0]);
+                    ptFindAdCenter.y = Math.round(circle[1]);
+                    circle = null;
+                    bFindAd = true;
+                }
+            }
+            break;
+            case 1:{
+                double[] pixelsVals = JUtilFunctions.screenshot.get((int)pixelforBase.y, (int)pixelforBase.x);
+                if (pixelsVals[0] != colorNormalBack.x || pixelsVals[1] != colorNormalBack.y || pixelsVals[2] != colorNormalBack.z){
+                    bFindAd = true;
+                }
+            }
+            break;
         }
 
         return bFindAd;
     };
 
+    public void closeAdWindow(){
+        switch(type){
+            case 0:{
+                //. click proc...
+                Point ptOrg = JUtilFunctions.getOrigPointFromBasePoint(ptFindAdCenter);
+                JUserActions.dispatchTap(ptOrg.x, ptOrg.y);
+            }
+            break;
+            case 1:{
+                Point ptBase = new Point(Config.IMAGE_WIDTH / 2, Config.IMAGE_HEIGHT - 20);
+                Point ptOrg = JUtilFunctions.getOrigPointFromBasePoint(ptBase);
+                JUserActions.dispatchTap(ptOrg.x, ptOrg.y);
+                ptBase = null;
+                ptOrg = null;
+            }
+            break;
+        }
+
+    }
+
     @Override
     public boolean run_internel(JAction prevAction){
 
-        boolean bInvalidParam = false;
-        if (bInitParams == false){
-            bInitParams = true;
-            bInvalidParam = parseParams();
-            if (bInvalidParam){
-                result_string = "Invalid Param";
-                executor.last_result_string = "Invalid Param: " + name;
-                return true;
-            }
-        }
-
-        JUtilFunctions.delay_duration(1000);
+        JUtilFunctions.delay_duration(2000);
 
         boolean bFindAd = true;
         while(bFindAd) {
             bFindAd = findAd();
             if (bFindAd) {
-                //. click proc...
-                Point ptOrg = JUtilFunctions.getOrigPointFromBasePoint(ptFindAdCenter);
-                JUserActions.dispatchTap(ptOrg.x, ptOrg.y);
-                JUtilFunctions.delay_duration(1000);
+                closeAdWindow();
+                JUtilFunctions.delay_duration(2000);
             }
         }
 

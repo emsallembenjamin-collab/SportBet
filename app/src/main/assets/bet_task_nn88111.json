@@ -1,24 +1,24 @@
 {
   "has_bet_task"          : "yes",
-  "user_id"               : "kingvn006",
+  "user_id"               : "kingvn016",
   "password"              : "123456a",
   "full_width"            : 540,
   "full_height"           : 960,
-  "site"                  : "ee67805.com",
+  "site"                  : "nn88111.com",
   "update_site_info"      : "false",
   "limitTime"			        : 9000000,
 
   "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "GIAI J-LEAGUE 2 NHAT BAN",
-  "progress_date"		      : "3 16",
-  "team1"				          : "Montedio Yamagata",
-  "team2"				          : "Ventforet Kofu",
+  "league_name"			      : "CUP C2 CHAU AU",
+  "progress_date"		      : "3 14",
+  "team1"				          : "Slavia Praha",
+  "team2"				          : "AC Milan",
   "betTarget"			  	     : "Xiu",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			        : "2.25",
+  "betMark"			        : "3",
   "betAmount"			      : "20"
 
 }
