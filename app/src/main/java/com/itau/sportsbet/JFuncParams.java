@@ -11,7 +11,8 @@ import org.opencv.core.Rect;
 class JFuncParams_ColorBar {
     public Point3 targetUpColor = null;
     public Point3 targetDownColor = null;
-    public int nLimitLen = 0;
+    public int nMinLen = 0;
+    public int nMaxLen = 0;
     public int fixedVal = 0;
     public int startVal = 0;
     public int endVal = 0;
@@ -47,8 +48,7 @@ class JFuncParams_FindSectionIncluding2Targets {
     Point3  ptBetPannelBackDownColor = null;
     Rect    rcDecideforCollapseCond = null;
     Point   ptPosClickforExpanding = null;
-    boolean bDecideCollapseIfHasPt = false;
-    Rect    rcSectionSignature  = new Rect(30, 0, 200, 100);
+    Rect    rcSectionSignature  = new Rect(30, 20, 50, 60);
     boolean bScrollPosChanged = false;
     //.2024-12
     int     scrollAmount       = Config.vscroll_unit;

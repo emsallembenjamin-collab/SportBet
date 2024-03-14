@@ -335,7 +335,7 @@ class JActionValidator_ColorbarDet extends JActionValidator {
             // OpenCV uses BGR color ordering but now set param in order "RGB".
             param.targetUpColor = new Point3(jsonArray.getInt(startIdxforJsonStringArray + 7), jsonArray.getInt(startIdxforJsonStringArray + 8), jsonArray.getInt(startIdxforJsonStringArray + 9));
             param.targetDownColor = new Point3(jsonArray.getInt(startIdxforJsonStringArray + 10), jsonArray.getInt(startIdxforJsonStringArray + 11), jsonArray.getInt(startIdxforJsonStringArray + 12));
-            param.nLimitLen = jsonArray.getInt(startIdxforJsonStringArray + 13);
+            param.nMinLen = jsonArray.getInt(startIdxforJsonStringArray + 13);
 
             bRet = true;
         }

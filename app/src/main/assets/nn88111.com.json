@@ -10,7 +10,7 @@
       "delay"                 : 1000,
       "waitPageload"          : false,
       "validator_param_list"  : ["ocr", "have", "Tai Ngay", "400","100","530","200"],
-      "confirmproc_param_list"  : ["find and close ad modal", "2"],
+      "confirmproc_param_list"  : ["find and close ad modal1", "2"],
 
       "branch": {
         "success" : ["find login button"],
@@ -108,7 +108,7 @@
       "delay"                 : 3000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
-      "confirmproc_param_list"  : ["find and close ad modal", "2"],
+      "confirmproc_param_list"  : ["find and close ad modal2", "2"],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : []
@@ -327,7 +327,22 @@
 
 
     {
-      "name"                  : "find and close ad modal",
+      "name"                  : "find and close ad modal1",
+      "type"                  : "find_close_ad",
+      "string_param_list"     : ["0"],
+      "digit_param_list"      : [100, 50, 15,25, 255,255,255],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
+    },
+    {
+      "name"                  : "find and close ad modal2",
       "type"                  : "find_close_ad",
       "string_param_list"     : ["0"],
       "digit_param_list"      : [100, 50, 15,25, 255,255,255],

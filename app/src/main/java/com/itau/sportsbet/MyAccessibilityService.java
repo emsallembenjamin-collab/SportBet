@@ -127,9 +127,9 @@ public class MyAccessibilityService extends AccessibilityService {
 
                 JUtilFunctions.disableSuperuserGranteMsg();
 
-                do_test("1");
+                //do_test("1");
                 do_test("2");
-                do_test("3");
+                // do_test("3");
             }
         });
 

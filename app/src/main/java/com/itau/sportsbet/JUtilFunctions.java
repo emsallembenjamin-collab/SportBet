@@ -768,7 +768,8 @@ public class JUtilFunctions {
         int nSegCnt = continuousSegments.size();
         for (int i = 0; i < nSegCnt; i++){
             Point sc = continuousSegments.get(i);
-            if (sc.y - sc.x < param.nLimitLen){
+            int nLen = (int)(sc.y - sc.x);
+            if ((nLen < param.nMinLen) || (param.nMaxLen > 0 && nLen > param.nMaxLen)){
                 continuousSegments.remove(i);
                 i--;
                 nSegCnt--;
@@ -804,6 +805,33 @@ public class JUtilFunctions {
         }
 
         return bHas;
+    }
+
+
+    public static boolean hasNoneSpecialColorPointInRegion(Mat image, Rect rcWork, Point3 upColor, Point3 downColor) {
+
+        boolean bHasNone = false;
+        // Iterate through the vertical line
+        for (int y = rcWork.y; y < rcWork.y + rcWork.height; y++) {
+            if (bHasNone)
+                break;
+            for (int x = rcWork.x; x < rcWork.x + rcWork.width; x++) {
+                double[] pixelsVals = image.get(y, x);
+                if ((pixelsVals[0] >= downColor.x) && (pixelsVals[0] <= upColor.x) &&
+                        (pixelsVals[1] >= downColor.y) && (pixelsVals[1] <= upColor.y) &&
+                        (pixelsVals[2] >= downColor.z) && (pixelsVals[2] <= upColor.z)){
+                }
+                else{
+                    bHasNone = true;
+                    break;
+                }
+
+                pixelsVals = null;
+
+            }
+        }
+
+        return bHasNone;
     }
 
 
@@ -1426,7 +1454,7 @@ public class JUtilFunctions {
             //.2024-3-9
             //. for detecting using border color...
             JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
-            if (sectionHead.x > 850)
+            if (sectionHead.y > 850)
                 break;
 
             Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, colorBarParam.fixedVal, (int)(sectionHead.y - sectionHead.x));
@@ -1615,11 +1643,9 @@ public class JUtilFunctions {
                 // Check if the current pixel color matches the target color
                 Rect rcDecide = new Rect(param.nextSectionInfo.fixedVal + param.rcDecideforCollapseCond.x,
                         (int)ptFindPos.y + param.rcDecideforCollapseCond.y, param.rcDecideforCollapseCond.width, param.rcDecideforCollapseCond.height);
-                boolean bHasPoint = JUtilFunctions.hasSpecialColorPointInRegion(JUtilFunctions.screenshot, rcDecide,
+                boolean bCollapsed = JUtilFunctions.hasNoneSpecialColorPointInRegion(JUtilFunctions.screenshot, rcDecide,
                         param.ptBetPannelBackUpColor, param.ptBetPannelBackDownColor);
-                boolean bExpanded = bHasPoint;
-                if (param.bDecideCollapseIfHasPt)
-                    bExpanded = !bExpanded;
+                boolean bExpanded = !bCollapsed;
 
                 if (bExpanded){
                     //. none collapsed case...
