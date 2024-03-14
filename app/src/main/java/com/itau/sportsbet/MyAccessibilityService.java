@@ -67,9 +67,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
 
         runnable = new JEngine(loadTask);
-
         handler.postDelayed(runnable, initialDelay);
-
     }
 
     // Override methods for handling accessibility events

@@ -371,7 +371,7 @@ class JAction_Do_Find_ColorBar extends JAction{
         param.targetDownColor = new Point3(digit_param_list.get(7).intValue(),
                 digit_param_list.get(8).intValue(), digit_param_list.get(9).intValue());
 
-        param.nLimitLen = digit_param_list.get(10).intValue();
+        param.nMinLen = digit_param_list.get(10).intValue();
 
         ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, param);
 
@@ -482,7 +482,7 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         //. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
-        JUtilFunctions.delay_duration(3000);
+        JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
         JUtilFunctions.delay_duration(100);
@@ -806,14 +806,14 @@ class JAction_FindClose_Ad extends JAction{
     @Override
     public boolean run_internel(JAction prevAction){
 
-        JUtilFunctions.delay_duration(2000);
+        JUtilFunctions.delay_duration(3000);
 
         boolean bFindAd = true;
         while(bFindAd) {
             bFindAd = findAd();
             if (bFindAd) {
                 closeAdWindow();
-                JUtilFunctions.delay_duration(2000);
+                JUtilFunctions.delay_duration(3000);
             }
         }
 

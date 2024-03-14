@@ -135,7 +135,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
         colorBarParam.targetUpColor = new Point3(237,243,250);
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
-        colorBarParam.nLimitLen = 30;
+        colorBarParam.nMinLen = 30;
         colorBarParam.fixedVal = 470;
         colorBarParam.startVal = 50;
         colorBarParam.endVal = 850;
@@ -189,7 +189,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         //. for find color bar...
         colorBarParam.targetUpColor = new Point3(240,240,240);
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
-        colorBarParam.nLimitLen = 30;
+        colorBarParam.nMinLen = 30;
         colorBarParam.fixedVal = 470;
         colorBarParam.startVal = 50;
         colorBarParam.endVal = 850;
@@ -247,7 +247,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
         JFuncParams_ColorBar param = new JFuncParams_ColorBar();
         param.targetUpColor = new Point3(54,192,101);
         param.targetDownColor = param.targetUpColor;
-        param.nLimitLen = 50;
+        param.nMinLen = 50;
         param.bVert = true;
         param.fixedVal = 400; param.startVal = 100; param.endVal = 400;
 
@@ -270,7 +270,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
             //. so I do it that find color bar...
             param.targetUpColor = new Point3(69,137,200);
             param.targetDownColor = param.targetUpColor;
-            param.nLimitLen = 45;
+            param.nMinLen = 45;
             param.bVert = true;
             param.fixedVal = 490; param.startVal = 730; param.endVal = 950;
 
@@ -283,7 +283,7 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
 
                 param.targetUpColor = new Point3(255,255,255);
                 param.targetDownColor = new Point3(255,255,255);
-                param.nLimitLen = 45;
+                param.nMinLen = 45;
                 param.fixedVal = 300; param.startVal = nEndY_TitleBar + 10; param.endVal = 450;
 
                 ArrayList<Point> retSegments1 = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, param);
@@ -293,14 +293,14 @@ public class JBetAction_KSports_m_zenandfe extends JBetAction  {
                     //. find 2 color bars.
                     param.targetUpColor = new Point3(222,239,255);
                     param.targetDownColor = param.targetUpColor;
-                    param.nLimitLen = 35;
+                    param.nMinLen = 35;
                     param.fixedVal = 290; param.startVal = nEndY_EditBar + 10; param.endVal = nEndY_EditBar + 160;
 
                     ArrayList<Point> retSegments2 = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, param);
 
                     param.targetUpColor = new Point3(255,234,212);
                     param.targetDownColor = param.targetUpColor;
-                    param.nLimitLen = 35;
+                    param.nMinLen = 35;
                     param.fixedVal = 270; param.startVal = nEndY_EditBar + 100; param.endVal = nEndY_EditBar + 350;
 
                     ArrayList<Point> retSegments3 = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, param);

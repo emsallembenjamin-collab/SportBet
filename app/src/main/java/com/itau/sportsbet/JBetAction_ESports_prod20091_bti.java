@@ -99,7 +99,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
             JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
             colorBarParam.targetUpColor = new Point3(14,14,14);
             colorBarParam.targetDownColor = colorBarParam.targetUpColor;
-            colorBarParam.nLimitLen = 30;
+            colorBarParam.nMinLen = 30;
             colorBarParam.fixedVal = 470;
             colorBarParam.startVal = 670;
             colorBarParam.endVal = 850;
@@ -199,7 +199,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
         colorBarParam.targetUpColor = new Point3(70,75,88);
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
-        colorBarParam.nLimitLen = 30;
+        colorBarParam.nMinLen = 30;
         colorBarParam.fixedVal = 470;
         colorBarParam.startVal = 50;
         colorBarParam.endVal = 850;
@@ -268,7 +268,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         //. for find color bar...
         colorBarParam.targetUpColor = new Point3(70,75,88);
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
-        colorBarParam.nLimitLen = 30;
+        colorBarParam.nMinLen = 30;
         colorBarParam.fixedVal = 470;
         colorBarParam.startVal = 120;
         colorBarParam.endVal = 850;
@@ -328,7 +328,7 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
         //. for find color bar...
         colorBarParam.targetUpColor = new Point3(255,255,255);
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
-        colorBarParam.nLimitLen = 30;
+        colorBarParam.nMinLen = 30;
         colorBarParam.fixedVal = 320;
         colorBarParam.startVal = 250;
         colorBarParam.endVal = 700;

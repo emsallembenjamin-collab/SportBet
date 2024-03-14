@@ -11,14 +11,14 @@
   "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "GIAI J-LEAGUE 2 NHAT BAN",
-  "progress_date"		      : "3 16",
-  "team1"				          : "Montedio Yamagata",
-  "team2"				          : "Ventforet Kofu",
-  "betTarget"			  	     : "Xiu",
+  "league_name"			      : "GIAI A-LEAGUE UC",
+  "progress_date"		      : "3 15",
+  "team1"				          : "Newcastle Jets",
+  "team2"				          : "Adelaide United",
+  "betTarget"			  	     : "Newcastle Jets",
   "corner_kick"			      : 0,
-  "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			        : "2.25",
-  "betAmount"			      : "20"
+  "betTypeCategory"		   : "Keo chap",
+  "betMark"			        : "0",
+  "betAmount"			      : "415"
 
 }

@@ -11,14 +11,14 @@
   "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "CUP C2 CHAU AU",
-  "progress_date"		      : "3 14",
-  "team1"				          : "Slavia Praha",
-  "team2"				          : "AC Milan",
-  "betTarget"			  	     : "Xiu",
+  "league_name"			      : "Giai hang nhat Tho Nhi Ky",
+  "progress_date"		      : "3 17",
+  "team1"				          : "Bodrum Belediyesi Bodrumspor",
+  "team2"				          : "Boluspor",
+  "betTarget"			  	     : "Tai",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			        : "3",
-  "betAmount"			      : "20"
+  "betMark"			        : "2.25",
+  "betAmount"			      : "115"
 
 }
