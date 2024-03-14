@@ -54,6 +54,11 @@ class CLabelInfo
             bRet = true;
         else if (rcBound.height > CLabelInfo.MaxCharHeight)
             bRet = true;
+        else if (rcBound.height < CLabelInfo.MinCharHeight) {
+            float fRate = (float)rcBound.width / rcBound.height;
+            if (fRate > 3.0f)
+                bRet = true;
+        }
 
         return bRet;
     }
@@ -122,16 +127,19 @@ class CLabelInfo
         boolean bCond1 = (Math.abs(m_ptCenter.y - otherlabelInfo.m_ptCenter.y) <= CLabelInfo.MaxOffsetCenterY);
         if (bCond1)
         {
-            //. second. limit horizontal gap...
-            int right1 = m_rcBound.x + m_rcBound.width;
-            int right2 = otherlabelInfo.m_rcBound.x + otherlabelInfo.m_rcBound.width;
+            boolean bCond3 = Math.abs(m_rcBound.height - otherlabelInfo.m_rcBound.height) < CLabelInfo.MaxOffsetHeight;
+            if (bCond3) {
+                //. second. limit horizontal gap...
+                int right1 = m_rcBound.x + m_rcBound.width;
+                int right2 = otherlabelInfo.m_rcBound.x + otherlabelInfo.m_rcBound.width;
 
-            int nNewLeft =(int) JUtilFunctions.min(m_rcBound.x, otherlabelInfo.m_rcBound.x);
-            int nNewRight = (int)JUtilFunctions.max(right1, right2);
-            int nNewLength = nNewRight - nNewLeft;
-            boolean bCond2 = (nNewLength <= (m_rcBound.width + otherlabelInfo.m_rcBound.width + CLabelInfo.MaxOffsetX));
-            if (bCond2)
-                bNeighbour = true;
+                int nNewLeft =(int) JUtilFunctions.min(m_rcBound.x, otherlabelInfo.m_rcBound.x);
+                int nNewRight = (int)JUtilFunctions.max(right1, right2);
+                int nNewLength = nNewRight - nNewLeft;
+                boolean bCond2 = (nNewLength <= (m_rcBound.width + otherlabelInfo.m_rcBound.width + CLabelInfo.MaxOffsetX));
+                if (bCond2)
+                    bNeighbour = true;
+            }
         }
         return bNeighbour;
     }

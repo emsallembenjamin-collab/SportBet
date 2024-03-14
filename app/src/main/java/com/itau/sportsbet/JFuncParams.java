@@ -61,6 +61,3 @@ class JFuncParams_FindSectionIncluding2Targets {
 
 
 
-
-public class JFuncParams {
-}

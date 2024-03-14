@@ -437,8 +437,28 @@ class JAction_Do_Find_ColorBar extends JAction{
 //.
 class JAction_Do_Input_Id_Password extends JAction{
 
-    @Override
-    public boolean run_internel(JAction prevAction){
+    public int nUserIdIndex = 0;
+    public int nPasswordIndex = 1;
+    public Point ptUser_id = null;
+    public Point ptPassword = null;
+
+    //. 2024-3-14
+    //. in some sites.
+    //. userID & password input window moved when clicked edit ctrl.
+    //. because, browser shows notification bar in the bottom and some errors...
+    //. so we must recalc userID & password window position per step click...
+    public boolean recalcEditCtrlsPosition(){
+
+        JUtilFunctions.delay_duration(500);
+        //. in case, prevAction must not null.
+        JAction myPrevAction = prevAction;
+        boolean bRecalc = myPrevAction.run_internel(myPrevAction.prevAction);
+        setEditCtrlPos();
+
+        return bRecalc;
+    }
+
+    public boolean parseParams(){
 
         int nDigitParamCnt = digit_param_list.size();
         int nMaxRequireRectCnt = 2;
@@ -450,69 +470,90 @@ class JAction_Do_Input_Id_Password extends JAction{
         }
         int nPrevCnt = prevAction.result_rects.size();
         if (nPrevCnt < nMaxRequireRectCnt){
-            result_string = "Invalid Param: " + name;
-            executor.last_result_string = result_string;
-            //. must finish all process.
-            return true;
+            return false;
         }
-
-        int nUserIdIndex = 0, nPasswordIndex = 1;
         if (nDigitParamCnt == 2){
             nUserIdIndex = digit_param_list.get(0).intValue();
             nPasswordIndex = digit_param_list.get(1).intValue();
         }
 
+        return true;
+    }
+
+    public void setEditCtrlPos(){
+
         Rect rc1 = prevAction.result_rects.get(nUserIdIndex);
         Rect rc2 = prevAction.result_rects.get(nPasswordIndex);
 
-        Point ptUser_id = JUtilFunctions.getCenterPoint(rc1);
-        Point ptPassword = JUtilFunctions.getCenterPoint(rc2);
+        ptUser_id = JUtilFunctions.getCenterPoint(rc1);
+        ptPassword = JUtilFunctions.getCenterPoint(rc2);
+        ptPassword.x -= (150 / Config.resizeXRatio);
+    }
+
+
+
+
+
+    @Override
+    public boolean run_internel(JAction prevAct){
+
+        boolean bParsingParam = parseParams();
+        if (bParsingParam == false){
+            result_string = "Invalid Param: " + name;
+            executor.last_result_string = result_string;
+            //. must finish all process.
+            return true;
+        }
+        setEditCtrlPos();
 
         //. first, paste user_id
         String targetString = MyAccessibilityService.mainService.loadTask.user_id;
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
         JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, targetString);
-        JUtilFunctions.delay_duration(100);
+        //JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y);
-        JUtilFunctions.delay_duration(300);
+        recalcEditCtrlsPosition();
         //. need twice times.
         JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y);
-        JUtilFunctions.delay_duration(100);
+        recalcEditCtrlsPosition();
 
         //. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
-        JUtilFunctions.delay_duration(3000);
-
-        JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
-        JUtilFunctions.delay_duration(100);
-
-        //. offset point
-        Point ptOffset = JUtilFunctions.getOrigPointFromBasePoint(80, -60);
-        JUserActions.dispatchTap(ptOffset.x, ptUser_id.y + ptOffset.y);
         JUtilFunctions.delay_duration(1000);
 
+        JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
+        recalcEditCtrlsPosition();
+
+        //. offset point
+        Point ptOffset = JUtilFunctions.getOrigPointFromBasePoint(100, -60);
+        JUserActions.dispatchTap(ptOffset.x, ptUser_id.y + ptOffset.y);
+        recalcEditCtrlsPosition();
+
+
+        ////////////////////////////////////////////////////////////
         //. second, paste password...
         targetString = MyAccessibilityService.mainService.loadTask.password;
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
         JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, targetString);
-        JUtilFunctions.delay_duration(100);
+        // JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchTap(ptPassword.x, ptPassword.y);
-        JUtilFunctions.delay_duration(100);
+        recalcEditCtrlsPosition();
 
         //. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
-        JUtilFunctions.delay_duration(3000);
+        JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y);
-        JUtilFunctions.delay_duration(100);
+        recalcEditCtrlsPosition();
         JUserActions.dispatchTap(ptOffset.x, ptPassword.y + ptOffset.y);
-        JUtilFunctions.delay_duration(1000);
+        recalcEditCtrlsPosition();
 
         //. 2024-2-29.
         //. clone prev prevAction.result_rects for me...
         result_rects.clear();
+        int nPrevCnt = prevAct.result_rects.size();
         for (int i = 0; i < nPrevCnt; i++){
             Rect rcPrev = prevAction.result_rects.get(i);
             Rect rcNew = rcPrev.clone();
