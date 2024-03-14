@@ -235,7 +235,7 @@ public class JUserActions {
     public static void deleteContentofInput(int len) {
         for(int i = 0; i<len ; i++){
             dispatchOneKeyPress(KeyEvent.KEYCODE_DEL);
-            JUtilFunctions.delay_duration(50);
+            JUtilFunctions.delay_duration(300);
         }
     }
 

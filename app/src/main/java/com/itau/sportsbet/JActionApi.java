@@ -482,7 +482,7 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         //. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
-        JUtilFunctions.delay_duration(3000);
+        JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
         JUtilFunctions.delay_duration(100);
