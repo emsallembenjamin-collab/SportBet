@@ -41,6 +41,9 @@ abstract class JAction {
     public ArrayList<String> branch_fail;
     public JActionValidator validator = null;
     public JAction  confirmProc_firstAction = null;
+    //.2024-3-14
+    //. we need know the previous action...
+    public JAction  prevAction = null;
     public Config.DoConfirmMode  do_confirm_mode = e_Before;
 
     //. important. which param used? mine or prev result?
@@ -174,6 +177,7 @@ abstract class JAction {
         boolean bFinished = false;
         Log.d("PPPP Action: ", "Started! :" + name);
 
+        this.prevAction = prevAction;
         MyAccessibilityService.mainService.bPageLoadFlag = false;
 
         //. 2024-3-7

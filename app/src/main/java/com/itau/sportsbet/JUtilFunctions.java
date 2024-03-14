@@ -1508,7 +1508,8 @@ public class JUtilFunctions {
         //. we must identify finded section is same after scrolled..
         Mat matFirstSignature = null;
 
-        int nScrollCnt = param.tryScrollCnt;
+        // int nScrollCnt = param.tryScrollCnt;
+        int nScrollCnt = 3; //. 2024-3-14, my think, until 3, maybe while loop will be exit...
         while(nScrollCnt-- >0 ){
 
             Point ptFindPos = new Point(-1, -1);

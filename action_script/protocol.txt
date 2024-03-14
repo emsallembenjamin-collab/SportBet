@@ -363,12 +363,18 @@ action_scenario 화일의 전체 구조는 다음과 같다.
 		 
 	Params:
 		"string_param_list": 
-			no use.
+			special ad type.
+			"0" : white cross (X) mark in circle. in the middle and bottom position...
+			"1" : white cross (X) mark in right top part, but background image is shadowed... 
 		"digit_param_list"  : 
-			[thresBorder, thresCircle, minRadius, maxRadius, R,G,B]
+			in case 0: [thresBorder, thresCircle, minRadius, maxRadius, R,G,B]
+			in case 1: [normalBackR, normalBackG, normalBackB, ptXforClick, ptYforClick]
 
 			notice:
 			ad modal may apprear serveral times...
+			find_close_ad의 파라메터parsing은 두가지 방식으로 진행된다.
+			하나는 일반적인 action처럼 자기의 정의부 digit_param_list를 리용하는것이고
+			다른 하나는 caller의 confirmproc_param_list를 통하여 하는것이다.  
 		
 		
 

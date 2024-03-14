@@ -28,6 +28,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.Normalizer;
+import java.util.concurrent.CountDownLatch;
 import java.util.regex.Pattern;
 
 
@@ -108,7 +109,9 @@ public class JUserActions {
         Process process = null;
         DataOutputStream os = null;
         try {
-            Log.d("Click action", "Click Action");
+            String strLog = String.format("Click Action: %dx%d", (int)x, (int)y);
+            Log.d("Click action", strLog);
+
             process = Runtime.getRuntime().exec("su");
             os = new DataOutputStream(process.getOutputStream());
             os.writeBytes("/system/bin/input tap " + x + " " + y + "\n");
@@ -156,9 +159,14 @@ public class JUserActions {
     public static void copyTextToClipboardfromWorkThread(Context context, String text) {
 
         Handler handler = new Handler(Looper.getMainLooper());
+        final CountDownLatch latch = new CountDownLatch(1);
         handler.post(new Runnable() {
+
             @Override
             public void run() {
+
+                //Log.d("PPP AccessibilityService", "Start CopyClipboard Thread: " + text);
+
                 // Get the Clipboard Manager
                 ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
 
@@ -168,9 +176,21 @@ public class JUserActions {
                 // Set the ClipData to the Clipboard
                 if (clipboard != null) {
                     clipboard.setPrimaryClip(clip);
+                    //Log.d("PPP AccessibilityService", "End CopyClipboard Thread1: " + text);
                 }
+
+                //Log.d("PPP AccessibilityService", "End CopyClipboard Thread2: " + text);
+                latch.countDown();
+                //Log.d("PPP AccessibilityService", "End CopyClipboard Thread3: " + text);
             }
         });
+
+        // Wait for the background thread to complete
+        try {
+            latch.await();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
 
@@ -233,9 +253,23 @@ public class JUserActions {
     }
 
     public static void deleteContentofInput(int len) {
-        for(int i = 0; i<len ; i++){
-            dispatchOneKeyPress(KeyEvent.KEYCODE_DEL);
-            JUtilFunctions.delay_duration(300);
+
+        try {
+            // Get runtime to execute shell command
+            Process process = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(process.getOutputStream());
+
+            // Send the Del key event 10 times
+            int keyCode = KeyEvent.KEYCODE_DEL;
+            for (int i = 0; i < len; i++) {
+                os.writeBytes("input keyevent " + keyCode + "\n");
+                os.flush();
+            }
+
+            os.close();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
         }
     }
 

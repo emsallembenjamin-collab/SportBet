@@ -41,7 +41,7 @@
       "string_param_list"     : [],
       "digit_param_list"      : [1],
       "time_limit"            : 0,
-      "delay"                 : 1000,
+      "delay"                 : 3000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
       "confirmproc_param_list"  :[],

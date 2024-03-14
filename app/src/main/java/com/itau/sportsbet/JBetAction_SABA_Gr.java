@@ -374,7 +374,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
         colorBarParam.nMinLen = 10;
         colorBarParam.fixedVal = 470;
-        colorBarParam.startVal = 50 + offsetVert;
+        colorBarParam.startVal = 70 + offsetVert;
         colorBarParam.endVal = 850;
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
@@ -424,7 +424,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
                     break;
                 }
                 if (param.bScrollPosChanged == false){
-                    int nScrolls = (int)(ptFindSecPos.y - colorBarParam.startVal / Config.resizeYRatio) + 100;
+                    int nScrolls = (int)(ptFindSecPos.y - colorBarParam.startVal / Config.resizeYRatio);
                     Point ptBottom = JUtilFunctions.getOrigPointFromBasePoint(new Point(Config.IMAGE_WIDTH / 2, param.scrollAmount));
                     JUserActions.scrollToLong(ptBottom, nScrolls);
                 }
@@ -500,7 +500,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
         else
             colorBarParam.fixedVal = 420; //. no 470, Up arrow appears.
 
-        colorBarParam.startVal = 50 + offsetVert;
+        colorBarParam.startVal = 70 + offsetVert;
         colorBarParam.endVal = 850;
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
@@ -562,7 +562,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
          */
 
         //. in SABA, there is separators same Section per tournament.
-        int nTryCnt = 5;
+        int nTryCnt = 10;
         Point ptOutClickPos = new Point();
         boolean bFindTarget = false;
         Point ptFindSecPos = new Point();
@@ -578,8 +578,9 @@ public class JBetAction_SABA_Gr extends JBetAction {
                     break;
                 }
                 if (param.bScrollPosChanged == false){
-                    int nScrolls = (int)(ptFindSecPos.y - colorBarParam.startVal / Config.resizeYRatio) + 100;
-                    Point ptBottom = JUtilFunctions.getOrigPointFromBasePoint(new Point(Config.IMAGE_WIDTH / 2, param.scrollAmount));
+                    // int nScrolls = (int)(ptFindSecPos.y - colorBarParam.startVal / Config.resizeYRatio) + 100;
+                    int nScrolls = (int)(200 / Config.resizeYRatio);
+                    Point ptBottom = JUtilFunctions.getOrigPointFromBasePoint(new Point(Config.IMAGE_WIDTH / 2, Config.IMAGE_HEIGHT - 50));
                     JUserActions.scrollToLong(ptBottom, nScrolls);
                 }
             }
@@ -589,8 +590,16 @@ public class JBetAction_SABA_Gr extends JBetAction {
             }
         }
 
+        if (bFindTarget == true){
+            //. do click.
+            JUserActions.dispatchTap(ptOutClickPos.x, ptOutClickPos.y);
+            JUtilFunctions.delay_duration(2000);
 
-        strRet = "success";
+            strRet = "success";
+        }
+        else{
+            strRet = "fail findBettingTypeSection: can't find targets BetMark.";
+        }
 
         return strRet;
     }
