@@ -128,9 +128,27 @@ public class Assets {
             e.printStackTrace();
         }
     }
-
     public static String read_bettask_json_from_file(){
         String betTaskJsonFilePath = getConfigDataPath() + File.separator + "bet_task.json";
+        String json = null;
+        try (
+                InputStream in = new FileInputStream(betTaskJsonFilePath);
+
+        ) {
+
+            int size = in.available();
+            byte[] buffer = new byte[size];
+            in.read(buffer);
+            in.close();
+            json = new String(buffer, "UTF-8");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return json;
+    }
+    public static String read_bettask_json_from_file(String strTag){
+        String betTaskJsonFilePath = getConfigDataPath() + File.separator + "bet_task" + strTag + ".json";
         String json = null;
         try (
                 InputStream in = new FileInputStream(betTaskJsonFilePath);
@@ -192,7 +210,7 @@ public class Assets {
         }
     }
     public static String read_action_scenario_from_file(String siteName){
-        String actionScenarioFilePath = getConfigDataPath() + File.separator + "actionScenario.json";
+        String actionScenarioFilePath = getConfigDataPath() + File.separator + "action_scenario.json";
         String json = null;
         try (
                 InputStream in = new FileInputStream(actionScenarioFilePath);

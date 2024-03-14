@@ -677,6 +677,23 @@ public class JUtilFunctions {
         return highContrastImage;
     }
 
+    //.*=================================================================================
+    //.func: areMatsEqual
+    //.desc:
+    //.
+    public static boolean areMatsEqual(Mat mat1, Mat mat2) {
+        if (mat1.rows() != mat2.rows() || mat1.cols() != mat2.cols() || mat1.type() != mat2.type()) {
+            return false;
+        }
+
+        Mat diff = new Mat();
+        Core.absdiff(mat1, mat2, diff);
+
+        Scalar scalar = Core.sumElems(diff);
+        double totalDiff = scalar.val[0] + scalar.val[1] + scalar.val[2] + scalar.val[3]; // For multi-channel matrices
+        return totalDiff == 0;
+    }
+
 
 
     //.*=================================================================================
@@ -1049,7 +1066,7 @@ public class JUtilFunctions {
                 }
                 setOcrPatternToTess(ocrParam.ocrPattern);
 
-                JUtilFunctions.SaveMatFile(imageForOcr, MyAccessibilityService.mainService);
+                //pgh JUtilFunctions.SaveMatFile(imageForOcr, MyAccessibilityService.mainService);
 
                 int nTargetRectCnt = rcTargets.size();
                 for (int i = 0; i < nTargetRectCnt; i++) {
@@ -1142,7 +1159,7 @@ public class JUtilFunctions {
             Mat ocrAreaMat = JUtilFunctions.originScreenShot.submat(rcForOcr);
 
             //.for test.
-            JUtilFunctions.SaveMatFile(ocrAreaMat, MyAccessibilityService.mainService);
+            //pgh JUtilFunctions.SaveMatFile(ocrAreaMat, MyAccessibilityService.mainService);
 
             for (int k = 0; k < rcTexts.size(); k++){
                 Rect rc = rcTexts.get(k);
@@ -1459,6 +1476,10 @@ public class JUtilFunctions {
         boolean bAlreadyFindedTargetSection = false;
         boolean bFindedNextSection = false;
 
+        //. 2024-3-13
+        //. we must identify finded section is same after scrolled..
+        Mat matFirstSignature = null;
+
         int nScrollCnt = param.tryScrollCnt;
         while(nScrollCnt-- >0 ){
 
@@ -1466,9 +1487,67 @@ public class JUtilFunctions {
             Point ptNextSecPos = new Point(-1, -1);
             boolean bFindTargetSection = findColorBarSection(param.sectionTarget, param.secTargetIntOcrParam,
                     param.secWidthforUsingBorder, param.nextSectionInfo, ptFindPos, ptNextSecPos);
+            if (bFindTargetSection == true){
+                param.bFindedLeagueSection = true;
+                bAlreadyFindedTargetSection = true;
+
+                //. 2024-3-13
+                //. we must if finded 2 section is the same?
+                Rect rcSectionSignature = param.rcSectionSignature.clone();
+                rcSectionSignature.y += (int)ptFindPos.y;
+
+                if (matFirstSignature == null){
+                    matFirstSignature = JUtilFunctions.screenshot.submat(rcSectionSignature);
+                }
+                else{
+                    Mat matNewSignature = null;
+                    matNewSignature = JUtilFunctions.screenshot.submat(rcSectionSignature);
+                    boolean bEqualSec = JUtilFunctions.areMatsEqual(matFirstSignature, matNewSignature);
+                    matNewSignature = null;
+
+                    if (bEqualSec == false){
+                        bFindTargetSection = false;
+
+                        ptNextSecPos.x = ptFindPos.x;
+                        ptNextSecPos.y = ptFindPos.y;
+                        ptFindPos.x = -1;
+                        ptFindPos.y = -1;
+                    }
+                }
+                rcSectionSignature = null;
+                if (bFindTargetSection == true){
+                    //. do ocr proc.
+                    int nStartY = (int)ptFindPos.y;
+                    int nEndY = nLimitY;
+                    if (ptNextSecPos.x >= 0){
+                        nEndY = (int)ptNextSecPos.x;
+                        bFindedNextSection = true;
+                    }
+
+                    int height = nEndY - nStartY;
+                    if (height > 10){
+                        Rect rcAnalyseBase = new Rect(0, nStartY, param.nAnalyseWidth, height);
+                        //. do ocr.
+                        String strRet = JUtilFunctions.find2TargetsArea(param, rcAnalyseBase, ptOutClickPos );
+                        if(strRet.equals("success")){
+                            bResult = true;
+                            break;
+                        }
+                    }
+
+                    if (bFindedNextSection)
+                        break;
+                    else{
+                        JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                        param.bScrollPosChanged = true;
+                        continue;
+                    }
+                }
+            }
+
             if (bFindTargetSection == false){
                 if (bAlreadyFindedTargetSection == false){
-                    JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+                    JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
                     param.bScrollPosChanged = true;
                     continue;
                 }
@@ -1494,44 +1573,15 @@ public class JUtilFunctions {
                     if (bFindedNextSection)
                         break;
                     else{
-                        JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+                        JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
                         param.bScrollPosChanged = true;
                         continue;
                     }
                 }
             }
-            else{
-                param.bFindedLeagueSection = true;
-                bAlreadyFindedTargetSection = true;
-
-                //. do ocr proc.
-                int nStartY = (int)ptFindPos.y;
-                int nEndY = nLimitY;
-                if (ptNextSecPos.x >= 0){
-                    nEndY = (int)ptNextSecPos.x;
-                    bFindedNextSection = true;
-                }
-
-                int height = nEndY - nStartY;
-                if (height > 10){
-                    Rect rcAnalyseBase = new Rect(0, nStartY, param.nAnalyseWidth, height);
-                    //. do ocr.
-                    String strRet = JUtilFunctions.find2TargetsArea(param, rcAnalyseBase, ptOutClickPos );
-                    if(strRet.equals("success")){
-                        bResult = true;
-                        break;
-                    }
-                }
-
-                if (bFindedNextSection)
-                    break;
-                else{
-                    JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
-                    param.bScrollPosChanged = true;
-                    continue;
-                }
-            }
         }
+
+        matFirstSignature = null;
 
         return bResult;
     }
@@ -1557,18 +1607,21 @@ public class JUtilFunctions {
                 if (ptFindPos.y > nLimitY){
                     //. too down pos...
                     //. so need to some up scrolling...
-                    JUserActions.scrollUpPage((int)(200 / Config.resizeYRatio));
+                    Point ptBase = new Point(200, ptFindPos.y);
+                    JUserActions.scrollToLong(ptBase, (int)(param.scrollAmount / 3 / Config.resizeYRatio));
                     continue;
                 }
 
-                //. judge if collapsed ???
-                double[] pixelsVals = JUtilFunctions.screenshot.get((int)ptFindPos.y + 20, param.nextSectionInfo.fixedVal);
                 // Check if the current pixel color matches the target color
                 Rect rcDecide = new Rect(param.nextSectionInfo.fixedVal + param.rcDecideforCollapseCond.x,
                         (int)ptFindPos.y + param.rcDecideforCollapseCond.y, param.rcDecideforCollapseCond.width, param.rcDecideforCollapseCond.height);
                 boolean bHasPoint = JUtilFunctions.hasSpecialColorPointInRegion(JUtilFunctions.screenshot, rcDecide,
                         param.ptBetPannelBackUpColor, param.ptBetPannelBackDownColor);
-                if (bHasPoint){
+                boolean bExpanded = bHasPoint;
+                if (param.bDecideCollapseIfHasPt)
+                    bExpanded = !bExpanded;
+
+                if (bExpanded){
                     //. none collapsed case...
                 }
                 else{
@@ -1590,7 +1643,7 @@ public class JUtilFunctions {
                 break;
             }
             else{
-                JUserActions.scrollUpPage((int)(Config.vscroll_unit / Config.resizeYRatio));
+                JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
             }
         }
 

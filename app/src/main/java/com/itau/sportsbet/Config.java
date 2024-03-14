@@ -252,7 +252,7 @@ public class Config {
 	public static String sports_viet = "Thể thao";
 
 	//pgh public static float tesseractDetaultCharHeight = 70.0f;
-	public static int max_userid_password_len = 16;
+	public static int max_userid_password_len = 10;
 
 	public static String betType_Handicap = "Keo chap";
 	public static String betType_TaiXiu = "Tai/Xiu";

@@ -6,6 +6,6 @@ public class APIResponse {
 
     public String cmd_type;
     public String data;
-    public String actionScenario;
+    public String scenario;
 }
 

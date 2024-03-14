@@ -7,8 +7,8 @@
     tools:context=".MainActivity">
 
     <LinearLayout
-        android:layout_width="309dp"
-        android:layout_height="338dp"
+        android:layout_width="269dp"
+        android:layout_height="333dp"
         android:layout_marginStart="56dp"
         android:layout_marginTop="157dp"
         android:layout_marginEnd="85dp"
@@ -32,8 +32,7 @@
             android:layout_height="wrap_content"
             android:ems="10"
             android:inputType="textPersonName"
-            android:text="phone_"
-            />
+            android:text="phone0" />
 
         <Button
             android:id="@+id/phone_set_btn"

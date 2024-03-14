@@ -61,8 +61,14 @@ public class MyAccessibilityService extends AccessibilityService {
         setServiceInfo(info);
 
         doInit();
+
+        long initialDelay = 1000; // milliseconds
+        long interval = 2000; // milliseconds
+
+
         runnable = new JEngine(loadTask);
 
+        handler.postDelayed(runnable, initialDelay);
 
     }
 

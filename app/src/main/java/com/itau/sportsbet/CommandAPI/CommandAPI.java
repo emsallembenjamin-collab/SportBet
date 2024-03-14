@@ -45,10 +45,9 @@ public class CommandAPI {
                 if(apiResponse.cmd_type.equals(APIResponse.CMD_CONFIG)){
                     if(apiResponse.data != null) {
                         Assets.save_betconfig_json_from_file(apiResponse.data);
-                    }else if( apiResponse.actionScenario != null){
-                        Assets.save_action_scenario_from_file(apiResponse.actionScenario);
-                    }else{
-                        api_success = false;
+                    }
+                    if( apiResponse.scenario != null){
+                        Assets.save_action_scenario_from_file(apiResponse.scenario);
                     }
                 }else if(apiResponse.cmd_type.equals(APIResponse.CMD_GAME)){
                     if(apiResponse.data != null){

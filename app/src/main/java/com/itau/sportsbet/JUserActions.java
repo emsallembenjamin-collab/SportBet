@@ -40,9 +40,9 @@ public class JUserActions {
         Point p2 = new Point(50, 1);
         touchEventLong(p1, p2);
     }
-    public static void scrollDownPage(int h) {
-        Point p1 = new Point(50, 100);
-        Point p2 = new Point(50, 100 + h);
+    public static void scrollDownPage(int startY, int h) {
+        Point p1 = new Point(50, startY);
+        Point p2 = new Point(50, startY + h);
         touchEvent(p1, p2);
     }
 
@@ -102,6 +102,7 @@ public class JUserActions {
         touchEventLong(p1, p2, 1000);
     }
 
+
     public static void dispatchTap(double x, double y) {
 
         Process process = null;
@@ -137,7 +138,7 @@ public class JUserActions {
     }
     public static void dispatchLongClick(int x, int y) {
         Point p = new Point(x, y);
-        touchEventLong(p, p);
+        touchEventLong(p, p, 2000);
     }
     public static void copyTextToClipboard(Context context, String text) {
         // Get the Clipboard Manager
@@ -234,6 +235,7 @@ public class JUserActions {
     public static void deleteContentofInput(int len) {
         for(int i = 0; i<len ; i++){
             dispatchOneKeyPress(KeyEvent.KEYCODE_DEL);
+            JUtilFunctions.delay_duration(50);
         }
     }
 

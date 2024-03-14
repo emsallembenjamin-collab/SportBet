@@ -51,6 +51,8 @@ abstract class JAction {
     //. note. result_rects-> is original image coord size...
     public String result_string;
 
+    //. public 2024-3-13
+    public boolean parseParamFromConfirmList(ArrayList<String> master_Confirmproc_params) {return true;};
 
     //.*=========================================================
     //.func: create object...
@@ -341,6 +343,9 @@ public class JActionExecutor {
                 String confirmProc_do_mode = action.confirmproc_param_list.get(1);
                 int nConfirmMode = Integer.parseInt(confirmProc_do_mode);
                 action.do_confirm_mode = Config.DoConfirmMode.fromInteger(nConfirmMode);
+
+                //. 2024-3-13
+                boolean b = action.confirmProc_firstAction.parseParamFromConfirmList(action.confirmproc_param_list);
 
                 nRet++;
             }

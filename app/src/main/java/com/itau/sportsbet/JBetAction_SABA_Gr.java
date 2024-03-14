@@ -31,14 +31,116 @@ public class JBetAction_SABA_Gr extends JBetAction {
     public Point3   ptBackColor = new Point3(27,27,36);
     public Point3   ptBetPannelColor = new Point3(39,39,50);
 
-    JBetAction_SABA_Gr(JLoadTask loadTask){
+    //. 2024-3-12
+    //. for various change types...
+    public int      typeSite = 0;       //. gray, first
+    public int      offsetVert = 0;
+
+
+    JBetAction_SABA_Gr(JLoadTask loadTask, int typeSite){
         this.loadTask = loadTask;
+        this.typeSite = typeSite;
     }
+
+
+    //.*==========================================================================
+    //.-2. first : decideVertOffset.
+    //.
+    //.
+    String decideVertOffset() {
+
+        String strRet = "fail decideVertOffset";
+
+        if (typeSite == 1){
+            JUtilFunctions.delay_duration(1000);
+            JUtilFunctions.takeScreenshot();
+            JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
+            //. for find color bar...
+            colorBarParam.targetUpColor = new Point3(26,32,44);
+            colorBarParam.targetDownColor = colorBarParam.targetUpColor;
+            colorBarParam.nLimitLen = 30;
+            colorBarParam.fixedVal = 535;
+            colorBarParam.startVal = 0;
+            colorBarParam.endVal = 260;
+            ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
+            int nSecCnt = retSegments.size();
+            if (nSecCnt == 0){
+                strRet = "fail decideVertOffset: find colorbar(26,32,44)";
+                return strRet;
+            }
+
+            offsetVert = (int)((retSegments.get(0).y - retSegments.get(0).x));
+            strRet = "success";
+        }
+        else if (typeSite == 2){
+            JUtilFunctions.delay_duration(1000);
+            JUtilFunctions.takeScreenshot();
+            JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
+            //. for find color bar...
+            colorBarParam.targetUpColor = new Point3(255,255,255);
+            colorBarParam.targetDownColor = colorBarParam.targetUpColor;
+            colorBarParam.nLimitLen = 30;
+            colorBarParam.fixedVal = 535;
+            colorBarParam.startVal = 0;
+            colorBarParam.endVal = 260;
+            ArrayList<Point> retSegments = JUtilFunctions.findContinuousSegments(JUtilFunctions.screenshot, colorBarParam);
+            int nSecCnt = retSegments.size();
+            if (nSecCnt == 0){
+                strRet = "fail decideVertOffset: find colorbar(26,32,44)";
+                return strRet;
+            }
+
+            offsetVert = (int)((retSegments.get(0).y - retSegments.get(0).x));
+            strRet = "success";
+        }
+        else{
+            offsetVert = 0;
+            strRet = "success";
+        }
+
+        return strRet;
+    }
+
+    //.*==========================================================================
+    //.-2. first : decideVertOffset.
+    //.
+    //.
+    void setDecideInfoFromtypeSite(JFuncParams_FindSectionIncluding2Targets param) {
+
+        //. notice.
+        //. x-offset is from 470
+        switch (typeSite){
+            case 0:
+            case 2:
+                param.ptBetPannelBackUpColor = new Point3(56,255,243);
+                param.ptBetPannelBackDownColor = new Point3(39,150,150);
+                param.rcDecideforCollapseCond = new Rect(-450, 10, 100,40);
+                param.ptPosClickforExpanding = new Point(-200, 50);
+                param.bDecideCollapseIfHasPt = false;
+                break;
+            case 1:
+                param.ptBetPannelBackUpColor = new Point3(240,240,240);
+                param.ptBetPannelBackDownColor = new Point3(75,75,75);
+                param.rcDecideforCollapseCond = new Rect(-300, 10, 100,30);
+                param.ptPosClickforExpanding = new Point(-200, 30);
+                param.bDecideCollapseIfHasPt = true;
+                break;
+        }
+    }
+
+
 
     // Implementation of the abstract method
     @Override
     String run(){
         String strRet = null;
+
+        //. -2.
+        Log.d("PPPPP", "Start decideVertOffset.");
+        strRet = decideVertOffset();
+        Log.d("PPPPP", "decideVertOffset return: " + strRet);
+        if (strRet.equals("success") == false)
+            return strRet;
 
         //. -1.
         Log.d("PPPPP", "Start findBackColor.");
@@ -87,7 +189,10 @@ public class JBetAction_SABA_Gr extends JBetAction {
         return strRet;
     }
 
-    //.*==========================================================================
+
+
+
+        //.*==========================================================================
     //.0. first : findBackColor.
     //.
     //.
@@ -95,10 +200,9 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         String strRet = "fail findBackColor";
 
-        JUtilFunctions.takeScreenshot();
-
         //. first. we need wait until complete opening webpage...
-        String jsonString = "[\"contour_det\", \"great\", \"30\",  \"0\", \"400\",\"500\",\"850\"]";
+        String jsonString = String.format("[\"contour_det\", \"great\", \"30\",  \"0\", \"%d\",\"500\",\"%d\"]",
+                400 + offsetVert, 850);
         boolean bTimeOver = JUtilFunctions.checkValidation(jsonString, 30000, 2000);
         if (bTimeOver){
             strRet = "fail findBackColor: timeOver(contour_det)";
@@ -110,7 +214,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         JUtilFunctions.takeScreenshot();
 
-        int baseY = Config.IMAGE_HEIGHT / 2 + 50;
+        int baseY = Config.IMAGE_HEIGHT / 2 + 50 +  offsetVert;
         double[] pixelsVals = JUtilFunctions.screenshot.get(baseY, 2);
         ptBackColor.x = pixelsVals[0];
         ptBackColor.y = pixelsVals[1];
@@ -139,11 +243,11 @@ public class JBetAction_SABA_Gr extends JBetAction {
     String clickSportButton(){
         String strRet = null;
 
-        JUtilFunctions.delay_duration(3000);
+        JUtilFunctions.delay_duration(6000);
 
         JUtilFunctions.takeScreenshot();
 
-        Rect rcAnalyseBase = new Rect(40,100, 270, 200);
+        Rect rcAnalyseBase = new Rect(40,100 + offsetVert, 270, 200);
         JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
         strRet = JUtilFunctions.findText("Truc tiep", 0, rcAnalyseBase, result_rects, textDetParam);
         if (strRet.equals("success")){
@@ -153,8 +257,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
             JUtilFunctions.delay_duration(2000);
 
             // String jsonString = "[\"colorbar_det\", \"great\", \"2\", \"470\",\"300\",\"470\",\"900\",    \"39\",\"39\",\"50\", \"39\",\"39\",\"50\", \"20\" ]";
-            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"400\",\"470\",\"900\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
-                    (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
+            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"%d\",\"470\",\"%d\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
+                    400 + offsetVert, 850, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
 
             boolean bTimeOver = JUtilFunctions.checkValidation(jsonString, 30000, 2000);
             if (bTimeOver){
@@ -181,6 +285,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
         String strRet = null;
         boolean bToday = false;
 
+        JUtilFunctions.delay_duration(3000);
+
         String todayString = JUtilFunctions.getTodayString();
         if (todayString.equals(loadTask.progress_date))
             bToday = true;
@@ -188,7 +294,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
         JUtilFunctions.takeScreenshot();
 
         //.1. click Hom nay button...
-        Rect rcAnalyseBase = new Rect(40,240, 160, 240);
+        Rect rcAnalyseBase = new Rect(40,240 + offsetVert, 160, 240);
         JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
         strRet = JUtilFunctions.findText("Hom nay", 0, rcAnalyseBase, result_rects, textDetParam);
         if (strRet.equals("success")){
@@ -207,8 +313,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
             JUserActions.dispatchTap(ptMenuDate.x, ptMenuDate.y);
             JUtilFunctions.delay_duration(3000);
             // String jsonString = "[\"colorbar_det\", \"great\", \"2\", \"470\",\"300\",\"470\",\"900\",    \"39\",\"39\",\"50\", \"39\",\"39\",\"50\", \"20\" ]";
-            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"400\",\"470\",\"900\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
-                    (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
+            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"%d\",\"470\",\"%d\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
+                    400 + offsetVert, 850, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
 
             boolean bTimeOver = JUtilFunctions.checkValidation(jsonString, 30000, 2000);
             if (bTimeOver){
@@ -223,7 +329,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
                 JUtilFunctions.delay_duration(1000);
                 JUtilFunctions.takeScreenshot();
 
-                Rect rcAnalyseBaseForDate = new Rect(0,350, 270, 170);
+                Rect rcAnalyseBaseForDate = new Rect(0,350 + offsetVert, Config.IMAGE_WIDTH, 170);
                 //. first, find tomorrow.
                 String strTomorrowDate = JUtilFunctions.getTomorrowString();
                 strRet = JUtilFunctions.findText(strTomorrowDate, 0, rcAnalyseBaseForDate, result_rects, textDetParam);
@@ -268,6 +374,9 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
             }
         }
+        else{
+            strRet = "fail gotoChannelfromDate: cant fine Hom nay";
+        }
         rcAnalyseBase = null;
 
         return strRet;
@@ -285,7 +394,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
         colorBarParam.nLimitLen = 10;
         colorBarParam.fixedVal = 470;
-        colorBarParam.startVal = 50;
+        colorBarParam.startVal = 50 + offsetVert;
         colorBarParam.endVal = 850;
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
@@ -307,10 +416,16 @@ public class JBetAction_SABA_Gr extends JBetAction {
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
         param.neighborCond2Targets = e_UpDownDenseNeighborCond; //. Up/ down layout...
         param.nextSectionInfo = colorBarParam;
-        param.ptBetPannelBackUpColor = new Point3(56,255,243);
-        param.ptBetPannelBackDownColor = new Point3(39,150,150);
-        param.rcDecideforCollapseCond = new Rect(-450, 10, 100,40);
-        param.ptPosClickforExpanding = new Point(-200, 50);
+        //.2024-3-13
+        setDecideInfoFromtypeSite(param);
+
+        //. 2024-3-12
+        //. adjust scrolls
+        if (typeSite == 1 || typeSite == 2){
+            param.scrollAmount = param.scrollAmount / 3 * 2;
+        }
+
+
 
         //. in SABA, there is separators same Section per tournament.
         int nTryCnt = 10;
@@ -346,8 +461,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
             JUtilFunctions.delay_duration(2000);
 
             // String jsonString = "[\"colorbar_det\", \"great\", \"2\", \"470\",\"400\",\"470\",\"900\",    \"39\",\"39\",\"50\", \"39\",\"39\",\"50\", \"20\" ]";
-            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"400\",\"470\",\"900\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
-                    (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
+            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"%d\",\"470\",\"%d\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
+                    400 + offsetVert, 850, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
 
             boolean bTimeOver = JUtilFunctions.checkValidation(jsonString, 30000, 2000);
             if (bTimeOver){
@@ -374,13 +489,24 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         JUtilFunctions.delay_duration(2000);
 
+        //. in some case, init scroll is uped.
+        /*
+        for (int i = 0 ; i < 3; i++){
+            JUserActions.scrollDownPage(Config.Screen_Height / 2, (int)(Config.vscroll_unit / 2 / Config.resizeYRatio));
+        }
+        JUtilFunctions.delay_duration(1000);
+
+         */
+
+
+
         JFuncParams_ColorBar colorBarParam = new JFuncParams_ColorBar();
         //. for find color bar...
         colorBarParam.targetUpColor = ptBackColor;
         colorBarParam.targetDownColor = colorBarParam.targetUpColor;
         colorBarParam.nLimitLen = 10;
         colorBarParam.fixedVal = 420;   //. no 470, Up arrow appears.
-        colorBarParam.startVal = 50;
+        colorBarParam.startVal = 50 + offsetVert;
         colorBarParam.endVal = 850;
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
@@ -417,6 +543,13 @@ public class JBetAction_SABA_Gr extends JBetAction {
         param.tryScrollCnt = 3;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
         param.nextSectionInfo = colorBarParam;
+
+        //. 2024-3-12
+        //. adjust scrolls
+        if (typeSite == 1 || typeSite == 2){
+            param.scrollAmount = param.scrollAmount / 3 * 2;
+        }
+
 
         Point ptOutClickPos = new Point();
         boolean bFinded = JUtilFunctions.findSectionIncluding2Targets(param, ptOutClickPos);

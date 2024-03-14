@@ -47,7 +47,11 @@ class JFuncParams_FindSectionIncluding2Targets {
     Point3  ptBetPannelBackDownColor = null;
     Rect    rcDecideforCollapseCond = null;
     Point   ptPosClickforExpanding = null;
+    boolean bDecideCollapseIfHasPt = false;
+    Rect    rcSectionSignature  = new Rect(30, 0, 200, 100);
     boolean bScrollPosChanged = false;
+    //.2024-12
+    int     scrollAmount       = Config.vscroll_unit;
 
     public JFuncParams_FindSectionIncluding2Targets(){
 

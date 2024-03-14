@@ -1,25 +1,24 @@
 {
-
   "has_bet_task"          : "yes",
-  "user_id"               : "kingvn006",
-  "password"              : "123456a",
+  "user_id"               : "Over11",
+  "password"              : "Abcd123",
   "full_width"            : 540,
   "full_height"           : 960,
-  "site"                  : "ee67805.com",
+  "site"                  : "oxbet.in",
   "update_site_info"      : "false",
   "limitTime"			        : 9000000,
 
-  "category"			         : 0,
+  "category"			         : 1,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "GIAI J-LEAGUE 2 NHAT BAN",
-  "progress_date"		      : "3 16",
-  "team1"				          : "Montedio Yamagata",
-  "team2"				          : "Ventforet Kofu",
+  "league_name"			      : "SPAIN LA LIGA",
+  "progress_date"		      : "3 9",
+  "team1"				          : "Girona",
+  "team2"				          : "Osasuna",
   "betTarget"			  	     : "Xiu",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			        : "2.25",
+  "betMark"			      : "2.5-3",
   "betAmount"			      : "20"
 
 }
