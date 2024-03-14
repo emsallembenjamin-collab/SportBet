@@ -81,13 +81,16 @@ public class MyAccessibilityService extends AccessibilityService {
                         if (loginActionExecutor != null){
 
                             //pgh for test.
+                            /*
                             result_string = loginActionExecutor.run(null);
                             Log.d("PPP AccessibilityService", "Login Finished: " + result_string);
                             //. all done.
                             loginActionExecutor.clear_mem();
                             loginActionExecutor = null;
+                            */
 
-                            // result_string = "success";
+
+                            result_string = "success";
 
                             //. if success in login...
                             if (result_string.equals("success")){
@@ -127,8 +130,8 @@ public class MyAccessibilityService extends AccessibilityService {
 
                 JUtilFunctions.disableSuperuserGranteMsg();
 
-                //do_test("1");
-                do_test("2");
+                do_test("1");
+                // do_test("2");
                 // do_test("3");
             }
         });

@@ -1,0 +1,49 @@
+Tat Ca keo:				All bets.
+Chinh:					Main
+Hiep:					Round
+Toan tran:				Full match
+Tai/Xiu:				Over/Under
+Cuoc:					betting.
+The thao:				Sport
+Truc tiep:				Direct
+Sap dien ra             Coming soon
+Tiep theo:				Next
+Som:					Early
+Hom nay:				Today
+Ngay mai:				Tomorrow
+Chu Nhat:				Sunday
+Thur Hai:				Monday	
+
+
+Pho bien 				Popular
+Toan Tran               Full Battle(Match)
+Cuoc Chap 				Handicap Betting
+
+
+
+Bong da:				Football
+Giai dau:				Tournaments
+Thoi gian:				Time
+Tat ca tinh nang		All features
+gio:					o'clock
+
+Phieu cuoc:				Bet slip
+Tai khoan cua toi: 		My Account
+Ty le cuoc tran dau: 	Match odds
+Keo chap Chau A:		Asian Handicap
+Chau Au:				Europe  (1X2)
+Tay Ban Nha:			Spain
+Chung cuoc:				Final round
+Hom nay:				Today
+Thang:					March 
+
+
+
+Giải Ngoại Hạng Anh     English Premier League
+Thẻ phạt				Penalty Card
+Tổng Thời Gian Ghi Bàn  Total Goal Scoring Time
+
+
+
+
+
