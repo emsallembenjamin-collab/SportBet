@@ -7,6 +7,8 @@ import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
 import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
 
+import android.util.Log;
+
 import org.opencv.core.Mat;
 import org.opencv.core.Point;
 import org.opencv.core.Point3;
@@ -522,6 +524,7 @@ class JAction_Do_Input_Id_Password extends JAction{
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
         JUtilFunctions.delay_duration(1000);
 
+        recalcEditCtrlsPosition();
         JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
         recalcEditCtrlsPosition();
 
@@ -536,7 +539,7 @@ class JAction_Do_Input_Id_Password extends JAction{
         targetString = MyAccessibilityService.mainService.loadTask.password;
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
         JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, targetString);
-        // JUtilFunctions.delay_duration(1000);
+        JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchTap(ptPassword.x, ptPassword.y);
         recalcEditCtrlsPosition();
@@ -545,10 +548,11 @@ class JAction_Do_Input_Id_Password extends JAction{
         JUserActions.deleteContentofInput(Config.max_userid_password_len);
         JUtilFunctions.delay_duration(1000);
 
+        recalcEditCtrlsPosition();
         JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y);
         recalcEditCtrlsPosition();
+
         JUserActions.dispatchTap(ptOffset.x, ptPassword.y + ptOffset.y);
-        recalcEditCtrlsPosition();
 
         //. 2024-2-29.
         //. clone prev prevAction.result_rects for me...

@@ -1567,7 +1567,8 @@ public class JUtilFunctions {
                     if (bFindedNextSection)
                         break;
                     else{
-                        JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                        // JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                        JUserActions.scrollUpPage((int)(300 / Config.resizeYRatio));
                         param.bScrollPosChanged = true;
                         continue;
                     }
@@ -1576,7 +1577,8 @@ public class JUtilFunctions {
 
             if (bFindTargetSection == false){
                 if (bAlreadyFindedTargetSection == false){
-                    JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                    // JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                    JUserActions.scrollUpPage((int)(300 / Config.resizeYRatio));
                     param.bScrollPosChanged = true;
                     continue;
                 }
@@ -1602,7 +1604,8 @@ public class JUtilFunctions {
                     if (bFindedNextSection)
                         break;
                     else{
-                        JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                        // JUserActions.scrollUpPage((int)(param.scrollAmount / Config.resizeYRatio));
+                        JUserActions.scrollUpPage((int)(300 / Config.resizeYRatio));
                         param.bScrollPosChanged = true;
                         continue;
                     }
