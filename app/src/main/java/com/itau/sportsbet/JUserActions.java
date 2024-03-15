@@ -88,6 +88,9 @@ public class JUserActions {
 
     public static void touchEventLong(Point p1, Point p2, int time){
         try {
+            String strLog = String.format("Long Click Action: %dx%d", (int)p1.x, (int)p1.y);
+            Log.d("Click action", strLog);
+
             Process process = Runtime.getRuntime().exec("su");
 
             DataOutputStream outputStream = new DataOutputStream(process.getOutputStream());
@@ -165,7 +168,7 @@ public class JUserActions {
             @Override
             public void run() {
 
-                //Log.d("PPP AccessibilityService", "Start CopyClipboard Thread: " + text);
+               // Log.d("PPP AccessibilityService", "Start CopyClipboard Thread: " + text);
 
                 // Get the Clipboard Manager
                 ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);

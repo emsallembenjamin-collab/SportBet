@@ -60,6 +60,8 @@ public class MyAccessibilityService extends AccessibilityService {
         info.packageNames = null;
         setServiceInfo(info);
 
+
+        //.for some init.
         doInit();
 
         long initialDelay = 1000; // milliseconds
@@ -138,14 +140,15 @@ public class MyAccessibilityService extends AccessibilityService {
 
         //. extract tessmodel data...
         Assets.extractTessData(this);
+
         //. for test. extract some config json files.
 //        Assets.extractAllConfigAssets(this);
         //. Init openCV and tesseract...
         JUtilFunctions.doInit();
 
+
         Size szScreen = getScreenSize();
         Log.d("SportsBet Service", "onServiceConnected! " + szScreen.width + "x" + szScreen.height);
-
 
     }
     protected  void loadDataFromDb(){

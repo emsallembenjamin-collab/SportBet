@@ -55,7 +55,7 @@
       "name"                  : "find user_id and password input ctrl",
       "type"                  : "do_find_color_bar",
       "string_param_list"     : [],
-      "digit_param_list"      : [450,300, 450, 650,    34, 41, 57,    34, 41, 57, 40 ],
+      "digit_param_list"      : [420,300, 420, 650,    34, 41, 57,    34, 41, 57, 40 ],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,

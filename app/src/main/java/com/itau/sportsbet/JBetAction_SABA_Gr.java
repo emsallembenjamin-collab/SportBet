@@ -402,7 +402,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
         //. 2024-3-12
         //. adjust scrolls
         if (typeSite.equals("nn88111.com") == false){
-            param.scrollAmount = param.scrollAmount / 3 * 2;
+            param.scrollAmount = Config.vscroll_unit / 3 * 2;
         }
 
 
@@ -424,8 +424,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
                     break;
                 }
                 if (param.bScrollPosChanged == false){
-                    int nScrolls = (int)(ptFindSecPos.y - colorBarParam.startVal / Config.resizeYRatio);
-                    Point ptBottom = JUtilFunctions.getOrigPointFromBasePoint(new Point(Config.IMAGE_WIDTH / 2, param.scrollAmount));
+                    int nScrolls = (int)(200 / Config.resizeYRatio);
+                    Point ptBottom = JUtilFunctions.getOrigPointFromBasePoint(new Point(Config.IMAGE_WIDTH / 2, Config.IMAGE_HEIGHT - 50));
                     JUserActions.scrollToLong(ptBottom, nScrolls);
                 }
             }
@@ -543,7 +543,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
         //. 2024-3-12
         //. adjust scrolls
         //if (typeSite == 1 || typeSite == 2){
-        param.scrollAmount = param.scrollAmount /  2;
+        param.scrollAmount = Config.vscroll_unit /  2;
         //}
 
 
