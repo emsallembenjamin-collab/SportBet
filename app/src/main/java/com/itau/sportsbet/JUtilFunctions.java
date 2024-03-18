@@ -191,11 +191,10 @@ public class JUtilFunctions {
     }
 
     public static Point getTargetSectionfromBorderSection(Point borderSec, int secWidthforUsingBorder){
-        if (secWidthforUsingBorder > 0){
-            borderSec.x = borderSec.y;
-            borderSec.y = borderSec.x + secWidthforUsingBorder;
-        }
-        return borderSec;
+        Point newBorderSec = null;
+        newBorderSec = new Point(borderSec.y, borderSec.y + secWidthforUsingBorder);
+
+        return newBorderSec;
     }
 
     public static void changeToOrigRectFromBaseRect(Rect rcBase){
@@ -1182,7 +1181,7 @@ public class JUtilFunctions {
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, textDetParam.ignorePartMode, textDetParam.textDetMode);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, textDetParam);
         if (nTextRegionCnt > 0) {
             Mat ocrAreaMat = JUtilFunctions.originScreenShot.submat(rcForOcr);
 
@@ -1345,7 +1344,8 @@ public class JUtilFunctions {
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
+        JParamsForTextDet paramforTextDet = JParamsForTextDet.fromInteger(1);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, paramforTextDet);
         if (nTextRegionCnt == 0) {
             strRet = "fail no text region";
         }
@@ -1378,7 +1378,23 @@ public class JUtilFunctions {
                     bFinded = true;
                 }
                 else{
-                    String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTexts,
+
+                    ArrayList<Rect> rcTextsforTargets2 = rcTexts;
+                    //. 2024-3-15.
+                    //. for only digit panel, some problems. so I sparate two process...
+                    if (param.target2IsDigitOnly == true){
+                        rcTextsforTargets2 = new ArrayList<Rect>();
+                        JParamsForTextDet paramforTextDetforTarget2 = JParamsForTextDet.fromInteger(1);
+                        paramforTextDetforTarget2.maxOffsetX = 5; // small value.
+                        int nTextRegionCntforTarget2 = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTextsforTargets2, paramforTextDetforTarget2);
+
+                        for (int k = 0; k < rcTextsforTargets2.size(); k++){
+                            Rect rc = rcTextsforTargets2.get(k);
+                            JUtilFunctions.changeToOrigRectFromBaseRect(rc);
+                        }
+                    }
+
+                    String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTextsforTargets2,
                             rcArrayTarget2, param.target2, param.target2OcrParam);
                     if (result_string2.equals("success")){
 
@@ -1453,26 +1469,26 @@ public class JUtilFunctions {
 
             //.2024-3-9
             //. for detecting using border color...
-            JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
-            if (sectionHead.y > 850)
+            Point ptNewSecHeader = JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
+            if (ptNewSecHeader.y > 850)
                 break;
 
-            Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, colorBarParam.fixedVal, (int)(sectionHead.y - sectionHead.x));
+            Rect rcAnalyseBase = new Rect(0, (int)ptNewSecHeader.x, colorBarParam.fixedVal, (int)(ptNewSecHeader.y - ptNewSecHeader.x));
 
             JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
             String strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list,
                     rcAnalyseBase, result_rects, textDetParam);
             if (strRet.equals("success")){
                 bResult = true;
-                ptFindPos.x = sectionHead.x;
-                ptFindPos.y = sectionHead.y;
+                ptFindPos.x = ptNewSecHeader.x;
+                ptFindPos.y = ptNewSecHeader.y;
 
                 //. set next section pos.
                 if (i != nSegCnt - 1){
                     Point sectionHeadNext = retSegments.get(i + 1);
-                    JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
-                    ptNextSecPos.x = sectionHeadNext.x;
-                    ptNextSecPos.y = sectionHeadNext.y;
+                    Point ptNewSecHeader1 = JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
+                    ptNextSecPos.x = ptNewSecHeader1.x;
+                    ptNextSecPos.y = ptNewSecHeader1.y;
                 }
                 break;
             }
@@ -1480,9 +1496,9 @@ public class JUtilFunctions {
 
         if (bResult == false && nSegCnt > 0){
             Point sectionHeadNext = retSegments.get(0);
-            JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
-            ptNextSecPos.x = sectionHeadNext.x;
-            ptNextSecPos.y = sectionHeadNext.y;
+            Point ptNewSecHeader2 = JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
+            ptNextSecPos.x = ptNewSecHeader2.x;
+            ptNextSecPos.y = ptNewSecHeader2.y;
         }
         retSegments = null;
         string_param_list = null;

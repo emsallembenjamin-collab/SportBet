@@ -22,7 +22,7 @@
       "name"                  : "find login button",
       "type"                  : "do_ocr",
       "string_param_list"     : ["LOGIN", "0"],
-      "digit_param_list"      : [200, 100, 370, 210, 2],
+      "digit_param_list"      : [200, 100, 370, 210, 10],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -40,10 +40,10 @@
       "type"                  : "do_click",
       "string_param_list"     : [],
       "digit_param_list"      : [1],
-      "time_limit"            : 0,
+      "time_limit"            : 10000,
       "delay"                 : 3000,
       "waitPageload"          : false,
-      "validator_param_list"  : [],
+      "validator_param_list"  : ["colorbar_det", "great", "1", "400","540","400","900",    "228","213","185", "228","213","185", "30"],
       "confirmproc_param_list"  :[],
       "branch": {
         "success" : ["find user_id and password input ctrl"],
@@ -55,7 +55,7 @@
       "name"                  : "find user_id and password input ctrl",
       "type"                  : "do_find_color_bar",
       "string_param_list"     : [],
-      "digit_param_list"      : [420,300, 420, 650,    34, 41, 57,    34, 41, 57, 40 ],
+      "digit_param_list"      : [420,250, 420, 650,    34, 41, 57,    34, 41, 57, 40 ],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -87,7 +87,7 @@
       "name"                  : "find login now button",
       "type"                  : "do_find_color_bar",
       "string_param_list"     : [],
-      "digit_param_list"      : [400,650, 400, 850,    228, 213, 185,    228, 213, 185,   20 ],
+      "digit_param_list"      : [400,500, 400, 850,    228, 213, 185,    228, 213, 185,   20 ],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -105,15 +105,23 @@
       "string_param_list"     : [],
       "digit_param_list"      : [1],
       "time_limit"            : 0,
-      "delay"                 : 5000,
+      "delay"                 : 3000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
-      "confirmproc_param_list"  : [],
+      "confirmproc_param_list"  : ["find and close chance modal1", "2"],
       "branch": {
         "success" : ["goto sports channel"],
         "fail"    : []
       }
     },
+
+
+
+
+
+
+
+    
 
 
 
@@ -165,7 +173,7 @@
       "name"                  : "find already logined",
       "type"                  : "do_ocr",
       "string_param_list"     : ["$user_id", "2"],
-      "digit_param_list"      : [80, 200, 350, 300, 2],
+      "digit_param_list"      : [80, 200, 350, 300, 5],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -217,7 +225,7 @@
       "name"                  : "find logout button",
       "type"                  : "do_ocr",
       "string_param_list"     : ["đăng xuất", "2"],
-      "digit_param_list"      : [60, 600, 250, 850, 2],
+      "digit_param_list"      : [60, 600, 250, 850, 10],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -255,9 +263,26 @@
 
     {
       "name"                  : "goto sports channel",
+      "type"                  : "do_find_color_bar",
+      "string_param_list"     : [],
+      "digit_param_list"      : [5,100, 5, 955,    56, 62, 77,    56, 62, 77, 200 ],
+      "time_limit"            : 0,
+      "delay"                 : 100,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["goto real sports channel"],
+        "fail"    : ["the end process", "fail"]
+      }
+    },
+
+
+    {
+      "name"                  : "goto real sports channel",
       "type"                  : "do_click",
       "string_param_list"     : [],
-      "digit_param_list"      : [270, 850],
+      "digit_param_list"      : [1,0, 150, 0],
       "time_limit"            : 50000,
       "delay"                 : 5000,
       "waitPageload"          : false,
@@ -276,6 +301,40 @@
       "digit_param_list"      : [],
       "time_limit"            : 0,
       "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : [],
+        "fail"    : []
+      }
+    },
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    {
+      "name"                  : "find and close chance modal1",
+      "type"                  : "find_close_ad",
+      "string_param_list"     : ["2", "OK", "0"],
+      "digit_param_list"      : [70, 800, 470, 930],
+      "time_limit"            : 0,
+      "delay"                 : 2000,
       "waitPageload"          : false,
       "validator_param_list"  : [],
       "confirmproc_param_list"  : [],

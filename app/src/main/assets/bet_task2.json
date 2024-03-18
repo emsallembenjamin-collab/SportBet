@@ -11,14 +11,14 @@
   "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "GIAI A-LEAGUE UC",
-  "progress_date"		      : "3 15",
-  "team1"				          : "Newcastle Jets",
-  "team2"				          : "Adelaide United",
-  "betTarget"			  	     : "Newcastle Jets",
+  "league_name"			      : "GIAI SERIE C Y",
+  "progress_date"		      : "3 18",
+  "team1"				          : "Potenza",
+  "team2"				          : "AZ Picerno",
+  "betTarget"			  	     : "AZ Picerno",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Keo chap",
-  "betMark"			        : "0",
+  "betMark"			        : "-0.25",
   "betAmount"			      : "415"
 
 }

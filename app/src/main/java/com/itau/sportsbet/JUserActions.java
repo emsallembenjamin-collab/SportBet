@@ -233,6 +233,44 @@ public class JUserActions {
         }
     }
 
+
+    public static void inputString(String inputText) {
+
+        // Perform root command to input text
+        try {
+            Process process = Runtime.getRuntime().exec("su");
+            DataOutputStream os = new DataOutputStream(process.getOutputStream());
+
+            // Iterate over each character in the input text
+            for (int i = 0; i < inputText.length(); i++) {
+                char c = inputText.charAt(i);
+                // Escape special characters before appending to the command
+                String command = escapeSpecialCharacter(c);
+                // Append character to EditText by simulating input event
+                os.writeBytes("input text " + command + "\n");
+            }
+
+            os.flush();
+            os.close();
+            process.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // Function to escape special characters
+    private static String escapeSpecialCharacter(char c) {
+        switch (c) {
+            case ' ':
+                return "\\ ";
+            case '!':
+                return "\\!";
+            default:
+                return String.valueOf(c);
+        }
+    }
+
+
     public static void dispatchOneKeyPress(int keyCode){
         try {
             // Get runtime to execute shell command

@@ -149,9 +149,11 @@ class JAction_Do_Ocr extends JAction{
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
+        JParamsForTextDet paramforTextDet = JParamsForTextDet.fromInteger(1);
+        paramforTextDet.maxOffsetX = digit_param_list.get(4).intValue();
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, paramforTextDet);
         if (nTextRegionCnt > 0){
-            float fResizeRate = digit_param_list.get(4).floatValue();
+
 
             //. get original text rect and image.
             Rect rcForOcr = JUtilFunctions.getOrigRectFromBaseRect(rcForAnalyse);
@@ -262,6 +264,7 @@ class JAction_Do_Click extends JAction{
                     else if (nBaseType == 2){
                         ptCenter.y = rc.y + rc.height;
                     }
+
                     double offsetX = digit_param_list.get(2).doubleValue();
                     double offsetY = digit_param_list.get(3).doubleValue();
                     pt = new Point(ptCenter.x + offsetX / Config.resizeXRatio, ptCenter.y + offsetY / Config.resizeYRatio);
@@ -489,7 +492,7 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         ptUser_id = JUtilFunctions.getCenterPoint(rc1);
         ptPassword = JUtilFunctions.getCenterPoint(rc2);
-        ptPassword.x -= (150 / Config.resizeXRatio);
+        ptPassword.x -= (50 / Config.resizeXRatio);
     }
 
 
@@ -508,58 +511,70 @@ class JAction_Do_Input_Id_Password extends JAction{
         }
         setEditCtrlPos();
 
-        //. first, paste user_id
-        String targetString = MyAccessibilityService.mainService.loadTask.user_id;
+        //. first, copy user_id to clipboard.
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
-        JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, targetString);
+        JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, MyAccessibilityService.mainService.loadTask.user_id);
         //JUtilFunctions.delay_duration(1000);
 
-        JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y);
-        recalcEditCtrlsPosition();
-        //. need twice times.
-        JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y);
+        //. 2. click twice... why? in some site, appears password manager widnows.
+        JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y); JUtilFunctions.delay_duration(500);
+        JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y); JUtilFunctions.delay_duration(500);
+
+        //. 3. 2024-3-6. clear previous id
+        JUserActions.deleteContentofInput(Config.max_userid_password_len); JUtilFunctions.delay_duration(1500);
+
+        //. 4. maybe change edit positions.
         recalcEditCtrlsPosition();
 
-        //. 2024-3-6. clear previous id
-        JUserActions.deleteContentofInput(Config.max_userid_password_len);
-        JUtilFunctions.delay_duration(1000);
+        //. 5. long click...
+        JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y); JUtilFunctions.delay_duration(3000);
 
-        recalcEditCtrlsPosition();
-        JUserActions.dispatchLongClick((int)ptUser_id.x, (int)ptUser_id.y);
-        recalcEditCtrlsPosition();
+        //. 6. do ocr and find "Paste"
+        JUtilFunctions.takeScreenshot();
+        Rect rcAnalyseBaseID = new Rect(0, (int)(ptUser_id.y * Config.resizeYRatio - 150), 220, 170);
+        JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
+        String strOcrRet = JUtilFunctions.findText("Paste", 6, rcAnalyseBaseID, result_rects, textDetParam);
+        if (strOcrRet.equals("success") == false){
+            result_string = "fail input user_id";
+            executor.last_result_string = "fail input user_id: " + name;
+            return true;
+        }
 
-        //. offset point
-        Point ptOffset = JUtilFunctions.getOrigPointFromBasePoint(100, -60);
-        JUserActions.dispatchTap(ptOffset.x, ptUser_id.y + ptOffset.y);
-        recalcEditCtrlsPosition();
-
+        Point ptOffset_id = JUtilFunctions.getCenterPoint(result_rects.get(0));
+        JUserActions.dispatchTap(ptOffset_id.x, ptOffset_id.y);JUtilFunctions.delay_duration(1000);
 
         ////////////////////////////////////////////////////////////
         //. second, paste password...
-        targetString = MyAccessibilityService.mainService.loadTask.password;
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
-        JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, targetString);
-        JUtilFunctions.delay_duration(1000);
+        JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, MyAccessibilityService.mainService.loadTask.password);
+        // JUtilFunctions.delay_duration(1000);
 
         JUserActions.dispatchTap(ptPassword.x, ptPassword.y);
-        recalcEditCtrlsPosition();
+        JUserActions.deleteContentofInput(Config.max_userid_password_len); JUtilFunctions.delay_duration(1500);
+        //recalcEditCtrlsPosition();
 
-        //. 2024-3-6. clear previous id
-        JUserActions.deleteContentofInput(Config.max_userid_password_len);
-        JUtilFunctions.delay_duration(1000);
+        JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y); JUtilFunctions.delay_duration(3000);
 
-        recalcEditCtrlsPosition();
-        JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y);
-        recalcEditCtrlsPosition();
+        JUtilFunctions.takeScreenshot();
+        Rect rcAnalyseBasePass = new Rect(0, (int)(ptPassword.y * Config.resizeYRatio - 150), 220, 170);
+        strOcrRet = JUtilFunctions.findText("Paste", 6, rcAnalyseBasePass, result_rects, textDetParam);
+        if (strOcrRet.equals("success") == false){
+            result_string = "fail input user_password";
+            executor.last_result_string = "fail input user_password: " + name;
+            return true;
+        }
+        Point ptOffset_pass = JUtilFunctions.getCenterPoint(result_rects.get(0));
+        JUserActions.dispatchTap(ptOffset_pass.x, ptOffset_pass.y);JUtilFunctions.delay_duration(1000);
 
-        JUserActions.dispatchTap(ptOffset.x, ptPassword.y + ptOffset.y);
+
+
 
         //. 2024-2-29.
         //. clone prev prevAction.result_rects for me...
         result_rects.clear();
         int nPrevCnt = prevAct.result_rects.size();
         for (int i = 0; i < nPrevCnt; i++){
-            Rect rcPrev = prevAction.result_rects.get(i);
+            Rect rcPrev = prevAct.result_rects.get(i);
             Rect rcNew = rcPrev.clone();
             result_rects.add(rcNew);
         }
@@ -697,7 +712,8 @@ class JAction_Do_Input_VerifiCode extends JAction{
         Mat imageForRecog = JUtilFunctions.screenshot.submat(rcForImage);
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(imageForRecog, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
+        JParamsForTextDet paramforTextDet = JParamsForTextDet.fromInteger(1);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(imageForRecog, rcTexts, paramforTextDet);
         if (nTextRegionCnt == 0){
             result_string = "fail Operation: " + name;
             executor.last_result_string = result_string;
@@ -728,6 +744,10 @@ class JAction_Do_Input_VerifiCode extends JAction{
 //.
 class JAction_FindClose_Ad extends JAction{
 
+    //. 2024-3-15 notice...
+    //. in case of type == 0,,, params passed by default script section not using parseParamFromConfirmList...
+    //. in case of type == 1,,, params passed by parseParamFromConfirmList not default script section...
+
     //. 2024-3-13
     //. customize ad types.
     public int type = 0;
@@ -745,8 +765,8 @@ class JAction_FindClose_Ad extends JAction{
     Point3  colorNormalBack = null;
     Point   pixelforBase = null;
 
-
-
+    //. for 2. OK, exit,... modal windows appear, so I click the button and close window.
+    ArrayList<String>   stringListforOcr = null;
 
     boolean bInitParams = false;
     Point   ptFindAdCenter = new Point();
@@ -771,7 +791,6 @@ class JAction_FindClose_Ad extends JAction{
                     borderColor.x = digit_param_list.get(4).intValue();
                     borderColor.y = digit_param_list.get(5).intValue();
                     borderColor.z = digit_param_list.get(6).intValue();
-
                 }
             }
             break;
@@ -790,6 +809,29 @@ class JAction_FindClose_Ad extends JAction{
                     colorNormalBack = new Point3(R, G, B);
                     pixelforBase = new Point(pX, pY);
                 }
+            }
+            break;
+            case 2:{    //. OK, exit,... modal windows appear, so I click the button and close window.
+                int paramCnt = string_param_list.size();
+                int digitParamCnt = digit_param_list.size();
+                if (paramCnt % 2 == 0 || digitParamCnt != 4){
+                    bInvalidParam = true;
+                }
+                else{
+                    ArrayList<String>   stringListforOcr = new ArrayList<String>();
+                    for (int i = 1; i < paramCnt; i++){
+                        stringListforOcr.add(string_param_list.get(i));
+                    }
+
+                    rcAnalyse.x = digit_param_list.get(0).intValue();
+                    rcAnalyse.y = digit_param_list.get(1).intValue();
+                    rcAnalyse.width = digit_param_list.get(2).intValue();
+                    rcAnalyse.height = digit_param_list.get(3).intValue();
+
+                    rcAnalyse.width = rcAnalyse.width - rcAnalyse.x;
+                    rcAnalyse.height = rcAnalyse.height - rcAnalyse.y;
+                }
+
             }
             break;
         }
@@ -823,6 +865,24 @@ class JAction_FindClose_Ad extends JAction{
                 }
             }
             break;
+            case 2:{
+                JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
+                String strRet = JUtilFunctions.getTextAreaFromOcr(stringListforOcr, rcAnalyse, result_rects, textDetParam);
+                if (strRet.equals("success")){
+                    int nRetCnt = result_rects.size();
+                    for (int i = 0; i < nRetCnt; i++){
+                        Rect rc = result_rects.get(i);
+                        if (rc.width > 0){
+                            Point ptCenter = JUtilFunctions.getCenterPoint(rc);
+                            ptFindAdCenter.x = ptCenter.x;
+                            ptFindAdCenter.y = ptCenter.y;
+                            ptCenter = null;
+                            bFindAd = true;
+                        }
+                    }
+                }
+            }
+            break;
         }
 
         return bFindAd;
@@ -830,7 +890,9 @@ class JAction_FindClose_Ad extends JAction{
 
     public void closeAdWindow(){
         switch(type){
-            case 0:{
+            case 0:
+            case 2:
+            {
                 //. click proc...
                 Point ptOrg = JUtilFunctions.getOrigPointFromBasePoint(ptFindAdCenter);
                 JUserActions.dispatchTap(ptOrg.x, ptOrg.y);
@@ -851,16 +913,21 @@ class JAction_FindClose_Ad extends JAction{
     @Override
     public boolean run_internel(JAction prevAction){
 
-        JUtilFunctions.delay_duration(3000);
+        Log.d("PPPP SportsBet Service", "start FindClose_Ad: " + name);
+
+        JUtilFunctions.delay_duration(2000);
 
         boolean bFindAd = true;
         while(bFindAd) {
             bFindAd = findAd();
             if (bFindAd) {
+                Log.d("PPPP SportsBet Service", "find Ad: " + name);
                 closeAdWindow();
-                JUtilFunctions.delay_duration(3000);
+                JUtilFunctions.delay_duration(2000);
             }
         }
+
+        Log.d("PPPP SportsBet Service", "end FindClose_Ad: " + name);
 
         result_string = "success";
         executor.last_result_string = "success: " + name;

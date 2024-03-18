@@ -467,7 +467,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         String strRet = null;
 
-        JUtilFunctions.delay_duration(2000);
+        JUtilFunctions.delay_duration(3000);
 
         //. in some case, init scroll is uped.
         //. must short scroll, why? avoid page refresh...
@@ -523,7 +523,7 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         param.secWidthforUsingBorder = 70;
         param.target1 = loadTask.betTarget;
-        param.target1OcrParam.strCompMethod = e_ExactEqual;
+        param.target1OcrParam.strCompMethod = e_PermitIncluding;
         param.target1OcrParam.strPreprocessMethod = e_removeSpace;
 
 
@@ -537,29 +537,14 @@ public class JBetAction_SABA_Gr extends JBetAction {
         param.tryScrollCnt = 5;
         param.nAnalyseWidth = Config.IMAGE_WIDTH;
         param.nextSectionInfo = colorBarParam;
-
         setDecideInfoFromtypeSite(param);
-
         //. 2024-3-12
         //. adjust scrolls
         //if (typeSite == 1 || typeSite == 2){
         param.scrollAmount = Config.vscroll_unit /  2;
         //}
-
-
-        /*
-        Point ptOutClickPos = new Point();
-        boolean bFinded = JUtilFunctions.findSectionIncluding2Targets(param, ptOutClickPos);
-        if (bFinded == false){
-            strRet = "fail findBettingTypeSection";
-            return strRet;
-        }
-
-        //. do click.
-        JUserActions.dispatchTap(ptOutClickPos.x, ptOutClickPos.y);
-        JUtilFunctions.delay_duration(1000);
-
-         */
+        //. 2024-3-15 add...
+        param.target2IsDigitOnly = true;
 
         //. in SABA, there is separators same Section per tournament.
         int nTryCnt = 10;
