@@ -480,6 +480,41 @@ betDetail:
 
 
 
+======== 2024-4-2  ==============
+==. 문자렬비교처리 정리  ====
+
+first:
+	in all case, apply removeDiacriticalMarks and make Uppercase:
+
+use case:
+1. League Name:
+		preprocess:
+			e_removeSpace  // remove only space. 
+										 // xxx 1부류 련맹전/ xxx 2부류 련맹전,
+										 //. xxx 1부류 련맹전(34) etc.
+		compare:
+			e_ExactEqual or e_PermitIncluding.
+
+2. Team Name:
+		preprocess:
+		compare:
+
+3. betTypeCategory:
+		preprocess:
+		compare:
+
+4. Bet Target:
+		preprocess:
+		compare:
+
+5. betMark:  only digit...
+		preprocess:
+			e_caseNumberic : 공백제거, 수자/문자와 류사한것 치환.
+		compare:
+			e_ExactEqual
+
+
+
 
 
 

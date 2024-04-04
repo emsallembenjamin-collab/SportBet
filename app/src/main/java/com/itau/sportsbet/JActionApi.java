@@ -6,7 +6,9 @@ import static android.view.KeyEvent.KEYCODE_DEL;
 import static com.itau.sportsbet.Config.IgnorePartMode.e_IgnoreMode1;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
 import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
+import static com.itau.sportsbet.MyAccessibilityService.mainService;
 
+import android.accessibilityservice.AccessibilityService;
 import android.util.Log;
 
 import org.opencv.core.Mat;
@@ -68,7 +70,7 @@ class JAction_Do_Calc extends JAction{
                     float growth = 0;
                     String strSecondParam = string_param_list.get(1);
                     if (strSecondParam.equals("$category")){
-                        growth = MyAccessibilityService.mainService.loadTask.category;
+                        growth = mainService.loadTask.category;
                     }
                     else{
                         growth = Float.parseFloat(strSecondParam);
@@ -112,7 +114,7 @@ class JAction_RunWebBrowser extends JAction{
     @Override
     public boolean run_internel(JAction prevAction){
         String site_url = string_param_list.get(0);
-        JUtilFunctions.launchChrome(MyAccessibilityService.mainService, site_url);
+        JUtilFunctions.launchChrome(mainService, site_url);
         //. always success.
         result_string = "success";
         executor.last_result_string = "success run browser: " + name;
@@ -513,12 +515,13 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         //. first, copy user_id to clipboard.
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
-        JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, MyAccessibilityService.mainService.loadTask.user_id);
+        JUserActions.copyTextToClipboardfromWorkThread(mainService, mainService.loadTask.user_id);
         //JUtilFunctions.delay_duration(1000);
 
         //. 2. click twice... why? in some site, appears password manager widnows.
         JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y); JUtilFunctions.delay_duration(500);
         JUserActions.dispatchTap(ptUser_id.x, ptUser_id.y); JUtilFunctions.delay_duration(500);
+        mainService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
 
         //. 3. 2024-3-6. clear previous id
         JUserActions.deleteContentofInput(Config.max_userid_password_len); JUtilFunctions.delay_duration(1500);
@@ -531,6 +534,7 @@ class JAction_Do_Input_Id_Password extends JAction{
 
         //. 6. do ocr and find "Paste"
         JUtilFunctions.takeScreenshot();
+        JUtilFunctions.delay_duration(500);
         Rect rcAnalyseBaseID = new Rect(0, (int)(ptUser_id.y * Config.resizeYRatio - 150), 220, 170);
         JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
         String strOcrRet = JUtilFunctions.findText("Paste", 6, rcAnalyseBaseID, result_rects, textDetParam);
@@ -543,19 +547,23 @@ class JAction_Do_Input_Id_Password extends JAction{
         Point ptOffset_id = JUtilFunctions.getCenterPoint(result_rects.get(0));
         JUserActions.dispatchTap(ptOffset_id.x, ptOffset_id.y);JUtilFunctions.delay_duration(1000);
 
+        JUtilFunctions.delay_duration(500);
         ////////////////////////////////////////////////////////////
         //. second, paste password...
         // JUserActions.copyTextToClipboard(MyAccessibilityService.mainService, targetString);
-        JUserActions.copyTextToClipboardfromWorkThread(MyAccessibilityService.mainService, MyAccessibilityService.mainService.loadTask.password);
+        JUserActions.copyTextToClipboardfromWorkThread(mainService, mainService.loadTask.password);
         // JUtilFunctions.delay_duration(1000);
 
-        JUserActions.dispatchTap(ptPassword.x, ptPassword.y);
+        recalcEditCtrlsPosition();
+        JUserActions.dispatchTap(ptPassword.x, ptPassword.y);JUtilFunctions.delay_duration(500);
+        mainService.performGlobalAction(AccessibilityService.GLOBAL_ACTION_BACK);
         JUserActions.deleteContentofInput(Config.max_userid_password_len); JUtilFunctions.delay_duration(1500);
-        //recalcEditCtrlsPosition();
+        recalcEditCtrlsPosition();
 
         JUserActions.dispatchLongClick((int)ptPassword.x, (int)ptPassword.y); JUtilFunctions.delay_duration(3000);
 
         JUtilFunctions.takeScreenshot();
+        JUtilFunctions.delay_duration(500);
         Rect rcAnalyseBasePass = new Rect(0, (int)(ptPassword.y * Config.resizeYRatio - 150), 220, 170);
         strOcrRet = JUtilFunctions.findText("Paste", 6, rcAnalyseBasePass, result_rects, textDetParam);
         if (strOcrRet.equals("success") == false){
@@ -606,7 +614,7 @@ class JAction_Do_Repeat_Scroll extends JAction{
         int nRepeatCnt = 0;
         String strParam = string_param_list.get(0);
         if (strParam.equals("$category")){
-            nRepeatCnt = MyAccessibilityService.mainService.loadTask.category;
+            nRepeatCnt = mainService.loadTask.category;
         }
         else{
             nRepeatCnt = Integer.parseInt(strParam);
@@ -759,7 +767,7 @@ class JAction_FindClose_Ad extends JAction{
     public int maxRadius = 25;
     public Point3 borderColor = new Point3(255,255, 255);
 
-    public Rect rcAnalyse = new Rect(220, 540, 100, 400);
+    public Rect rcAnalyse = new Rect(240, 540, 60, 400);
 
     //. for 1. white cross (X) mark in right top part, but background image is shadowed...
     Point3  colorNormalBack = null;
@@ -854,7 +862,8 @@ class JAction_FindClose_Ad extends JAction{
                     ptFindAdCenter.x = Math.round(circle[0]);
                     ptFindAdCenter.y = Math.round(circle[1]);
                     circle = null;
-                    bFindAd = true;
+                    if (Math.abs(ptFindAdCenter.x - Config.IMAGE_WIDTH / 2) < 15)
+                        bFindAd = true;
                 }
             }
             break;

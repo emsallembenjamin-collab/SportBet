@@ -144,7 +144,6 @@ public class Assets {
         return json;
     }
 
-
     public static String read_action_scenario_from_file(String siteName){
         String actionScenarioFilePath = getConfigDataPath() + File.separator + siteName + ".json";
         String json = null;

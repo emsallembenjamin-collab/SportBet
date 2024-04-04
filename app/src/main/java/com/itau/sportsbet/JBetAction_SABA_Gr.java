@@ -8,6 +8,7 @@ import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighb
 import static com.itau.sportsbet.Config.OcrPattern.e_DigitOnly;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrCompMethod.e_PermitIncluding;
+import static com.itau.sportsbet.Config.StrCompMethod.e_littleDifferent;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonLetters;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
@@ -88,6 +89,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
             offsetVert = (int)((retSegments.get(0).y - retSegments.get(0).x));
             strRet = "success";
         }
+
+        Log.d("PPP decideVertOffset", "decideVertOffset: " + offsetVert);
 
         return strRet;
     }
@@ -200,15 +203,27 @@ public class JBetAction_SABA_Gr extends JBetAction {
         ptBackColor.y = pixelsVals[1];
         ptBackColor.z = pixelsVals[2];
 
+        Log.d("PPP FindBackColor", "FindBackColor: R" + ptBackColor.x);
+        Log.d("PPP FindBackColor", "FindBackColor: G" + ptBackColor.y);
+        Log.d("PPP FindBackColor", "FindBackColor: B" + ptBackColor.z);
+
+        int nCountPxs = 0;
         for (int x = 2; x < 50; x++){
             pixelsVals = JUtilFunctions.screenshot.get(baseY, x);
             if (pixelsVals[0] != ptBackColor.x || pixelsVals[1] != ptBackColor.y || pixelsVals[2] != ptBackColor.z){
-                ptBetPannelColor.x = pixelsVals[0];
-                ptBetPannelColor.y = pixelsVals[1];
-                ptBetPannelColor.z = pixelsVals[2];
+                nCountPxs++;
+                if (nCountPxs > 5){
+                    ptBetPannelColor.x = pixelsVals[0];
+                    ptBetPannelColor.y = pixelsVals[1];
+                    ptBetPannelColor.z = pixelsVals[2];
 
-                strRet = "success";
-                break;
+                    Log.d("PPP FindBetPannelColor", "FindBetPannelColor: R" + ptBetPannelColor.x);
+                    Log.d("PPP FindBetPannelColor", "FindBetPannelColor: G" + ptBetPannelColor.y);
+                    Log.d("PPP FindBetPannelColor", "FindBetPannelColor: B" + ptBetPannelColor.z);
+
+                    strRet = "success";
+                    break;
+                }
             }
         }
 
@@ -237,8 +252,9 @@ public class JBetAction_SABA_Gr extends JBetAction {
             JUtilFunctions.delay_duration(3000);
 
             // String jsonString = "[\"colorbar_det\", \"great\", \"2\", \"470\",\"300\",\"470\",\"900\",    \"39\",\"39\",\"50\", \"39\",\"39\",\"50\", \"20\" ]";
-            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"%d\",\"470\",\"%d\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"20\" ]",
+            String jsonString = String.format("[\"colorbar_det\", \"great\", \"2\", \"470\",\"%d\",\"470\",\"%d\",    \"%d\",\"%d\",\"%d\", \"%d\",\"%d\",\"%d\", \"15\" ]",
                     400 + offsetVert, 850, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z, (int)ptBetPannelColor.x, (int)ptBetPannelColor.y, (int)ptBetPannelColor.z);
+
 
             boolean bTimeOver = JUtilFunctions.checkValidation(jsonString, 30000, 2000);
             if (bTimeOver){
@@ -379,17 +395,17 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         JFuncParams_FindSectionIncluding2Targets param = new JFuncParams_FindSectionIncluding2Targets();
         param.sectionTarget = loadTask.league_name;
-        param.secTargetIntOcrParam = 4;
+        param.secTargetIntOcrParam = 7;
 
         //. important.
         //. in case this, because section and betting borad color are same, so we use border color...
         param.secWidthforUsingBorder = 55;
 
         param.target1 = loadTask.team1;
-        param.target1OcrParam.strCompMethod = e_PermitIncluding;
+        param.target1OcrParam.strCompMethod = e_littleDifferent;
         param.target1OcrParam.strPreprocessMethod = e_removeSpace;
         param.target2 = loadTask.team2;
-        param.target2OcrParam.strCompMethod = e_PermitIncluding;
+        param.target2OcrParam.strCompMethod = e_littleDifferent;
         param.target2OcrParam.strPreprocessMethod = e_removeSpace;
 
         param.tryScrollCnt = 30;
@@ -401,9 +417,9 @@ public class JBetAction_SABA_Gr extends JBetAction {
 
         //. 2024-3-12
         //. adjust scrolls
-        if (typeSite.equals("nn88111.com") == false){
+        //if (typeSite.equals("nn88111.com") == false){
             param.scrollAmount = Config.vscroll_unit / 3 * 2;
-        }
+        //}
 
 
 
@@ -480,8 +496,8 @@ public class JBetAction_SABA_Gr extends JBetAction {
         int findCircleCnt = detResult.cols();
         if (findCircleCnt == 1){
             double[] circle = detResult.get(0, 0);
-            int xCircle = (int)Math.round(circle[0]);
-            int yCircle = (int)Math.round(circle[1]);
+            int xCircle = (int)Math.round(circle[0] / Config.resizeXRatio);
+            int yCircle = (int)Math.round(circle[1] / Config.resizeYRatio);
             JUserActions.dispatchTap(xCircle, yCircle);
             JUtilFunctions.delay_duration(1000);
         }
@@ -519,11 +535,11 @@ public class JBetAction_SABA_Gr extends JBetAction {
             return strRet;
         }
         param.sectionTarget = searchKey;
-        param.secTargetIntOcrParam = 0;
+        param.secTargetIntOcrParam = 7;
 
         param.secWidthforUsingBorder = 70;
         param.target1 = loadTask.betTarget;
-        param.target1OcrParam.strCompMethod = e_PermitIncluding;
+        param.target1OcrParam.strCompMethod = e_littleDifferent;
         param.target1OcrParam.strPreprocessMethod = e_removeSpace;
 
 
@@ -640,9 +656,9 @@ public class JBetAction_SABA_Gr extends JBetAction {
         }
 
         ArrayList<String> string_param_list = new ArrayList<String>();
-        string_param_list.add("5");string_param_list.add("5");
-        string_param_list.add("8");string_param_list.add("5");
-        Rect rcAnalyseBase = new Rect(0, 500, 450, 400);
+        string_param_list.add("Tôi đã");string_param_list.add("0");
+        string_param_list.add("Hoàn tất");string_param_list.add("0");
+        Rect rcAnalyseBase = new Rect(280, 750, 240, 200);
 
         JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
         String strDigitPannelFind = JUtilFunctions.getTextAreaFromOcr(string_param_list,
@@ -652,21 +668,21 @@ public class JBetAction_SABA_Gr extends JBetAction {
             return strRet;
         }
 
-        Rect rc5 = result_rects.get(0);
-        Rect rc8 = result_rects.get(1);
-        if (rc5.width == 0 || rc8.width == 0){
+        Rect rcToi = result_rects.get(0);
+        Rect rcHoan = result_rects.get(1);
+        if (rcToi.width == 0 || rcHoan.width == 0){
             strRet = "fail completeBet: cant digitPannels 2";
             return strRet;
         }
 
-        Point pt5 = JUtilFunctions.getCenterPoint(rc5);
-        Point pt8 = JUtilFunctions.getCenterPoint(rc8);
+        Point ptToi = JUtilFunctions.getCenterPoint(rcToi);
+        Point ptHoan = JUtilFunctions.getCenterPoint(rcHoan);
 
         int nCellWidth = (int)(Config.Screen_Width / 4);
-        int nCellHeight = (int)((pt8.y - pt5.y));
+        int nCellHeight = (int)((ptHoan.y - ptToi.y));
 
         int nX = (int)(Config.Screen_Width / 8);
-        int nY = (int)(pt5.y - nCellHeight);
+        int nY = (int)(ptToi.y - nCellHeight * 3);
         for (int i = 1; i <= 10; i++){
             int nXStride = (i - 1) % 3;
             int nYStride = (i - 1) / 3;

@@ -270,7 +270,7 @@
       "time_limit"            : 50000,
       "delay"                 : 3000,
       "waitPageload"          : false,
-      "validator_param_list"  : ["ocr", "have", "Truc tiep", "30","280","180","430"],
+      "validator_param_list"  : ["ocr", "have", "Truc tiep", "30","280","180","500"],
       "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["the end process", "success"],

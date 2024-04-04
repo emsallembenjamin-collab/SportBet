@@ -18,8 +18,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -129,7 +131,7 @@ public class MyAccessibilityService extends AccessibilityService {
 
                 JUtilFunctions.disableSuperuserGranteMsg();
 
-                //do_test("1");
+                //do_test("1");ee67805.com
                 //do_test("2");
                 do_test("3");
             }
@@ -138,6 +140,8 @@ public class MyAccessibilityService extends AccessibilityService {
         workThread.start(); // Start the work thread
 
     }
+
+
 
     // Override methods for handling accessibility events
     @Override
@@ -148,6 +152,8 @@ public class MyAccessibilityService extends AccessibilityService {
         if (event == null) {
             return;
         }
+
+
 
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED) {
 
