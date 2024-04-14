@@ -53,9 +53,11 @@ class JFuncParams_FindSectionIncluding2Targets {
     //.2024-12
     int     scrollAmount       = Config.vscroll_unit;
 
-    public JFuncParams_FindSectionIncluding2Targets(){
+    //. 2024-3-15
+    //. for only digit panel is very problem...
+    //. text detect is different, ...
+    boolean target2IsDigitOnly  = false;
 
-    }
 
 };
 

@@ -10,7 +10,8 @@ public class Config {
 		e_PermitIncluding,	// 0
 		e_IncludedBehind,
 		e_BriefType,
-		e_ExactEqual;
+		e_ExactEqual,
+		e_littleDifferent;
 
 		public static StrCompMethod fromInteger(int x) {
 			switch(x) {
@@ -22,6 +23,8 @@ public class Config {
 					return e_BriefType;
 				case 3:
 					return e_ExactEqual;
+				case 4:
+					return e_littleDifferent;
 			}
 			return null;
 		}
@@ -36,6 +39,8 @@ public class Config {
 					return 2;
 				case e_ExactEqual:
 					return 3;
+				case e_littleDifferent:
+					return 4;
 			}
 			return -1;
 		}

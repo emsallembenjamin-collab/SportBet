@@ -31,10 +31,10 @@ class CLabelInfo
     static int MaxCharWidth = 70;
     static int MaxCharHeight = 45;
     static int MaxGapOverlappedDetection = 2;
-    static int MinCharHeight = 11;
+    static int MinCharHeight = 7;
     static int MinCharWidth = 10;
     static int MaxOffsetCenterY = 8;
-    static int MaxOffsetHeight = 15;
+    static int MaxOffsetHeight = 9;
     static int  MaxOffsetX = 10;
     public CLabelInfo() {
         m_nPtCnts = 0;
@@ -54,7 +54,7 @@ class CLabelInfo
             bRet = true;
         else if (rcBound.height > CLabelInfo.MaxCharHeight)
             bRet = true;
-        else if (rcBound.height < CLabelInfo.MinCharHeight) {
+        else if (rcBound.height < CLabelInfo.MinCharHeight && rcBound.width > 30) {
             float fRate = (float)rcBound.width / rcBound.height;
             if (fRate > 3.0f)
                 bRet = true;
@@ -127,7 +127,10 @@ class CLabelInfo
         boolean bCond1 = (Math.abs(m_ptCenter.y - otherlabelInfo.m_ptCenter.y) <= CLabelInfo.MaxOffsetCenterY);
         if (bCond1)
         {
-            boolean bCond3 = Math.abs(m_rcBound.height - otherlabelInfo.m_rcBound.height) < CLabelInfo.MaxOffsetHeight;
+            boolean bCond3 = true;
+            if (m_rcBound.height > CLabelInfo.MinCharHeight && otherlabelInfo.m_rcBound.height > CLabelInfo.MinCharHeight) {
+                bCond3 = Math.abs(m_rcBound.height - otherlabelInfo.m_rcBound.height) < CLabelInfo.MaxOffsetHeight;
+            }
             if (bCond3) {
                 //. second. limit horizontal gap...
                 int right1 = m_rcBound.x + m_rcBound.width;
@@ -263,8 +266,15 @@ public class TextNormalDetector {
             }
         }
     }
-    public  int do_detect(Mat _image, ArrayList<Rect> outRcArray, Config.IgnorePartMode ignoreMode ,Config.TextDetMode nDetectMode){
+    public  int do_detect(Mat _image, ArrayList<Rect> outRcArray, JParamsForTextDet param){
         int nRet = 0;
+
+        //. 2024-3-15. sometimes, MaxoffsetX need small..
+        int nOriginalMaxOffsetX = CLabelInfo.MaxOffsetX;
+        CLabelInfo.MaxOffsetX = param.maxOffsetX;
+
+
+
         // do canny.
         Mat edges = new Mat();
         double threshold1 = 30;
@@ -349,7 +359,7 @@ public class TextNormalDetector {
                 break;
             }
             //. final check.
-            if (ignoreMode == e_NormalIgnore && pInfo.isIgnore_after_merge())
+            if (param.ignorePartMode == e_NormalIgnore && pInfo.isIgnore_after_merge())
             {
                 pInfo.m_bRemoved = true;
                 pOneLine = null;
@@ -367,7 +377,7 @@ public class TextNormalDetector {
         //. step-4. finally, build text regions...
         //. decide text_region per block.
         //. and do some decides...
-        do_build_text_region(total_labels, outRcArray, nDetectMode);
+        do_build_text_region(total_labels, outRcArray, param.textDetMode);
 
         /*
         //pgh. for test.
@@ -380,6 +390,10 @@ public class TextNormalDetector {
         }
         JUtilFunctions.SaveMatFile(_image, context );
         */
+
+        //. 2024-3-15. sometimes, MaxoffsetX need small..
+        //. now recover it.
+        CLabelInfo.MaxOffsetX = nOriginalMaxOffsetX;
 
 
         nRet = outRcArray.size();

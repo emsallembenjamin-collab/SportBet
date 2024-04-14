@@ -5,6 +5,7 @@ import static com.itau.sportsbet.Config.NeighborCond2Targets.e_Merge2TargetNeigh
 import static com.itau.sportsbet.Config.NeighborCond2Targets.e_UpDownDenseNeighborCond;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrCompMethod.e_PermitIncluding;
+import static com.itau.sportsbet.Config.StrCompMethod.e_littleDifferent;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonLetters;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
@@ -210,10 +211,10 @@ public class JBetAction_ESports_prod20091_bti extends JBetAction {
 
 
         param.target1 = loadTask.team1;
-        param.target1OcrParam.strCompMethod = e_PermitIncluding;
+        param.target1OcrParam.strCompMethod = e_littleDifferent;
         param.target1OcrParam.strPreprocessMethod = e_removeNonAlphanumeric;
         param.target2 = loadTask.team2;
-        param.target2OcrParam.strCompMethod = e_PermitIncluding;
+        param.target2OcrParam.strCompMethod = e_littleDifferent;
         param.target2OcrParam.strPreprocessMethod = e_removeNonAlphanumeric;
 
         param.tryScrollCnt = 30;

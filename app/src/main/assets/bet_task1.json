@@ -11,14 +11,14 @@
   "category"			         : 0,
   "sports_type"			      : "Bóng đá",
   "country_name"		      : "Y",
-  "league_name"			      : "GIAI J-LEAGUE 2 NHAT BAN",
-  "progress_date"		      : "3 16",
-  "team1"				          : "Montedio Yamagata",
-  "team2"				          : "Ventforet Kofu",
+  "league_name"			      : "Giải vô địch bóng đá Ukraine",
+  "progress_date"		      : "4 04",
+  "team1"				          : "Zorya Lugansk",
+  "team2"				          : "Dinamo Kiev",
   "betTarget"			  	     : "Xiu",
   "corner_kick"			      : 0,
   "betTypeCategory"		   : "Tai/Xiu",
-  "betMark"			        : "2.25",
+  "betMark"			        : "2.75",
   "betAmount"			      : "20"
 
 }

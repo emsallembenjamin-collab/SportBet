@@ -8,6 +8,7 @@ import static com.itau.sportsbet.Config.OcrPattern.e_NormalPattern;
 import static com.itau.sportsbet.Config.StrCompMethod.e_ExactEqual;
 import static com.itau.sportsbet.Config.StrCompMethod.e_IncludedBehind;
 import static com.itau.sportsbet.Config.StrCompMethod.e_PermitIncluding;
+import static com.itau.sportsbet.Config.StrCompMethod.e_littleDifferent;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_caseNumberic;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeNonAlphanumeric;
 import static com.itau.sportsbet.Config.StrPreprocessMethod.e_removeSpace;
@@ -20,6 +21,7 @@ import static com.itau.sportsbet.Config.TextDetMode.e_NormalTxtDet;
 class JParamsForTextDet {
     public Config.TextDetMode textDetMode = e_NormalTxtDet;
     public Config.IgnorePartMode ignorePartMode = e_NormalIgnore;
+    public int      maxOffsetX = CLabelInfo.MaxOffsetX;
 
     public static JParamsForTextDet fromInteger(int x) {
         JParamsForTextDet retMode = null;
@@ -83,6 +85,15 @@ public class JParamsForOcr {
                 retMode.strPreprocessMethod = e_caseNumberic;
                 retMode.fResizeRate = 2.0f;
                 retMode.bNeedMoreContrast = true;
+                break;
+            case 6:     //. no need resize...
+                retMode = new JParamsForOcr();
+                retMode.fResizeRate = 1.0f;
+                break;
+            case 7:     //. no need resize...
+                retMode = new JParamsForOcr();
+                retMode.strCompMethod = e_littleDifferent;
+                retMode.strPreprocessMethod = e_removeNonAlphanumeric;
                 break;
         }
         return retMode;

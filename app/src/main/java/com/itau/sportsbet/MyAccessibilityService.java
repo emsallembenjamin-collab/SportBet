@@ -19,8 +19,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.accessibility.AccessibilityNodeInfo;
+import android.view.inputmethod.InputMethodManager;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.EditText;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -67,10 +69,11 @@ public class MyAccessibilityService extends AccessibilityService {
         long initialDelay = 1000; // milliseconds
         long interval = 2000; // milliseconds
 
-
         runnable = new JEngine(loadTask);
         handler.postDelayed(runnable, initialDelay);
     }
+
+
 
     // Override methods for handling accessibility events
     @Override
@@ -81,6 +84,8 @@ public class MyAccessibilityService extends AccessibilityService {
         if (event == null) {
             return;
         }
+
+
 
         if (event.getEventType() == AccessibilityEvent.TYPE_VIEW_SELECTED) {
 
@@ -145,7 +150,6 @@ public class MyAccessibilityService extends AccessibilityService {
 //        Assets.extractAllConfigAssets(this);
         //. Init openCV and tesseract...
         JUtilFunctions.doInit();
-
 
         Size szScreen = getScreenSize();
         Log.d("SportsBet Service", "onServiceConnected! " + szScreen.width + "x" + szScreen.height);

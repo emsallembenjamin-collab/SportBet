@@ -191,11 +191,10 @@ public class JUtilFunctions {
     }
 
     public static Point getTargetSectionfromBorderSection(Point borderSec, int secWidthforUsingBorder){
-        if (secWidthforUsingBorder > 0){
-            borderSec.x = borderSec.y;
-            borderSec.y = borderSec.x + secWidthforUsingBorder;
-        }
-        return borderSec;
+        Point newBorderSec = null;
+        newBorderSec = new Point(borderSec.y, borderSec.y + secWidthforUsingBorder);
+
+        return newBorderSec;
     }
 
     public static void changeToOrigRectFromBaseRect(Rect rcBase){
@@ -227,7 +226,7 @@ public class JUtilFunctions {
         // Get the current date
         Calendar currentDate = Calendar.getInstance();
         // Define the formatter for the date string
-        SimpleDateFormat formatter = new SimpleDateFormat("M d");
+        SimpleDateFormat formatter = new SimpleDateFormat("M dd");
         // Format the current date to a string
         String todayString = formatter.format(currentDate.getTime());
         return todayString;
@@ -241,7 +240,7 @@ public class JUtilFunctions {
         Calendar currentDate = Calendar.getInstance();
         currentDate.add(Calendar.DAY_OF_MONTH, 1);
         // Define the formatter for the date string
-        SimpleDateFormat formatter = new SimpleDateFormat("M d");
+        SimpleDateFormat formatter = new SimpleDateFormat("M dd");
         // Format the current date to a string
         String tomorrowString = formatter.format(currentDate.getTime());
         return tomorrowString;
@@ -878,7 +877,10 @@ public class JUtilFunctions {
 
     }
 
-
+    public static String removeSpaces(String input) {
+        // Using regular expression to replace all spaces with an empty string
+        return input.replaceAll("\\s", "");
+    }
 
     public static String preprocessForOcrString(String input, Config.StrPreprocessMethod nPreprocessMethodForOcrString){
 
@@ -905,14 +907,89 @@ public class JUtilFunctions {
                 strRet = input;
                 break;
         }
-
         return strRet;
+    }
 
+
+    //. 2024-4-2 add.
+    //. input 2 strings.
+    //. can have 3 cases:
+    //.   1: differ only one character.     // if two char is digit => differ...
+    //.   2: one character is added.
+    //    3: missing in one of the strings.
+    public static boolean areStringsLittleDifferent(String strTarget, String strOCR) {
+
+        if (strOCR.contains(strTarget))
+            return true;
+
+        int nTargetLen = strTarget.length();
+        int nOcrLen = strOCR.length();
+        int nFirstPosForTarget = -1;
+
+        //. first , match first position.
+        char chFirst = strTarget.charAt(0);
+        for (int i = 0; i < nOcrLen; i++) {
+            if (strOCR.charAt(i) == chFirst){
+                nFirstPosForTarget = i;
+                break;
+            }
+        }
+        if (nFirstPosForTarget == -1)
+            return false;
+
+        boolean bOverflowLen = false;
+        int nDiffCaseNumber = 0;
+        boolean bDifferDigitForCase1 = false;
+        for (int i = 0; i < nTargetLen; i++) {
+            int nOCRIdx = i + nFirstPosForTarget;
+            if (nOCRIdx >= nOcrLen){
+                bOverflowLen = true;
+                break;
+            }
+
+            char chTarget = strTarget.charAt(i);
+            char chOCR = strOCR.charAt(nOCRIdx);
+            if ( chTarget != chOCR ) {
+                //. decide case...
+                String strTargetRemain = strTarget.substring(i);
+                String strTargetRemain_Tail = strTarget.substring(i + 1);
+
+                String strOcrRemain = strOCR.substring(nOCRIdx);
+                String strOcrRemain_Tail = strOCR.substring(nOCRIdx + 1);
+
+                if (strOcrRemain_Tail.contains(strTargetRemain_Tail)){
+                    nDiffCaseNumber = 1;
+                    if (Character.isDigit(chTarget) && Character.isDigit(chOCR)){
+                        bDifferDigitForCase1 = true;
+                    }
+                }
+                else if (strOcrRemain_Tail.contains(strTargetRemain)){
+                    nDiffCaseNumber = 2;
+                }
+                else if (strOcrRemain.contains(strTargetRemain)){
+                    nDiffCaseNumber = 3;
+                }
+                else
+                    nDiffCaseNumber = -1;
+
+                break;
+            }
+        }
+        if (bOverflowLen == true){
+            return false;
+        }
+
+        boolean bEqual = false;
+        if (nDiffCaseNumber == 0)
+            bEqual = true;
+        if (nDiffCaseNumber == 1 && bDifferDigitForCase1 == false)
+            bEqual = true;
+        if (nDiffCaseNumber == 2 || nDiffCaseNumber == 3)
+            bEqual = true;
+
+        return bEqual;
     }
-    public static String removeSpaces(String input) {
-        // Using regular expression to replace all spaces with an empty string
-        return input.replaceAll("\\s", "");
-    }
+
     public static boolean compareString(String ocrStr, String exactStr,
                                         Config.StrCompMethod nCompareMethod, Config.StrPreprocessMethod nPreprocessMethodForOcrString){
         boolean bRet = false;
@@ -931,6 +1008,7 @@ public class JUtilFunctions {
                 }
                 break;
                 case e_IncludedBehind:{
+                    //. no need yet (2024-4-2)
                     if (prep_OcrStr.contains(prep_exactStr))
                         bRet = true;
                 }
@@ -947,6 +1025,10 @@ public class JUtilFunctions {
                 break;
                 case e_ExactEqual:{
                     //. 2024-3-6 add. in case of exactly equals...
+                }
+                break;
+                case e_littleDifferent:{
+                    bRet = areStringsLittleDifferent(prep_exactStr, prep_OcrStr);
                 }
                 break;
 
@@ -1182,7 +1264,7 @@ public class JUtilFunctions {
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, textDetParam.ignorePartMode, textDetParam.textDetMode);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, textDetParam);
         if (nTextRegionCnt > 0) {
             Mat ocrAreaMat = JUtilFunctions.originScreenShot.submat(rcForOcr);
 
@@ -1345,7 +1427,8 @@ public class JUtilFunctions {
 
         //. get text detector...
         ArrayList<Rect> rcTexts = new ArrayList<Rect>();
-        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, e_IgnoreMode1, e_NormalTxtDet);
+        JParamsForTextDet paramforTextDet = JParamsForTextDet.fromInteger(1);
+        int nTextRegionCnt = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTexts, paramforTextDet);
         if (nTextRegionCnt == 0) {
             strRet = "fail no text region";
         }
@@ -1378,7 +1461,23 @@ public class JUtilFunctions {
                     bFinded = true;
                 }
                 else{
-                    String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTexts,
+
+                    ArrayList<Rect> rcTextsforTargets2 = rcTexts;
+                    //. 2024-3-15.
+                    //. for only digit panel, some problems. so I sparate two process...
+                    if (param.target2IsDigitOnly == true){
+                        rcTextsforTargets2 = new ArrayList<Rect>();
+                        JParamsForTextDet paramforTextDetforTarget2 = JParamsForTextDet.fromInteger(1);
+                        paramforTextDetforTarget2.maxOffsetX = 5; // small value.
+                        int nTextRegionCntforTarget2 = JUtilFunctions.textNormalDetector.do_detect(analyseAreaMat, rcTextsforTargets2, paramforTextDetforTarget2);
+
+                        for (int k = 0; k < rcTextsforTargets2.size(); k++){
+                            Rect rc = rcTextsforTargets2.get(k);
+                            JUtilFunctions.changeToOrigRectFromBaseRect(rc);
+                        }
+                    }
+
+                    String result_string2 = JUtilFunctions.do_ocr_find_all_regions(ocrAreaMat, rcTextsforTargets2,
                             rcArrayTarget2, param.target2, param.target2OcrParam);
                     if (result_string2.equals("success")){
 
@@ -1453,26 +1552,26 @@ public class JUtilFunctions {
 
             //.2024-3-9
             //. for detecting using border color...
-            JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
-            if (sectionHead.y > 850)
+            Point ptNewSecHeader = JUtilFunctions.getTargetSectionfromBorderSection(sectionHead, secWidthforUsingBorder);
+            if (ptNewSecHeader.y > 850)
                 break;
 
-            Rect rcAnalyseBase = new Rect(0, (int)sectionHead.x, colorBarParam.fixedVal, (int)(sectionHead.y - sectionHead.x));
+            Rect rcAnalyseBase = new Rect(0, (int)ptNewSecHeader.x, colorBarParam.fixedVal, (int)(ptNewSecHeader.y - ptNewSecHeader.x));
 
             JParamsForTextDet textDetParam = JParamsForTextDet.fromInteger(1);
             String strRet = JUtilFunctions.getTextAreaFromOcr(string_param_list,
                     rcAnalyseBase, result_rects, textDetParam);
             if (strRet.equals("success")){
                 bResult = true;
-                ptFindPos.x = sectionHead.x;
-                ptFindPos.y = sectionHead.y;
+                ptFindPos.x = ptNewSecHeader.x;
+                ptFindPos.y = ptNewSecHeader.y;
 
                 //. set next section pos.
                 if (i != nSegCnt - 1){
                     Point sectionHeadNext = retSegments.get(i + 1);
-                    JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
-                    ptNextSecPos.x = sectionHeadNext.x;
-                    ptNextSecPos.y = sectionHeadNext.y;
+                    Point ptNewSecHeader1 = JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
+                    ptNextSecPos.x = ptNewSecHeader1.x;
+                    ptNextSecPos.y = ptNewSecHeader1.y;
                 }
                 break;
             }
@@ -1480,9 +1579,9 @@ public class JUtilFunctions {
 
         if (bResult == false && nSegCnt > 0){
             Point sectionHeadNext = retSegments.get(0);
-            JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
-            ptNextSecPos.x = sectionHeadNext.x;
-            ptNextSecPos.y = sectionHeadNext.y;
+            Point ptNewSecHeader2 = JUtilFunctions.getTargetSectionfromBorderSection(sectionHeadNext, secWidthforUsingBorder);
+            ptNextSecPos.x = ptNewSecHeader2.x;
+            ptNextSecPos.y = ptNewSecHeader2.y;
         }
         retSegments = null;
         string_param_list = null;

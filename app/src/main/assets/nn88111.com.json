@@ -22,7 +22,7 @@
       "name"                  : "find login button",
       "type"                  : "do_ocr",
       "string_param_list"     : ["Đ.NHẬP", "0"],
-      "digit_param_list"      : [0, 400, 160, 530, 2],
+      "digit_param_list"      : [0, 400, 160, 530, 10],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -123,8 +123,8 @@
     {
       "name"                  : "find already logined",
       "type"                  : "do_ocr",
-      "string_param_list"     : ["$user_id", "2"],
-      "digit_param_list"      : [0, 400, 160, 530, 2],
+      "string_param_list"     : ["$user_id", "6"],
+      "digit_param_list"      : [0, 400, 160, 530, 5],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
@@ -190,7 +190,7 @@
       "name"                  : "find sign out button",
       "type"                  : "do_ocr",
       "string_param_list"     : ["Xac Nhan", "0"],
-      "digit_param_list"      : [50, 500, 270, 670, 2],
+      "digit_param_list"      : [50, 500, 270, 670, 10],
       "time_limit"            : 0,
       "delay"                 : 1000,
       "waitPageload"          : false,
@@ -223,7 +223,39 @@
       "name"                  : "goto sports channel",
       "type"                  : "do_ocr",
       "string_param_list"     : ["THAO", "0"],
-      "digit_param_list"      : [0, 580, 150, 860, 2],
+      "digit_param_list"      : [0, 580, 150, 900, 10],
+      "time_limit"            : 0,
+      "delay"                 : 1000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["click sports channel button"],
+        "fail"    : ["scroll to up for find sports button"]
+      }
+    },
+
+    {
+      "name"                  : "scroll to up for find sports button",
+      "type"                  : "do_repeat_scroll",
+      "string_param_list"     : ["1"],
+      "digit_param_list"      : [70, 820, 250],
+      "time_limit"            : 0,
+      "delay"                 : 3000,
+      "waitPageload"          : false,
+      "validator_param_list"  : [],
+      "confirmproc_param_list"  : [],
+      "branch": {
+        "success" : ["goto sports channel again"],
+        "fail"    : []
+      }
+    },
+
+    {
+      "name"                  : "goto sports channel again",
+      "type"                  : "do_ocr",
+      "string_param_list"     : ["THAO", "0"],
+      "digit_param_list"      : [0, 580, 150, 900, 10],
       "time_limit"            : 0,
       "delay"                 : 1000,
       "waitPageload"          : false,
@@ -234,6 +266,11 @@
         "fail"    : ["the end process", "fail"]
       }
     },
+
+
+
+    
+
 
 
 
@@ -301,7 +338,7 @@
       "time_limit"            : 50000,
       "delay"                 : 5000,
       "waitPageload"          : false,
-      "validator_param_list"  : ["ocr", "have", "Truc tiep", "30","280","180","430"],
+      "validator_param_list"  : ["ocr", "have", "Truc tiep", "30","280","180","500"],
       "confirmproc_param_list"  : [],
       "branch": {
         "success" : ["the end process", "success"],
@@ -362,7 +399,7 @@
       "name"                  : "find refresh modal",
       "type"                  : "do_ocr",
       "string_param_list"     : ["Xac Nhan", "0"],
-      "digit_param_list"      : [270, 520, 480, 660, 2],
+      "digit_param_list"      : [270, 520, 480, 660, 10],
       "time_limit"            : 0,
       "delay"                 : 100,
       "waitPageload"          : false,
