@@ -191,7 +191,6 @@ public class Assets {
             in.close();
             json = new String(buffer, "UTF-8");
 
-<<<<<<< HEAD
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -210,8 +209,7 @@ public class Assets {
             return false;
         }
     }
-=======
->>>>>>> develop
+
     public static String read_action_scenario_from_file(String siteName){
         String actionScenarioFilePath = getConfigDataPath() + File.separator + "action_scenario.json";
         String json = null;
